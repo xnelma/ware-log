@@ -7,3 +7,5 @@ sources.fileextensions = "*.qdoc"
 
 outputdir = doc/tutorial
 outputformats = HTML
+HTML.stylesheets = doc/tutorial-files/template/style/style.css
+HTML.headerstyles = "<link rel=\"stylesheet\" type=\"text/css\" href=\"style/style.css\"/>\n"
