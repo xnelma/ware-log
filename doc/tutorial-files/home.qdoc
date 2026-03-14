@@ -1,5 +1,10 @@
 /*!
      \page tutorial.html
      \title Tutorial for the WareLog App
+
      \brief provides steps for creating an app for entering a catalogue of items.
+
+     \list
+         \li \l {01-setup.html} {Setup}
+     \endlist
 */
