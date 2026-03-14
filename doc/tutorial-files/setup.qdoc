@@ -1,6 +1,127 @@
 /*!
-    \page 01-setup.html
-    \title Setup
+\page 01-setup.html
+\title Setup
 
-    \brief provides the steps for showing an empty page.
+\brief provides the steps for showing an empty page.
+
+To start the project, the project files need to be generated and built.
+This first chapter shows the steps taken up to showing an empty page.
+
+\section1 Creating a project
+
+First, \l {https://doc.qt.io/qtcreator/creator-project-creating.html}
+          {create a Qt Quick project}
+and \l {https://doc.qt.io/qtcreator/creator-how-to-set-android-preferences.html}
+       {set up the Android development environment} to build for.\br
+One consideration for the minimum Qt version would be the target mobile
+platform: support for Android 8.1 and lower was removed from Qt 6.8 upwards.
+The Qt Documentation provides
+\l {https://doc.qt.io/qt-6/android-getting-started.html}
+   {detailed instructions for creating and building a project for Android}.
+
+To not have a flat directory structure, create a src folder and inside an
+app folder, and move the main.cpp and Main.qml files there.
+
+The folder structure should look like this:
+
+\c {CMakeLists.txt} \br
+\c {src/app/CMakeLists.txt} \br
+\c {src/app/main.cpp} \br
+\c {src/app/Main.qml}
+
+The root \b {\c {CMakeLists.txt}} file should be similar to this:
+
+\code
+    cmake_minimum_required(VERSION 3.19)
+    # Set to the lowest version that supports needed features: in lower versions
+    # qt_finalize_target needs to be called manually, instead of being a part of
+    # qt_add_executable
+
+    project(WareLog VERSION 0.1 LANGUAGES CXX)
+
+    set(CMAKE_CXX_STANDARD 17)
+    # The support for C++20 is experimental for Qt6, so only use the newer version
+    # if needed later on.
+    set(CMAKE_CXX_STANDARD_REQUIRED ON)
+
+    find_package(Qt6
+        REQUIRED COMPONENTS
+            Quick
+            Core
+    )
+
+    set(CMAKE_INCLUDE_CURRENT_DIR ON)
+    set(CMAKE_AUTOMOC ON)
+
+    qt_standard_project_setup(
+        REQUIRES 6.7
+        # I want to build for a device with Android 8, which is not supported
+        # anymore starting Qt6.8
+    )
+
+    add_subdirectory(src/app)
+\endcode
+
+And the \b {\c {CMakeLists.txt}} file in \b {\c {src/app}} similar to this:
+
+\code
+    qt_add_executable(WareLog main.cpp)
+
+    target_link_libraries(WareLog PRIVATE
+        Qt6::Quick
+    )
+
+    qt_add_qml_module(WareLog
+        URI WarelogApp
+        VERSION 0.1
+        QML_FILES
+            Main.qml
+        SOURCES
+    )
+\endcode
+
+The entry point is \b {\c {main.cpp}} and loads the main component \c {Main.qml}:
+
+\code
+
+#include <QGuiApplication>
+#include <QQmlApplicationEngine>
+
+int main(int argc, char *argv[])
+{
+    QGuiApplication app(argc, argv);
+
+    QQmlApplicationEngine engine;
+    QObject::connect(
+        &engine,
+        &QQmlApplicationEngine::objectCreationFailed,
+        &app,
+        []() { QCoreApplication::exit(-1); },
+        Qt::QueuedConnection);
+    engine.loadFromModule("WarelogApp", "Main");
+
+    return app.exec();
+}
+
+\endcode
+
+With \b {\c {Main.qml}} only containing an empty window element so far:
+
+\code
+
+import QtQuick
+import QtQuick.Controls
+
+// Use application window not window because we will use the header, footer
+// and menuBar properties for tool bars later on.
+ApplicationWindow {
+    id: root
+
+    title: qsTr("Ware Log")
+    visible: true
+}
+
+\endcode
+
+Now, when you build and deploy the application, you should see an empty page.
 */
