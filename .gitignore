@@ -55,3 +55,6 @@ compile_commands.json
 
 # CMake build directory
 build/
+
+# Generated QDoc files
+doc/tutorial/
