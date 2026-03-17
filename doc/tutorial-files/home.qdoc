@@ -1,0 +1,35 @@
+/*!
+     \page tutorial.html
+     \title Tutorial for the WareLog App
+
+     \brief provides steps for creating an app for entering a catalogue of items.
+
+     For this project I want to try out the Felgo SDK. I created the initial
+     project files using the setup wizard for a Felgo App; for a
+     single-page application and for now without selecting plugins.
+
+     As the SDK version (4.3.1) available in the
+     \l {https://felgo.com/doc/felgo-installation/#download-install-felgo}
+        {Felgo Installer}
+     at the time I am starting the project is
+     \l {https://felgo.com/doc/felgo-updates/#latest-felgo-release}
+        {based on Qt 6.8.3},
+     the
+     \l {https://doc.qt.io/qt-6.8/whatsnew68.html#mobile-platforms}
+        {minimum Android version}
+     that can be built for is Android 9.
+     The minimum \e {target} Android version is
+     \l {https://felgo.com/doc/felgo-deployment-android/#install-android-packages}
+        {expected to be Android 12}, so
+     the Android SDK version 31 should be installed, too.
+     This will also be the version I am building for.
+     If the app should be published to the Play Store, note the current
+     \l {https://developer.android.com/google/play/requirements/target-sdk}
+        {minimum target requirements}
+     by Google Play, which would (at the time of writing this tutorial)
+     be Android 15, so Android SDK version 35.
+
+     \list
+         \li \l {01-setup.html} {Setup}
+     \endlist
+*/
