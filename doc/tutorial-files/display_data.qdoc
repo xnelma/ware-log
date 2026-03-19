@@ -133,4 +133,75 @@
     Then we return the database object \c{db} to be able to use it for more
     transaction calls.
 
+    \section1 Fill database with sample data
+
+    In the same transaction as the table is created, we can also check for
+    an empty table and populate it with the sample data.
+
+    \code
+    var rs = tx.executeSql('SELECT * FROM Collection');
+    if (rs.rows.length === 0) {
+        Data.fillDatabase(db);
+    }
+    \endcode
+
+    Add the method \c{fillDatabase}, taking the database as parameter (\c{db}),
+    again in the same file.
+
+    First we will retrieve the sample data via the method we already wrote,
+    \c{parseSampleData}, then we write a transaction in which every item
+    is inserted into the table.
+    It would also be good to do another check, if the method is not called
+    on an already filled database. Otherwise the entries will get
+    duplicated.
+
+    All together, the method can look like this:
+
+    \code
+    function fillDatabase(db)
+    {
+        var data = parseSampleData();
+
+        db.transaction(
+            function(tx) {
+                var res = tx.executeSql('SELECT * FROM Collection');
+                if (res.rows.length !== 0)
+                    return;
+
+                data.forEach(function(item) {
+                    tx.executeSql(
+                        'INSERT INTO Collection VALUES(?,?,?,?,?,?,?,?,?,?,?,?,?,?)',
+                        [item.title,
+                         item.origin, item.originColor,
+                         item.type,
+                         item.age, item.ageUnit,
+                         item.weightTotal, item.weightLeft,
+                         item.weightUnit,
+                         item.cost, item.secondaryCost,
+                         item.primaryColor, item.secondaryColor,
+                         tagStr(item.tags)]
+                    );
+                });
+            }
+        );
+    }
+    \endcode
+
+    The tag list is (for simplicity) concatenated into a string. The string
+    will have to be split again when reading the entry later on.
+
+    \code
+    function tagStr(tags)
+    {
+        var tagStr = "";
+        tags.forEach(function (s) {
+            tagStr = tagStr + s + "|";
+        });
+
+        if (tagStr.length > 0 && tagStr[tagStr.length - 1] === "|")
+            tagStr = tagStr.substring(0, tagStr.length - 1);
+
+        return tagStr;
+    }
+    \endcode
 */
