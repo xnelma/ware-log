@@ -4,7 +4,8 @@
 
     \brief provides steps for preparing and showing example data.
 
-    First we will add some sample data to display.
+    First we will add some sample data to display. This data will then be
+    parsed and ...
 
     \section1 Add sample data
 
@@ -33,5 +34,53 @@
     You can also always come back later to add more.
     This is to have some initial data to try out the layout for
     a list delegate.
+
+    \section2 Parse json file
+
+    Next, create a file \c{data.js} in the \c{qml} folder. This file will
+    contain the methods for reading, writing and saving data.
+    As a first method, we add \c{parseSampleData}, to parse the json file
+    created in the previous step.
+
+    To read the file, there is a Felgo component '\c{FileUtils}', which we will
+    use. There would be the QML object \c{XMLHttpRequest} that can also be used
+    to read files, but would require setting a build flag
+    (\c{QML_XHR_ALLOW_FILE_READ}), and would be more verbose.
+
+    For parsing a JSON file, the JavaScript method \c{JSON.parse()} is
+    available.
+
+    A minimalist implementation would be:
+
+    \code
+    var json = FileUtils.readFile(Qt.resolvedUrl("../assets/sample_data.json"));
+    var obj = JSON.parse(json);
+    return obj.collection;
+    \endcode
+
+    But some error checks would be good, so the function could look like this:
+
+    \code
+    function parseSampleData()
+    {
+        var path = "assets/sample_data.json";
+        if (!FileUtils.existsFile(path)) {
+            console.log("File " + path + " not found");
+            return "";
+        }
+
+        var json = FileUtils.readFile(Qt.resolvedUrl("../" + path));
+        var obj = JSON.parse(json);
+        if (!obj) {
+            console.log("JSON data " + json + " could not be parsed");
+            return "";
+        }
+
+        return obj.collection;
+    }
+    \endcode
+
+    For the error messages I attempted to match the sentence format usually
+    seen in Qt console output.
 
 */
