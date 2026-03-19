@@ -29,7 +29,15 @@
      by Google Play, which would (at the time of writing this tutorial)
      be Android 15, so Android SDK version 35.
 
+     Clear any component inside the \c {AppPage} component, so when you build
+     and deploy to a device now you should see an empty window.
+
+     As a baseline the app should show a list of items with generic data fields,
+     and allow adding and removing items.
+     This concept can be extended to be very detailed, so in this tutorial
+     I will show a base implementation.
+
      \list
-         \li \l {01-setup.html} {Setup}
+         \li \l {01-data.html} {Display Data}
      \endlist
 */

@@ -1,0 +1,114 @@
+{
+    "collection": [
+        {
+            "title": "Cascades Walk",
+            "origin": "Lahinch", "originColor": "#4eabc2",
+            "type": "River",
+            "age": 8, "ageUnit": "years",
+            "weightTotal": 15, "weightLeft": 15, "weightUnit": "g",
+            "cost": 3, "secondaryCost": 3,
+            "primaryColor": "#766b5b", "secondaryColor": "#736759",
+            "tags": ["0.73mm", "fine", "homogeneous"]
+        },
+        {
+            "title": "Inagh River Park",
+            "origin": "Lahinch", "originColor": "#4eabc2",
+            "type": "River",
+            "age": 9, "ageUnit": "years",
+            "weightTotal": 15, "weightLeft": 15, "weightUnit": "g",
+            "cost": 3, "secondaryCost": 2,
+            "primaryColor": "#8a765d", "secondaryColor": "#9d8c6f",
+            "tags": ["0.43mm", "medium", "homogeneous"]
+        },
+        {
+            "title": "Foyer of Workshop Canteen",
+            "origin": "Lahinch", "originColor": "#4eabc2",
+            "type": "Beach",
+            "age": 12, "ageUnit": "years",
+            "weightTotal": 5, "weightLeft": 5, "weightUnit": "g",
+            "cost": 2, "secondaryCost": 2,
+            "primaryColor": "#d7c9b0", "secondaryColor": "#f1efe9",
+            "tags": ["0.072mm", "fine", "white"]
+        },
+        {
+            "title": "Scrap Fields",
+            "origin": "North Atlantic", "originColor": "#001840",
+            "type": "Seabed",
+            "age": 11, "ageUnit": "months",
+            "weightTotal": 150, "weightLeft": 150, "weightUnit": "g",
+            "cost": 1, "secondaryCost": 1,
+            "primaryColor": "#9a8368", "secondaryColor": "#7b6c57",
+            "tags": ["0.4mm", "medium"]
+        },
+        {
+            "title": "Breaffy Woods",
+            "origin": "Lahinch", "originColor": "#4eabc2",
+            "type": "Island",
+            "age": 8, "ageUnit": "years",
+            "weightTotal": 150, "weightLeft": 110, "weightUnit": "g",
+            "cost": 5, "secondaryCost": 2,
+            "primaryColor": "#655b4a", "secondaryColor": "#7d7463",
+            "tags": ["0.53mm", "medium", "seashells"]
+        },
+        {
+            "title": "Karl Drais Central Park",
+            "origin": "Forstwell", "originColor": "#009a00",
+            "type": "Park",
+            "age": 19, "ageUnit": "years",
+            "weightTotal": 1500, "weightLeft": 1300, "weightUnit": "g",
+            "cost": 10, "secondaryCost": 10,
+            "primaryColor": "#b99e77", "secondaryColor": "#ae8169",
+            "tags": ["red tint", "medium", "homogeneous"]
+        },
+        {
+            "title": "Station Foyer",
+            "origin": "Lahinch", "originColor": "#4eabc2",
+            "type": "Inland",
+            "age": 12, "ageUnit": "years",
+            "weightTotal": 13, "weightLeft": 13, "weightUnit": "g",
+            "cost": 3, "secondaryCost": 3,
+            "primaryColor": "#655b4a", "secondaryColor": "#7d7463",
+            "tags": ["0.5mm", "medium", "homogeneous"]
+        },
+        {
+            "title": "West Cliffs",
+            "origin": "Lahinch", "originColor": "#4eabc2",
+            "type": "Beach",
+            "age": 8, "ageUnit": "years",
+            "weightTotal": 150, "weightLeft": 90, "weightUnit": "g",
+            "cost": 5, "secondaryCost": 5,
+            "primaryColor": "#534c44", "secondaryColor": "#6c645e",
+            "tags": ["0.43", "medium"]
+        },
+        {
+            "title": "Inisheer",
+            "origin": "Lahinch", "originColor": "#4eabc2",
+            "type": "Island",
+            "age": 8, "ageUnit": "years",
+            "weightTotal": 150, "weightLeft": 150, "weightUnit": "g",
+            "cost": 2, "secondaryCost": 2,
+            "primaryColor": "#8a765d", "secondaryColor": "#9d8c6f",
+            "tags": ["0.05mm", "fine", "homogeneous"]
+        },
+        {
+            "title": "Well on Inishmore",
+            "origin": "Lahinch", "originColor": "#4eabc2",
+            "type": "Spring",
+            "age": 8, "ageUnit": "years",
+            "weightTotal": 15, "weightLeft": 10, "weightUnit": "g",
+            "cost": 12, "secondaryCost": 12,
+            "primaryColor": "#52544d", "secondaryColor": "#4e4b45",
+            "tags": ["1.1mm", "coarse"]
+        },
+        {
+            "title": "Head of Lahinch",
+            "origin": "Lahinch", "originColor": "#4eabc2",
+            "type": "Beach",
+            "age": 8, "ageUnit": "years",
+            "weightTotal": 150, "weightLeft": 135, "weightUnit": "g",
+            "cost": 5, "secondaryCost": 5,
+            "primaryColor": "#52544d", "secondaryColor": "#4e4b45",
+            "tags": ["0.62mm", "medium"]
+        }
+    ]
+}

@@ -1,0 +1,37 @@
+/*!
+    \page 01-data.html
+    \title Display Data
+
+    \brief provides steps for preparing and showing example data.
+
+    First we will add some sample data to display.
+
+    \section1 Add sample data
+
+    Create an assets folder (if not available already), and add a json file
+    \c{sample_data.json} with the following structure:
+
+    \code
+    {
+        "collection": [
+            {
+                "title": "",
+                "origin": "", "originColor": "",
+                "type": "",
+                "age": 0, "ageUnit": "years",
+                "weightTotal": 0, "weightLeft": 0, "weightUnit": "g",
+                "cost": 0, "secondaryCost": 0,
+                "primaryColor: "#000", "secondaryColor": "#000",
+                "tags": ["", "", ...]
+            },
+            ...
+        ]
+    }
+    \endcode
+
+    Add as many or few entries as you want, for a domain of your choice.
+    You can also always come back later to add more.
+    This is to have some initial data to try out the layout for
+    a list delegate.
+
+*/
