@@ -5,7 +5,7 @@
     \brief provides steps for preparing and showing example data.
 
     First we will add some sample data to display. This data will then be
-    parsed and ...
+    parsed and used to fill a database.
 
     \section1 Add sample data
 
@@ -35,7 +35,7 @@
     This is to have some initial data to try out the layout for
     a list delegate.
 
-    \section2 Parse json file
+    \section1 Parse json file
 
     Next, create a file \c{data.js} in the \c{qml} folder. This file will
     contain the methods for reading, writing and saving data.
@@ -82,5 +82,55 @@
 
     For the error messages I attempted to match the sentence format usually
     seen in Qt console output.
+
+    \section1 Create database
+
+    As we also want to be able to change data, we cannot just use data from
+    the static json file, but will use a database.
+
+    For that there is the LocalStorage object in the Qt Quick module, which
+    can be imported using \c{import QtQuick.LocalStorage}.
+
+    Then create a method \c{openDatabase} in the same file \c{data.js}.
+    First, the database needs to be opened:
+
+    \code
+    var db = LocalStorage.openDatabaseSync("WareLogDB",
+                                           "1.0",
+                                           "The database used by WareLog.",
+                                           10e4);
+    \endcode
+
+    It will have a name (e.g. "WareLogDB"), version and description, and we
+    estimate it's size to be 10kB:\br
+    let's say one character is 2 Bytes,
+    and the average string length is 10 characters, and most entries are
+    strings, and numerics are smaller anyways. That would be 20 Bytes for
+    the average entry. There are 14 entries per item, which makes a generous
+    average of 280 Byte per item.\br
+    If there are about 10 items, that is 2.8kB for a database, and gives
+    room for about 30 entries.\br
+    This is a very rough upper estimate, but if the app is expected to hold a
+    much larger amount of data items, add a few more zeros.
+
+    For this database, we then create a table with entry names matching the
+    json entries.
+
+    \code
+    db.transaction(function(tx) {
+        tx.executeSql('CREATE TABLE IF NOT EXISTS Collection(title TEXT, ' +
+                      'origin TEXT, originColor TEXT, ' +
+                      'type TEXT, ' +
+                      'age NUMERIC, ageUnit TEXT, ' +
+                      'weightTotal NUMERIC, weightLeft NUMERIC, ' +
+                      'weightUnit TEXT, ' +
+                      'cost NUMERIC, secondaryCost NUMERIC, ' +
+                      'primaryColor TEXT, secondaryColor TEXT, ' +
+                      'tags TEXT)');
+    });
+    \endcode
+
+    Then we return the database object \c{db} to be able to use it for more
+    transaction calls.
 
 */

@@ -15,3 +15,27 @@ function parseSampleData()
 
     return obj.collection;
 }
+
+function openDatabase()
+{
+    var db = LocalStorage.openDatabaseSync("WareLogDB",
+                                           "1.0",
+                                           "The database used by WareLog.",
+                                           10e4);
+
+    db.transaction(function(tx) {
+        tx.executeSql('CREATE TABLE IF NOT EXISTS Collection(title TEXT, ' +
+                      'origin TEXT, originColor TEXT, ' +
+                      'type TEXT, ' +
+                      'age NUMERIC, ageUnit TEXT, ' +
+                      'weightTotal NUMERIC, weightLeft NUMERIC, ' +
+                      'weightUnit TEXT, ' +
+                      'cost NUMERIC, secondaryCost NUMERIC, ' +
+                      'primaryColor TEXT, secondaryColor TEXT, ' +
+                      'tags TEXT)');
+
+        // TODO fill database with sample data
+    });
+
+    return db;
+}
