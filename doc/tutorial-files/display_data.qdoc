@@ -34,8 +34,9 @@
 
     Add as many or few entries as you want, for a domain of your choice.
     You can also always come back later to add more.
-    This is to have some initial data to try out the layout for
-    a list delegate.
+    This is to have some initial data to try out the layout for a
+    \l {https://doc.qt.io/qt-6/qml-qtquick-listview.html#example-usage}
+       {list delegate}.
 
     \section1 Parse json file
 
