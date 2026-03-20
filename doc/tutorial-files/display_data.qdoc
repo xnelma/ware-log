@@ -1,0 +1,333 @@
+/*!
+    \page 02-listview.html
+    \previouspage {Prepare Data}
+    \title Display Data in List View
+
+    \brief provides steps for showing the (example) data
+
+    In this chapter we will define a list view, using the Felgo component
+    \c{AppListView}, and a component for its delegate.
+
+    \section1 Add basic list view
+
+    For starters, we will show the title of each item in a list view.
+    Add the \c{AppListView} component inside \c{AppPage}.
+    A margin between entries of 10 units would be good, so add the spacing
+    property with value 10, and a top anchor with a top margin of 10.
+
+    \code
+    AppListView {
+        spacing: 10
+        anchors.top: parent.top
+        anchors.topMargin: 10
+    }
+    \endcode
+
+    Then add a model and delegate:
+    The model will be a \c{ListModel}, which will be filled on
+    \c{Component.onCompleted}:
+
+    \code
+    AppListView {
+        ...
+
+        model: ListModel {
+            id: listModel
+
+            Component.onCompleted: Data.get(listModel);
+        }
+    }
+    \endcode
+
+    "\c{Data}" comes from the import of the javascript file:
+
+    \code
+    import "data.js" as Data
+    \endcode
+
+    For a basic delegate, add an \c{Item} with the parents width (I defined
+    \c{root} as id of \c{AppPage}) and a text components
+    height plus some margin.
+    As text component, use the Felgo component \c{AppText}, aligned to the
+    left with a margin of 10, and centered vertically.
+
+    The model data is specified as required property for \c{Item}, and then
+    assigned to the text property of the \c{AppText} component:
+
+    \code
+    delegate: Item {
+        required property string title
+
+        width: root.width;
+        height: txtTitle.height + 10
+
+        AppText {
+            id: txtTitle
+
+            text: title
+
+            anchors.verticalCenter: parent.verticalCenter
+            anchors.left: parent.left
+            anchors.leftMargin: 10
+        }
+    }
+    \endcode
+
+    Building and deploying the app now should show a list of titles.
+
+    \section1 Add detailed component for delegate
+
+    Next create a new qml Document, I will name it \c{CollectionDelegate}.
+    This will contain the layout for a delegate.
+    The base component is a \c{Item}.
+
+    \section2 Specify model data
+
+    Similar to the required property for the title in the previous section,
+    define required properties for every entry:
+
+    \code
+    required property string title
+    required property string origin
+    required property string originColor
+    required property string type
+    required property int age
+    required property string ageUnit
+    required property int weightTotal
+    required property int weightLeft
+    required property string weightUnit
+    required property int cost
+    required property int secondaryCost
+    required property string primaryColor
+    required property string secondaryColor
+    required property string tagStr
+    property list<string> tags
+    \endcode
+
+    The list of tags will be created from \c{tagStr} when it is available:
+
+    \code
+    Component.onCompleted: {
+        tags = Data.tagList(tagStr);
+    }
+    \endcode
+
+    There should also be a property \c{ageDescription} to give some domain
+    specific context to the meaning of the entry type.
+    I picked it to be:
+
+    \code
+    property string ageDescription: qsTr("collected %1 %2 ago")
+    \endcode
+
+    \section2 General structure of the layout
+
+    To have a robust layout that will e.g. match for each item (would be a
+    problem with a grid view that scales cells according to their content),
+    not break as easily with different text lengths (would be a problem if
+    I had a grid with a dynamic width for columns on e.g. the left, and then
+    rightermost columns would disappear out of the right side of the screen),
+    and give an overview over the data (so not just list it),
+    I chose to have a colored rectangle on the left with a fixed width
+    calculated from the parent's width,
+    and a \c{Column} for the text on the right side of it.
+
+    While entries could have a pictures instead of the colored
+    rectangle to show the characteristics of an item, one base idea for this
+    app was targeting items that are measured in e.g. grams, so are rather
+    homogeneous.
+    Not having to save pictures means using less storage space.
+    The colored rectangle also only serves as a base for further ideas for
+    custom components.
+
+    \code
+    Rectangle {
+        id: rectWeight
+
+        height: parent.height
+        width: delegate.width / 7
+
+        color: delegate.primaryColor
+    }
+
+    Column {
+        id: colContent
+
+        anchors.left: rectWeight.right
+        anchors.leftMargin: 10
+
+        ...
+    }
+    \endcode
+
+    While the height of the rectangle is set according to the parent height,
+    the parent height depends on the content of the text column, with some
+    padding:
+
+    \code
+    Item {
+        id: delegate
+
+        height: colContent.height + 2
+
+        ...
+    }
+    \endcode
+
+    \section2 Layout of properties title and origin
+
+    The first line of the content column will be title and origin.
+    The origin is colored.
+
+    \code
+    Row {
+        spacing: 10
+        AppText {
+            id: txtTitle
+
+            text: delegate.title
+            font.bold: true
+        }
+
+        AppText {
+            id: txtOrigin
+
+            text: delegate.origin
+            color: delegate.originColor
+        }
+    }
+    \endcode
+
+    \section2 Layout of the type property
+
+    The type will have a dark grey background, the tag list later on will
+    have a lighter grey background with round corners.
+
+    \code
+    Item {
+        height: txtType.height + 2
+        width: txtType.width + 4
+
+        Rectangle {
+            height: parent.height
+            width: parent.width
+            color: txtType.color
+            opacity: 0.2
+        }
+
+        AppText {
+            id: txtType
+
+            text: delegate.type
+
+            anchors.centerIn: parent
+        }
+    }
+    \endcode
+
+    \section2 Layout of the price
+
+    The price will be per 10g, or another fix amount.
+    If the secondary and primary price are not equal, the first price will
+    be formatted with a strikeout, and the other price is shown.
+    Make the color of the amount a softer color than the price to make it
+    stand out less.
+    Setting the opacity instead of a color makes switching to a different
+    font color, e.g. for a dark mode, easier.
+
+    \code
+    Row {
+        spacing: 2
+
+        AppText {
+                text: delegate.cost + "€"
+                font.strikeout: delegate.cost !== delegate.secondaryCost
+        }
+
+        AppText {
+            text: delegate.secondaryCost + "€"
+            visible: delegate.cost !== delegate.secondaryCost
+        }
+
+        AppText {
+            text: "/10g"
+            opacity: 0.7
+        }
+    }
+    \endcode
+
+    \section2 Layout of the age property
+
+    This will use the age description property we defined earlier, and can
+    be a simple \c{AppText} component:
+
+    \code
+    AppText {
+        text: delegate.ageDescription.arg(delegate.age)
+                                     .arg(delegate.ageUnit)
+    }
+    \endcode
+
+    \section2 Layout for the tag list
+
+    Now for the tag list. We will format it as a \c{Repeater} in a \c{Row}.
+    The model will be the string list for the tags we parsed earlier.
+    It is available as property \c{modelData} of type \c{string}.
+    Each tag should have a light grey background with round corners, but not
+    half circles, so decrement the radius with \c{2}.
+    The light grey is achieved by using the text color of the text item,
+    and setting an opacity of \c{0.1}.
+    The text is also not black, but a bit lighter, using an opacity of \c{0.8}.
+
+    \code
+    Row {
+        Repeater {
+            model: delegate.tags
+
+            Item {
+                required property string modelData
+
+                height: rectPropBg.height
+                width: rectPropBg.width + 3
+
+                AppText {
+                    id: txtProp
+
+                    text: parent.modelData
+
+                    opacity: 0.8
+                    anchors.centerIn: rectPropBg
+                }
+
+                Rectangle {
+                    id: rectPropBg
+
+                    color: txtProp.color
+                    opacity: 0.1
+                    radius: height / 2 - 2
+
+                    height: txtProp.height + 4
+                    width: txtProp.width + 10
+                }
+            }
+        }
+    }
+    \endcode
+
+    \section1 Use delegate component
+
+    Assign the delegate component to the delegate property:
+
+    \code
+    delegate: CollectionDelegate {
+        width: root.width
+    }
+    \endcode
+
+    Here we will also set its width.
+
+    Now if you build and deploy the app, you should see a detailed list view
+    with the sample data added in the first chapter.
+
+    \image {display_data.jpg} {List view with sample data}
+*/
