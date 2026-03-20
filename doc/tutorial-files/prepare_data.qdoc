@@ -1,8 +1,9 @@
 /*!
     \page 01-data.html
+    \nextpage {Display Data in List View}
     \title Prepare Data
 
-    \brief provides steps for preparing and showing example data.
+    \brief provides steps for preparing example data.
 
     First we will add some sample data. This data will then be
     parsed and used to fill a database.
