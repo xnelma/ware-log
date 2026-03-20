@@ -2,6 +2,7 @@ project = WareLog
 description = An app for entering a catalogue of items, for items that can be measured in grams, liters etc.
 
 sourcedirs = ./doc/tutorial-files
+imagedirs = ./doc/tutorial-files/images
 
 sources.fileextensions = "*.qdoc"
 

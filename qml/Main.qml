@@ -23,21 +23,8 @@ App {
                     Component.onCompleted: Data.get(listModel);
                 }
 
-                delegate: Item {
-                    required property string title
-
-                    width: root.width;
-                    height: txtTitle.height + 10
-
-                    AppText {
-                        id: txtTitle
-
-                        text: title
-
-                        anchors.verticalCenter: parent.verticalCenter
-                        anchors.left: parent.left
-                        anchors.leftMargin: 10
-                    }
+                delegate: CollectionDelegate {
+                    width: root.width
                 }
             }
         }
