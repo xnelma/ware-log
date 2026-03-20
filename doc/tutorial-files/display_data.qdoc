@@ -6,6 +6,8 @@
 
     First we will add some sample data to display. This data will then be
     parsed and used to fill a database.
+    As it will be displayed later on by a list view, we will also write a
+    method to read it from the database into a list model.
 
     \section1 Add sample data
 
@@ -204,4 +206,58 @@
         return tagStr;
     }
     \endcode
+
+    Now the data is available in a database, and the next step is reading it:
+    it is needed in form of a list model.
+
+    \section1 Read database into list model
+
+    Define a method \c{get} in \c{data.js}, with the parameter \c{model}.
+    This method should be the only one to call when getting the data, so the
+    first line would be opening the database:
+
+    \code
+    var db = openDatabase();
+    \endcode
+
+    On this database object, define a transaction, that gets the items and
+    appends them to a list model, given by \c{model}.
+
+    \code
+    db.transaction(function(tx) {
+        var res = tx.executeSql('SELECT * FROM Collection');
+        for (var i = 0; i < res.rows.length; i++) {
+            var item = res.rows.item(i);
+            model.append(
+                { title: item.title,
+                  origin: item.origin, originColor: item.originColor,
+                  type: item.type,
+                  age: item.age, ageUnit: item.ageUnit,
+                  weightTotal: item.weightTotal,
+                  weightLeft: item.weightLeft,
+                  weightUnit: item.weightUnit,
+                  cost: item.cost, secondaryCost: item.secondaryCost,
+                  primaryColor: item.primaryColor,
+                  secondaryColor: item.secondaryColor,
+                  tagStr: item.tags
+                } );
+        };
+    });
+    \endcode
+
+    The tags will be split in the UI component later on.
+    We can already add the method for getting the string list:
+
+    \code
+    function tagList(tagStr)
+    {
+        var tags = tagStr.split("|");
+        return tags;
+    }
+    \endcode
+
+    Now we have data available to fill a list view, and a single method to
+    retrieve said data: \c{get(model)}.
+    In the next chapter we will create the UI components for a list view
+    to display the data.
 */
