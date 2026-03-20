@@ -21,6 +21,12 @@ App {
                     id: listModel
 
                     Component.onCompleted: Data.get(listModel);
+
+                    function deleteItem(title) {
+                        for (var i = 0; i < listModel.count; i++)
+                            if (listModel.get(i).title === title)
+                                listModel.remove(i);
+                    }
                 }
 
                 delegate: CollectionDelegate {

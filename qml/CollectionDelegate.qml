@@ -39,7 +39,8 @@ SwipeOptionsContainer {
         iconType: IconType.remove
         height: parent.height
         onClicked: {
-            console.log("delete button clicked");
+            Data.deleteItem(title);
+            listModel.deleteItem(title);
         }
     }
 

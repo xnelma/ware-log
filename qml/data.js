@@ -115,3 +115,11 @@ function tagList(tagStr)
     var tags = tagStr.split("|");
     return tags;
 }
+
+function deleteItem(title)
+{
+    var db = openDatabase();
+    db.transaction(function(tx) {
+        tx.executeSql('DELETE FROM Collection WHERE title = \'' + title + '\'');
+    });
+}
