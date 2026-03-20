@@ -5,6 +5,11 @@ import "data.js" as Data
 
 App {
 
+    onInitTheme: {
+        Theme.colors.tintColor = "#c7c7c7"
+        Theme.navigationBar.shadowHeight = 0
+    }
+
     NavigationStack {
 
         AppPage {
