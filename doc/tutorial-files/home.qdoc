@@ -40,5 +40,6 @@
      \list
          \li \l {01-data.html} {Prepare Data}
          \li \l {02-listview.html} {Display Data in List View}
+         \li \l {03-delete.html} {Delete Item}
      \endlist
 */
