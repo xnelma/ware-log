@@ -1,0 +1,36 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+<!-- theme_colors.qdoc -->
+  <meta name="description" content="provides steps for setting theme colors">
+  <title>Set Theme Colors | WareLog</title>
+<link rel="stylesheet" type="text/css" href="style/style.css"/>
+</head>
+<body>
+  <link rel="prev" href="03-delete.html" />
+<p class="naviNextPrevious headerNavi">
+<a class="prevPage" href="03-delete.html">Delete Item</a>
+</p>
+<div class="sidebar"><div class="sidebar-content" id="sidebar-content"></div></div>
+<h1 class="title">Set Theme Colors</h1>
+<!-- $$$04-theme.html-description -->
+<div class="descr" id="details">
+<p>In this step I would like to change to a different accent color. As list items will have colored rectangles as part of their layout, I will choose a neutral grey tone, <code translate="no">#c7c7c7</code>.</p>
+<p>For the <code translate="no">App</code> component by Felgo, there is the <code translate="no">onInitTheme</code> property and the <code translate="no">Theme</code> component. The <code translate="no">tintColor</code> in <code translate="no">Theme.colors</code> would correspond to the accent color, so the following lines are enough to set it:</p>
+<pre class="cpp" translate="no">App {
+    onInitTheme: {
+        Theme<span class="operator">.</span>colors<span class="operator">.</span>tintColor <span class="operator">=</span> <span class="string">&quot;#c7c7c7&quot;</span>
+    }
+    <span class="operator">.</span><span class="operator">.</span><span class="operator">.</span>
+}</pre>
+<p>Another property that can be set is the shadow height of the navigation bar. To remove the shadow, add the following line:</p>
+<pre class="cpp" translate="no">Theme<span class="operator">.</span>navigationBar<span class="operator">.</span>shadowHeight <span class="operator">=</span> <span class="number">0</span></pre>
+<p>Now both the navigation bar and the swipe button have the tint color set to grey, and the navigation bar has the shadow removed.</p>
+<p class="centerAlign"><img src="images/theme_color.jpg" alt="{The theme has now a grey tint as accent color}" /></p></div>
+<!-- @@@04-theme.html -->
+<p class="naviNextPrevious footerNavi">
+<a class="prevPage" href="03-delete.html">Delete Item</a>
+</p>
+</body>
+</html>

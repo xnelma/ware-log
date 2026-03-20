@@ -1,0 +1,37 @@
+/*!
+    \page 04-theme.html
+    \previouspage {Delete Item}
+    \title Set Theme Colors
+
+    \brief provides steps for setting theme colors
+
+    In this step I would like to change to a different accent color.
+    As list items will have colored rectangles as part of their layout, I will
+    choose a neutral grey tone, \c{#c7c7c7}.
+
+    For the \c{App} component by Felgo, there is the \c{onInitTheme} property
+    and the \c{Theme} component.
+    The \c{tintColor} in \c{Theme.colors} would correspond to the accent color,
+    so the following lines are enough to set it:
+
+    \code
+    App {
+        onInitTheme: {
+            Theme.colors.tintColor = "#c7c7c7"
+        }
+        ...
+    }
+    \endcode
+
+    Another property that can be set is the shadow height of the navigation
+    bar. To remove the shadow, add the following line:
+
+    \code
+    Theme.navigationBar.shadowHeight = 0
+    \endcode
+
+    Now both the navigation bar and the swipe button have the tint color
+    set to grey, and the navigation bar has the shadow removed.
+
+    \image {theme_color.jpg} {The theme has now a grey tint as accent color}
+*/
