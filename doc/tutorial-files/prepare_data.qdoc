@@ -1,10 +1,10 @@
 /*!
     \page 01-data.html
-    \title Display Data
+    \title Prepare Data
 
     \brief provides steps for preparing and showing example data.
 
-    First we will add some sample data to display. This data will then be
+    First we will add some sample data. This data will then be
     parsed and used to fill a database.
     As it will be displayed later on by a list view, we will also write a
     method to read it from the database into a list model.
