@@ -1,0 +1,111 @@
+/*!
+    \page 03-delete.html
+    \previouspage {Display Data in List View}
+    \title Delete Item
+
+    \brief provides steps for deleting a list item
+
+    This chapter shows the steps for deleting an item from the list.
+
+    \section1 Add the delete button
+
+    The Felgo SDK provides a component \c{SwipeOptionsContainer}, that makes
+    e.g. a list item swipable, and shows a button left or right on swipe.
+
+    Wrap the base component \c{Item} in \c{CollectionDelegate.qml} in
+    \c{SwipeOptionsContainer} by moving id and properties to it, and having
+    the \c{Item} as child component of it.
+
+    \code
+    SwipeOptionsContainer {
+        id: delegate
+
+        height: content.height
+
+        required property string title
+        required property string origin
+        ...
+        property list<string> tags
+
+        property string ageDescription: qsTr("collected %1 %2 ago")
+
+        Component.onCompleted: {
+            tags = Data.tagList(tagStr);
+        }
+
+        Item {
+            id: content
+
+            height: colContent.height + 2
+
+            Rectangle {
+                ...
+            }
+        }
+        ...
+    }
+    \endcode
+
+    Then assign a \c{SwipeButton} to the \c{rightOption} property, with
+    a \c{remove} icon.
+
+    \code
+    rightOption: SwipeButton {
+        iconType: IconType.remove
+        height: parent.height
+        onClicked: {
+            console.log("delete button clicked");
+        }
+    }
+    \endcode
+
+    At this point, the list data should get displayed as before, but on
+    swiping to the left on a list item, a delete button is shown.
+
+    \image {delete_item.jpg} {On swiping right, a delete button is now shown.}
+
+    \section1 Write delete methods
+
+    With the swipe button we will not have access to the index, but to the
+    item title.
+    In case of deleting from the database, the following query would delete the
+    item with a matching title:
+
+    \code
+    function deleteItem(title)
+    {
+        var db = openDatabase();
+        db.transaction(function(tx) {
+            tx.executeSql('DELETE FROM Collection WHERE title = \'' + title + '\'');
+        });
+    }
+    \endcode
+
+    As this would not reload the list model, we define a method on it to
+    delete an item given a title:
+
+    \code
+    model: ListModel {
+        id: listModel
+
+        Component.onCompleted: Data.get(listModel);
+
+        function deleteItem(title) {
+            for (var i = 0; i < listModel.count; i++)
+                if (listModel.get(i).title === title)
+                    listModel.remove(i);
+        }
+    }
+    \endcode
+
+    Deleting items by title, especially from the database, also has the
+    advantage of being independent from a different order of items in
+    the view and the database. This might for example happen if items get
+    sorted in the frontend.
+    For large amounts of data, which are not expected for this app, the
+    worse runtime for the search as opposed direct indexing might be
+    noticeable.
+
+    Now, on swiping left and clicking the delete button, items will be
+    deleted from the database, and the list view.
+*/
