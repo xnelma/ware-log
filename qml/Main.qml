@@ -41,9 +41,16 @@ App {
 
             FloatingActionButton {
                 iconType: IconType.plussquareo
-                onClicked: console.log("clicked");
+                onClicked: root.navigationStack.push(editItemComponent)
                 visible: true
             }
+        }
+    }
+
+    Component {
+        id: editItemComponent
+
+        EditItemView {
         }
     }
 }
