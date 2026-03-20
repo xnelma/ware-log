@@ -4,4 +4,59 @@
     \title Delete Item
 
     \brief provides steps for deleting a list item
+
+    The Felgo SDK provides a component \c{SwipeOptionsContainer}, that makes
+    e.g. a list item swipable, and shows a button left or right on swipe.
+
+    Wrap the base component \c{Item} in \c{CollectionDelegate.qml} in
+    \c{SwipeOptionsContainer} by moving id and properties to it, and having
+    the \c{Item} as child component of it.
+
+    \code
+    SwipeOptionsContainer {
+        id: delegate
+
+        height: content.height
+
+        required property string title
+        required property string origin
+        ...
+        property list<string> tags
+
+        property string ageDescription: qsTr("collected %1 %2 ago")
+
+        Component.onCompleted: {
+            tags = Data.tagList(tagStr);
+        }
+
+        Item {
+            id: content
+
+            height: colContent.height + 2
+
+            Rectangle {
+                ...
+            }
+        }
+        ...
+    }
+    \endcode
+
+    Then assign a \c{SwipeButton} to the \c{rightOption} property, with
+    a \c{remove} icon.
+
+    \code
+    rightOption: SwipeButton {
+        iconType: IconType.remove
+        height: parent.height
+        onClicked: {
+            console.log("delete button clicked");
+        }
+    }
+    \endcode
+
+    At this point, the list data should get displayed as before, but on
+    swiping to the left on a list item, a delete button is shown.
+
+    \image {delete_item.jpg} {On swiping right, a delete button is now shown.}
 */

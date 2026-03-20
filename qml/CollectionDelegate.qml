@@ -3,10 +3,10 @@ import QtQuick
 import QtQuick.Layouts
 import "data.js" as Data
 
-Item {
+SwipeOptionsContainer {
     id: delegate
 
-    height: colContent.height + 2
+    height: content.height
 
     required property string title
     required property string origin
@@ -35,103 +35,116 @@ Item {
         tags = Data.tagList(tagStr);
     }
 
-    Rectangle {
-        id: rectWeight
-
+    rightOption: SwipeButton {
+        iconType: IconType.remove
         height: parent.height
-        width: delegate.width / 7
-
-        color: delegate.primaryColor
+        onClicked: {
+            console.log("delete button clicked");
+        }
     }
 
-    Column {
-        id: colContent
+    Item {
+        id: content
 
-        anchors.left: rectWeight.right
-        anchors.leftMargin: 10
+        height: colContent.height + 2
 
-        Row {
-            spacing: 10
-            AppText {
-                id: txtTitle
+        Rectangle {
+            id: rectWeight
 
-                text: delegate.title
-                font.bold: true
-            }
+            height: parent.height
+            width: delegate.width / 7
 
-            AppText {
-                id: txtOrigin
-
-                text: delegate.origin
-                color: delegate.originColor
-            }
+            color: delegate.primaryColor
         }
 
-        Item {
-            height: txtType.height + 2
-            width: txtType.width + 4
+        Column {
+            id: colContent
 
-            Rectangle {
-                height: parent.height
-                width: parent.width
-                color: txtType.color
-                opacity: 0.2
+            anchors.left: rectWeight.right
+            anchors.leftMargin: 10
+
+            Row {
+                spacing: 10
+                AppText {
+                    id: txtTitle
+
+                    text: delegate.title
+                    font.bold: true
+                }
+
+                AppText {
+                    id: txtOrigin
+
+                    text: delegate.origin
+                    color: delegate.originColor
+                }
+            }
+
+            Item {
+                height: txtType.height + 2
+                width: txtType.width + 4
+
+                Rectangle {
+                    height: parent.height
+                    width: parent.width
+                    color: txtType.color
+                    opacity: 0.2
+                }
+
+                AppText {
+                    id: txtType
+
+                    text: delegate.type
+
+                    anchors.centerIn: parent
+                }
+            }
+
+            Row {
+                spacing: 2
+
+                AppText {
+                        text: delegate.cost + "€"
+                        font.strikeout: delegate.cost !== delegate.secondaryCost
+                }
+
+                AppText {
+                    text: delegate.secondaryCost + "€"
+                    visible: delegate.cost !== delegate.secondaryCost
+                }
+
+                AppText {
+                    text: "/10g"
+                    opacity: 0.7
+                }
             }
 
             AppText {
-                id: txtType
-
-                text: delegate.type
-
-                anchors.centerIn: parent
-            }
-        }
-
-        Row {
-            spacing: 2
-
-            AppText {
-                    text: delegate.cost + "€"
-                    font.strikeout: delegate.cost !== delegate.secondaryCost
+                text: delegate.ageDescription.arg(delegate.age)
+                                             .arg(delegate.ageUnit)
             }
 
-            AppText {
-                text: delegate.secondaryCost + "€"
-                visible: delegate.cost !== delegate.secondaryCost
-            }
+            Row {
+                Repeater {
+                    model: delegate.tags
 
-            AppText {
-                text: "/10g"
-                opacity: 0.7
-            }
-        }
+                    Item {
+                        required property string modelData
 
-        AppText {
-            text: delegate.ageDescription.arg(delegate.age)
-                                         .arg(delegate.ageUnit)
-        }
+                        height: rectPropBg.height
+                        width: rectPropBg.width + 3
 
-        Row {
-            Repeater {
-                model: delegate.tags
+                        AppText {
+                            id: txtProp
 
-                Item {
-                    required property string modelData
+                            text: parent.modelData
 
-                    height: rectPropBg.height
-                    width: rectPropBg.width + 3
+                            opacity: 0.8
+                            anchors.centerIn: rectPropBg
+                        }
 
-                    AppText {
-                        id: txtProp
-
-                        text: parent.modelData
-
-                        opacity: 0.8
-                        anchors.centerIn: rectPropBg
-                    }
-
-                    Rectangle {
-                        id: rectPropBg
+                        Rectangle {
+                            id: rectPropBg
 
                         color: txtProp.color
                         opacity: 0.1
@@ -139,10 +152,12 @@ Item {
 
                         height: txtProp.height + 4
                         width: txtProp.width + 10
-                    }
+                        }
 
+                    }
                 }
             }
+
         }
     }
 }
