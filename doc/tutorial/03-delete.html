@@ -1,0 +1,96 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+<!-- delete_item.qdoc -->
+  <meta name="description" content="provides steps for deleting a list item">
+  <title>Delete Item | WareLog</title>
+<link rel="stylesheet" type="text/css" href="style/style.css"/>
+</head>
+<body>
+  <link rel="prev" href="02-listview.html" />
+<p class="naviNextPrevious headerNavi">
+<a class="prevPage" href="02-listview.html">Display Data in List View</a>
+</p>
+<div class="sidebar">
+<div class="toc">
+<h3 id="toc">Contents</h3>
+<ul>
+<li class="level1"><a href="#add-the-delete-button">Add the delete button</a></li>
+<li class="level1"><a href="#write-delete-methods">Write delete methods</a></li>
+</ul>
+</div>
+<div class="sidebar-content" id="sidebar-content"></div></div>
+<h1 class="title">Delete Item</h1>
+<!-- $$$03-delete.html-description -->
+<div class="descr" id="details">
+<p>This chapter shows the steps for deleting an item from the list.</p>
+<h2 id="add-the-delete-button">Add the delete button</h2>
+<p>The Felgo SDK provides a component <code translate="no">SwipeOptionsContainer</code>, that makes e.g. a list item swipable, and shows a button left or right on swipe.</p>
+<p>Wrap the base component <code translate="no">Item</code> in <code translate="no">CollectionDelegate.qml</code> in <code translate="no">SwipeOptionsContainer</code> by moving id and properties to it, and having the <code translate="no">Item</code> as child component of it.</p>
+<pre class="cpp" translate="no">SwipeOptionsContainer {
+    id: delegate
+
+    height: content<span class="operator">.</span>height
+
+    required property string title
+    required property string origin
+    <span class="operator">.</span><span class="operator">.</span><span class="operator">.</span>
+    property list<span class="operator">&lt;</span>string<span class="operator">&gt;</span> tags
+
+    property string ageDescription: qsTr(<span class="string">&quot;collected %1 %2 ago&quot;</span>)
+
+    Component<span class="operator">.</span>onCompleted: {
+        tags <span class="operator">=</span> Data<span class="operator">.</span>tagList(tagStr);
+    }
+
+    Item {
+        id: content
+
+        height: colContent<span class="operator">.</span>height <span class="operator">+</span> <span class="number">2</span>
+
+        Rectangle {
+            <span class="operator">.</span><span class="operator">.</span><span class="operator">.</span>
+        }
+    }
+    <span class="operator">.</span><span class="operator">.</span><span class="operator">.</span>
+}</pre>
+<p>Then assign a <code translate="no">SwipeButton</code> to the <code translate="no">rightOption</code> property, with a <code translate="no">remove</code> icon.</p>
+<pre class="cpp" translate="no">rightOption: SwipeButton {
+    iconType: IconType<span class="operator">.</span>remove
+    height: parent<span class="operator">.</span>height
+    onClicked: {
+        console<span class="operator">.</span>log(<span class="string">&quot;delete button clicked&quot;</span>);
+    }
+}</pre>
+<p>At this point, the list data should get displayed as before, but on swiping to the left on a list item, a delete button is shown.</p>
+<p class="centerAlign"><img src="images/delete_item.jpg" alt="{On swiping right, a delete button is now shown.}" /></p><h2 id="write-delete-methods">Write delete methods</h2>
+<p>With the swipe button we will not have access to the index, but to the item title. In case of deleting from the database, the following query would delete the item with a matching title:</p>
+<pre class="cpp" translate="no">function deleteItem(title)
+{
+    var db <span class="operator">=</span> openDatabase();
+    db<span class="operator">.</span>transaction(function(tx) {
+        tx<span class="operator">.</span>executeSql(<span class="char">'DELETE FROM Collection WHERE title = \''</span> <span class="operator">+</span> title <span class="operator">+</span> <span class="char">'\''</span>);
+    });
+}</pre>
+<p>As this would not reload the list model, we define a method on it to delete an item given a title:</p>
+<pre class="cpp" translate="no">model: ListModel {
+    id: listModel
+
+    Component<span class="operator">.</span>onCompleted: Data<span class="operator">.</span>get(listModel);
+
+    function deleteItem(title) {
+        <span class="keyword">for</span> (var i <span class="operator">=</span> <span class="number">0</span>; i <span class="operator">&lt;</span> listModel<span class="operator">.</span>count; i<span class="operator">+</span><span class="operator">+</span>)
+            <span class="keyword">if</span> (listModel<span class="operator">.</span>get(i)<span class="operator">.</span>title <span class="operator">=</span><span class="operator">=</span><span class="operator">=</span> title)
+                listModel<span class="operator">.</span>remove(i);
+    }
+}</pre>
+<p>Deleting items by title, especially from the database, also has the advantage of being independent from a different order of items in the view and the database. This might for example happen if items get sorted in the frontend. For large amounts of data, which are not expected for this app, the worse runtime for the search as opposed direct indexing might be noticeable.</p>
+<p>Now, on swiping left and clicking the delete button, items will be deleted from the database, and the list view.</p>
+</div>
+<!-- @@@03-delete.html -->
+<p class="naviNextPrevious footerNavi">
+<a class="prevPage" href="02-listview.html">Display Data in List View</a>
+</p>
+</body>
+</html>

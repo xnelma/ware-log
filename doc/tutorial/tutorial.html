@@ -1,0 +1,27 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+<!-- home.qdoc -->
+  <meta name="description" content="provides steps for creating an app for entering a catalogue of items.">
+  <title>Tutorial for the WareLog App | WareLog</title>
+<link rel="stylesheet" type="text/css" href="style/style.css"/>
+</head>
+<body>
+<div class="sidebar"><div class="sidebar-content" id="sidebar-content"></div></div>
+<h1 class="title">Tutorial for the WareLog App</h1>
+<!-- $$$tutorial.html-description -->
+<div class="descr" id="details">
+<p>For this project I want to try out the Felgo SDK. I created the initial project files using the setup wizard for a Felgo App; for a single-page application and for now without selecting plugins.</p>
+<p>As the SDK version (4.3.1) available in the <a href="https://felgo.com/doc/felgo-installation/#download-install-felgo">Felgo Installer</a> at the time I am starting the project is <a href="https://felgo.com/doc/felgo-updates/#latest-felgo-release">based on Qt 6.8.3</a>, the <a href="https://doc.qt.io/qt-6.8/whatsnew68.html#mobile-platforms">minimum Android version</a> that can be built for is Android 9. The minimum <i>target</i> Android version is <a href="https://felgo.com/doc/felgo-deployment-android/#install-android-packages">expected to be Android 12</a>, so the Android SDK version 31 should be installed, too. This will also be the version I am building for. If the app should be published to the Play Store, note the current <a href="https://developer.android.com/google/play/requirements/target-sdk">minimum target requirements</a> by Google Play, which would (at the time of writing this tutorial) be Android 15, so Android SDK version 35.</p>
+<p>Clear any component inside the <code translate="no">AppPage</code> component, so when you build and deploy to a device now you should see an empty window.</p>
+<p>As a baseline the app should show a list of items with generic data fields, and allow adding and removing items. This concept can be extended to be very detailed, so in this tutorial I will show a base implementation.</p>
+<ul>
+<li><a href="01-data.html">Prepare Data</a></li>
+<li><a href="02-listview.html">Display Data in List View</a></li>
+<li><a href="03-delete.html">Delete Item</a></li>
+</ul>
+</div>
+<!-- @@@tutorial.html -->
+</body>
+</html>

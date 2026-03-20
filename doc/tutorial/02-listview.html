@@ -1,0 +1,242 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+<!-- display_data.qdoc -->
+  <meta name="description" content="provides steps for showing the (example) data">
+  <title>Display Data in List View | WareLog</title>
+<link rel="stylesheet" type="text/css" href="style/style.css"/>
+</head>
+<body>
+  <link rel="prev" href="01-data.html" />
+  <link rel="next" href="03-delete.html" />
+<p class="naviNextPrevious headerNavi">
+<a class="prevPage" href="01-data.html">Prepare Data</a>
+<a class="nextPage" href="03-delete.html">Delete Item</a>
+</p>
+<div class="sidebar">
+<div class="toc">
+<h3 id="toc">Contents</h3>
+<ul>
+<li class="level1"><a href="#add-basic-list-view">Add basic list view</a></li>
+<li class="level1"><a href="#add-detailed-component-for-delegate">Add detailed component for delegate</a></li>
+<li class="level2"><a href="#specify-model-data">Specify model data</a></li>
+<li class="level2"><a href="#general-structure-of-the-layout">General structure of the layout</a></li>
+<li class="level2"><a href="#layout-of-properties-title-and-origin">Layout of properties title and origin</a></li>
+<li class="level2"><a href="#layout-of-the-type-property">Layout of the type property</a></li>
+<li class="level2"><a href="#layout-of-the-price">Layout of the price</a></li>
+<li class="level2"><a href="#layout-of-the-age-property">Layout of the age property</a></li>
+<li class="level2"><a href="#layout-for-the-tag-list">Layout for the tag list</a></li>
+<li class="level1"><a href="#use-delegate-component">Use delegate component</a></li>
+</ul>
+</div>
+<div class="sidebar-content" id="sidebar-content"></div></div>
+<h1 class="title">Display Data in List View</h1>
+<!-- $$$02-listview.html-description -->
+<div class="descr" id="details">
+<p>In this chapter we will define a list view, using the Felgo component <code translate="no">AppListView</code>, and a component for its delegate.</p>
+<h2 id="add-basic-list-view">Add basic list view</h2>
+<p>For starters, we will show the title of each item in a list view. Add the <code translate="no">AppListView</code> component inside <code translate="no">AppPage</code>. A margin between entries of 10 units would be good, so add the spacing property with value 10, and a top anchor with a top margin of 10.</p>
+<pre class="cpp" translate="no">AppListView {
+    spacing: <span class="number">10</span>
+    anchors<span class="operator">.</span>top: parent<span class="operator">.</span>top
+    anchors<span class="operator">.</span>topMargin: <span class="number">10</span>
+}</pre>
+<p>Then add a model and delegate: The model will be a <code translate="no">ListModel</code>, which will be filled on <code translate="no">Component.onCompleted</code>:</p>
+<pre class="cpp" translate="no">AppListView {
+    <span class="operator">.</span><span class="operator">.</span><span class="operator">.</span>
+
+    model: ListModel {
+        id: listModel
+
+        Component<span class="operator">.</span>onCompleted: Data<span class="operator">.</span>get(listModel);
+    }
+}</pre>
+<p>&quot;<code translate="no">Data</code>&quot; comes from the import of the javascript file:</p>
+<pre class="cpp" translate="no">import <span class="string">&quot;data.js&quot;</span> as Data</pre>
+<p>For a basic delegate, add an <code translate="no">Item</code> with the parents width (I defined <code translate="no">root</code> as id of <code translate="no">AppPage</code>) and a text components height plus some margin. As text component, use the Felgo component <code translate="no">AppText</code>, aligned to the left with a margin of 10, and centered vertically.</p>
+<p>The model data is specified as required property for <code translate="no">Item</code>, and then assigned to the text property of the <code translate="no">AppText</code> component:</p>
+<pre class="cpp" translate="no">delegate: Item {
+    required property string title
+
+    width: root<span class="operator">.</span>width;
+    height: txtTitle<span class="operator">.</span>height <span class="operator">+</span> <span class="number">10</span>
+
+    AppText {
+        id: txtTitle
+
+        text: title
+
+        anchors<span class="operator">.</span>verticalCenter: parent<span class="operator">.</span>verticalCenter
+        anchors<span class="operator">.</span>left: parent<span class="operator">.</span>left
+        anchors<span class="operator">.</span>leftMargin: <span class="number">10</span>
+    }
+}</pre>
+<p>Building and deploying the app now should show a list of titles.</p>
+<h2 id="add-detailed-component-for-delegate">Add detailed component for delegate</h2>
+<p>Next create a new qml Document, I will name it <code translate="no">CollectionDelegate</code>. This will contain the layout for a delegate. The base component is a <code translate="no">Item</code>.</p>
+<h3 id="specify-model-data">Specify model data</h3>
+<p>Similar to the required property for the title in the previous section, define required properties for every entry:</p>
+<pre class="cpp" translate="no">required property string title
+required property string origin
+required property string originColor
+required property string type
+required property <span class="type">int</span> age
+required property string ageUnit
+required property <span class="type">int</span> weightTotal
+required property <span class="type">int</span> weightLeft
+required property string weightUnit
+required property <span class="type">int</span> cost
+required property <span class="type">int</span> secondaryCost
+required property string primaryColor
+required property string secondaryColor
+required property string tagStr
+property list<span class="operator">&lt;</span>string<span class="operator">&gt;</span> tags</pre>
+<p>The list of tags will be created from <code translate="no">tagStr</code> when it is available:</p>
+<pre class="cpp" translate="no">Component<span class="operator">.</span>onCompleted: {
+    tags <span class="operator">=</span> Data<span class="operator">.</span>tagList(tagStr);
+}</pre>
+<p>There should also be a property <code translate="no">ageDescription</code> to give some domain specific context to the meaning of the entry type. I picked it to be:</p>
+<pre class="cpp" translate="no">property string ageDescription: qsTr(<span class="string">&quot;collected %1 %2 ago&quot;</span>)</pre>
+<h3 id="general-structure-of-the-layout">General structure of the layout</h3>
+<p>To have a robust layout that will e.g. match for each item (would be a problem with a grid view that scales cells according to their content), not break as easily with different text lengths (would be a problem if I had a grid with a dynamic width for columns on e.g. the left, and then rightermost columns would disappear out of the right side of the screen), and give an overview over the data (so not just list it), I chose to have a colored rectangle on the left with a fixed width calculated from the parent's width, and a <code translate="no">Column</code> for the text on the right side of it.</p>
+<p>While entries could have a pictures instead of the colored rectangle to show the characteristics of an item, one base idea for this app was targeting items that are measured in e.g. grams, so are rather homogeneous. Not having to save pictures means using less storage space. The colored rectangle also only serves as a base for further ideas for custom components.</p>
+<pre class="cpp" translate="no">Rectangle {
+    id: rectWeight
+
+    height: parent<span class="operator">.</span>height
+    width: delegate<span class="operator">.</span>width <span class="operator">/</span> <span class="number">7</span>
+
+    color: delegate<span class="operator">.</span>primaryColor
+}
+
+Column {
+    id: colContent
+
+    anchors<span class="operator">.</span>left: rectWeight<span class="operator">.</span>right
+    anchors<span class="operator">.</span>leftMargin: <span class="number">10</span>
+
+    <span class="operator">.</span><span class="operator">.</span><span class="operator">.</span>
+}</pre>
+<p>While the height of the rectangle is set according to the parent height, the parent height depends on the content of the text column, with some padding:</p>
+<pre class="cpp" translate="no">Item {
+    id: delegate
+
+    height: colContent<span class="operator">.</span>height <span class="operator">+</span> <span class="number">2</span>
+
+    <span class="operator">.</span><span class="operator">.</span><span class="operator">.</span>
+}</pre>
+<h3 id="layout-of-properties-title-and-origin">Layout of properties title and origin</h3>
+<p>The first line of the content column will be title and origin. The origin is colored.</p>
+<pre class="cpp" translate="no">Row {
+    spacing: <span class="number">10</span>
+    AppText {
+        id: txtTitle
+
+        text: delegate<span class="operator">.</span>title
+        font<span class="operator">.</span>bold: <span class="keyword">true</span>
+    }
+
+    AppText {
+        id: txtOrigin
+
+        text: delegate<span class="operator">.</span>origin
+        color: delegate<span class="operator">.</span>originColor
+    }
+}</pre>
+<h3 id="layout-of-the-type-property">Layout of the type property</h3>
+<p>The type will have a dark grey background, the tag list later on will have a lighter grey background with round corners.</p>
+<pre class="cpp" translate="no">Item {
+    height: txtType<span class="operator">.</span>height <span class="operator">+</span> <span class="number">2</span>
+    width: txtType<span class="operator">.</span>width <span class="operator">+</span> <span class="number">4</span>
+
+    Rectangle {
+        height: parent<span class="operator">.</span>height
+        width: parent<span class="operator">.</span>width
+        color: txtType<span class="operator">.</span>color
+        opacity: <span class="number">0.2</span>
+    }
+
+    AppText {
+        id: txtType
+
+        text: delegate<span class="operator">.</span>type
+
+        anchors<span class="operator">.</span>centerIn: parent
+    }
+}</pre>
+<h3 id="layout-of-the-price">Layout of the price</h3>
+<p>The price will be per 10g, or another fix amount. If the secondary and primary price are not equal, the first price will be formatted with a strikeout, and the other price is shown. Make the color of the amount a softer color than the price to make it stand out less. Setting the opacity instead of a color makes switching to a different font color, e.g. for a dark mode, easier.</p>
+<pre class="cpp" translate="no">Row {
+    spacing: <span class="number">2</span>
+
+    AppText {
+            text: delegate<span class="operator">.</span>cost <span class="operator">+</span> <span class="string">&quot;€&quot;</span>
+            font<span class="operator">.</span>strikeout: delegate<span class="operator">.</span>cost <span class="operator">!</span><span class="operator">=</span><span class="operator">=</span> delegate<span class="operator">.</span>secondaryCost
+    }
+
+    AppText {
+        text: delegate<span class="operator">.</span>secondaryCost <span class="operator">+</span> <span class="string">&quot;€&quot;</span>
+        visible: delegate<span class="operator">.</span>cost <span class="operator">!</span><span class="operator">=</span><span class="operator">=</span> delegate<span class="operator">.</span>secondaryCost
+    }
+
+    AppText {
+        text: <span class="string">&quot;/10g&quot;</span>
+        opacity: <span class="number">0.7</span>
+    }
+}</pre>
+<h3 id="layout-of-the-age-property">Layout of the age property</h3>
+<p>This will use the age description property we defined earlier, and can be a simple <code translate="no">AppText</code> component:</p>
+<pre class="cpp" translate="no">AppText {
+    text: delegate<span class="operator">.</span>ageDescription<span class="operator">.</span>arg(delegate<span class="operator">.</span>age)
+                                 <span class="operator">.</span>arg(delegate<span class="operator">.</span>ageUnit)
+}</pre>
+<h3 id="layout-for-the-tag-list">Layout for the tag list</h3>
+<p>Now for the tag list. We will format it as a <code translate="no">Repeater</code> in a <code translate="no">Row</code>. The model will be the string list for the tags we parsed earlier. It is available as property <code translate="no">modelData</code> of type <code translate="no">string</code>. Each tag should have a light grey background with round corners, but not half circles, so decrement the radius with <code translate="no">2</code>. The light grey is achieved by using the text color of the text item, and setting an opacity of <code translate="no">0.1</code>. The text is also not black, but a bit lighter, using an opacity of <code translate="no">0.8</code>.</p>
+<pre class="cpp" translate="no">Row {
+    Repeater {
+        model: delegate<span class="operator">.</span>tags
+
+        Item {
+            required property string modelData
+
+            height: rectPropBg<span class="operator">.</span>height
+            width: rectPropBg<span class="operator">.</span>width <span class="operator">+</span> <span class="number">3</span>
+
+            AppText {
+                id: txtProp
+
+                text: parent<span class="operator">.</span>modelData
+
+                opacity: <span class="number">0.8</span>
+                anchors<span class="operator">.</span>centerIn: rectPropBg
+            }
+
+            Rectangle {
+                id: rectPropBg
+
+                color: txtProp<span class="operator">.</span>color
+                opacity: <span class="number">0.1</span>
+                radius: height <span class="operator">/</span> <span class="number">2</span> <span class="operator">-</span> <span class="number">2</span>
+
+                height: txtProp<span class="operator">.</span>height <span class="operator">+</span> <span class="number">4</span>
+                width: txtProp<span class="operator">.</span>width <span class="operator">+</span> <span class="number">10</span>
+            }
+        }
+    }
+}</pre>
+<h2 id="use-delegate-component">Use delegate component</h2>
+<p>Assign the delegate component to the delegate property:</p>
+<pre class="cpp" translate="no">delegate: CollectionDelegate {
+    width: root<span class="operator">.</span>width
+}</pre>
+<p>Here we will also set its width.</p>
+<p>Now if you build and deploy the app, you should see a detailed list view with the sample data added in the first chapter.</p>
+<p class="centerAlign"><img src="images/display_data.jpg" alt="{List view with sample data}" /></p></div>
+<!-- @@@02-listview.html -->
+<p class="naviNextPrevious footerNavi">
+<a class="prevPage" href="01-data.html">Prepare Data</a>
+<a class="nextPage" href="03-delete.html">Delete Item</a>
+</p>
+</body>
+</html>

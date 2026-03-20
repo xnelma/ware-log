@@ -1,0 +1,187 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+<!-- prepare_data.qdoc -->
+  <meta name="description" content="provides steps for preparing example data.">
+  <title>Prepare Data | WareLog</title>
+<link rel="stylesheet" type="text/css" href="style/style.css"/>
+</head>
+<body>
+  <link rel="next" href="02-listview.html" />
+<p class="naviNextPrevious headerNavi">
+<a class="nextPage" href="02-listview.html">Display Data in List View</a>
+</p>
+<div class="sidebar">
+<div class="toc">
+<h3 id="toc">Contents</h3>
+<ul>
+<li class="level1"><a href="#add-sample-data">Add sample data</a></li>
+<li class="level1"><a href="#parse-json-file">Parse json file</a></li>
+<li class="level1"><a href="#create-database">Create database</a></li>
+<li class="level1"><a href="#fill-database-with-sample-data">Fill database with sample data</a></li>
+<li class="level1"><a href="#read-database-into-list-model">Read database into list model</a></li>
+</ul>
+</div>
+<div class="sidebar-content" id="sidebar-content"></div></div>
+<h1 class="title">Prepare Data</h1>
+<!-- $$$01-data.html-description -->
+<div class="descr" id="details">
+<p>First we will add some sample data. This data will then be parsed and used to fill a database. As it will be displayed later on by a list view, we will also write a method to read it from the database into a list model.</p>
+<h2 id="add-sample-data">Add sample data</h2>
+<p>Create an assets folder (if not available already), and add a json file <code translate="no">sample_data.json</code> with the following structure:</p>
+<pre class="cpp" translate="no">{
+    <span class="string">&quot;collection&quot;</span>: <span class="operator">[</span>
+        {
+            <span class="string">&quot;title&quot;</span>: <span class="string">&quot;&quot;</span><span class="operator">,</span>
+            <span class="string">&quot;origin&quot;</span>: <span class="string">&quot;&quot;</span><span class="operator">,</span> <span class="string">&quot;originColor&quot;</span>: <span class="string">&quot;&quot;</span><span class="operator">,</span>
+            <span class="string">&quot;type&quot;</span>: <span class="string">&quot;&quot;</span><span class="operator">,</span>
+            <span class="string">&quot;age&quot;</span>: <span class="number">0</span><span class="operator">,</span> <span class="string">&quot;ageUnit&quot;</span>: <span class="string">&quot;years&quot;</span><span class="operator">,</span>
+            <span class="string">&quot;weightTotal&quot;</span>: <span class="number">0</span><span class="operator">,</span> <span class="string">&quot;weightLeft&quot;</span>: <span class="number">0</span><span class="operator">,</span> <span class="string">&quot;weightUnit&quot;</span>: <span class="string">&quot;g&quot;</span><span class="operator">,</span>
+            <span class="string">&quot;cost&quot;</span>: <span class="number">0</span><span class="operator">,</span> <span class="string">&quot;secondaryCost&quot;</span>: <span class="number">0</span><span class="operator">,</span>
+            <span class="string">&quot;primaryColor: &quot;</span><span class="preprocessor">#000&quot;, &quot;secondaryColor&quot;: &quot;#000&quot;,</span>
+            <span class="string">&quot;tags&quot;</span>: <span class="operator">[</span><span class="string">&quot;&quot;</span><span class="operator">,</span> <span class="string">&quot;&quot;</span><span class="operator">,</span> <span class="operator">.</span><span class="operator">.</span><span class="operator">.</span><span class="operator">]</span>
+        }<span class="operator">,</span>
+        <span class="operator">.</span><span class="operator">.</span><span class="operator">.</span>
+    <span class="operator">]</span>
+}</pre>
+<p>Add as many or few entries as you want, for a domain of your choice. You can also always come back later to add more. This is to have some initial data to try out the layout for a <a href="https://doc.qt.io/qt-6/qml-qtquick-listview.html#example-usage">list delegate</a>.</p>
+<h2 id="parse-json-file">Parse json file</h2>
+<p>Next, create a file <code translate="no">data.js</code> in the <code translate="no">qml</code> folder. This file will contain the methods for reading, writing and saving data. As a first method, we add <code translate="no">parseSampleData</code>, to parse the json file created in the previous step.</p>
+<p>To read the file, there is a Felgo component '<code translate="no">FileUtils</code>', which we will use. There would be the QML object <code translate="no">XMLHttpRequest</code> that can also be used to read files, but would require setting a build flag (<code translate="no">QML_XHR_ALLOW_FILE_READ</code>), and would be more verbose.</p>
+<p>For parsing a JSON file, the JavaScript method <code translate="no">JSON.parse()</code> is available.</p>
+<p>A minimalist implementation would be:</p>
+<pre class="cpp" translate="no">var json <span class="operator">=</span> FileUtils<span class="operator">.</span>readFile(<span class="type">Qt</span><span class="operator">.</span>resolvedUrl(<span class="string">&quot;../assets/sample_data.json&quot;</span>));
+var obj <span class="operator">=</span> JSON<span class="operator">.</span>parse(json);
+<span class="keyword">return</span> obj<span class="operator">.</span>collection;</pre>
+<p>But some error checks would be good, so the function could look like this:</p>
+<pre class="cpp" translate="no">function parseSampleData()
+{
+    var path <span class="operator">=</span> <span class="string">&quot;assets/sample_data.json&quot;</span>;
+    <span class="keyword">if</span> (<span class="operator">!</span>FileUtils<span class="operator">.</span>existsFile(path)) {
+        console<span class="operator">.</span>log(<span class="string">&quot;File &quot;</span> <span class="operator">+</span> path <span class="operator">+</span> <span class="string">&quot; not found&quot;</span>);
+        <span class="keyword">return</span> <span class="string">&quot;&quot;</span>;
+    }
+
+    var json <span class="operator">=</span> FileUtils<span class="operator">.</span>readFile(<span class="type">Qt</span><span class="operator">.</span>resolvedUrl(<span class="string">&quot;../&quot;</span> <span class="operator">+</span> path));
+    var obj <span class="operator">=</span> JSON<span class="operator">.</span>parse(json);
+    <span class="keyword">if</span> (<span class="operator">!</span>obj) {
+        console<span class="operator">.</span>log(<span class="string">&quot;JSON data &quot;</span> <span class="operator">+</span> json <span class="operator">+</span> <span class="string">&quot; could not be parsed&quot;</span>);
+        <span class="keyword">return</span> <span class="string">&quot;&quot;</span>;
+    }
+
+    <span class="keyword">return</span> obj<span class="operator">.</span>collection;
+}</pre>
+<p>For the error messages I attempted to match the sentence format usually seen in Qt console output.</p>
+<h2 id="create-database">Create database</h2>
+<p>As we also want to be able to change data, we cannot just use data from the static json file, but will use a database.</p>
+<p>For that there is the LocalStorage object in the Qt Quick module, which can be imported using <code translate="no">import QtQuick.LocalStorage</code>.</p>
+<p>Then create a method <code translate="no">openDatabase</code> in the same file <code translate="no">data.js</code>. First, the database needs to be opened:</p>
+<pre class="cpp" translate="no">var db <span class="operator">=</span> LocalStorage<span class="operator">.</span>openDatabaseSync(<span class="string">&quot;WareLogDB&quot;</span><span class="operator">,</span>
+                                       <span class="string">&quot;1.0&quot;</span><span class="operator">,</span>
+                                       <span class="string">&quot;The database used by WareLog.&quot;</span><span class="operator">,</span>
+                                       <span class="number">10e4</span>);</pre>
+<p>It will have a name (e.g. &quot;WareLogDB&quot;), version and description, and we estimate it's size to be 10kB:<br />
+ let's say one character is 2 Bytes, and the average string length is 10 characters, and most entries are strings, and numerics are smaller anyways. That would be 20 Bytes for the average entry. There are 14 entries per item, which makes a generous average of 280 Byte per item.<br />
+ If there are about 10 items, that is 2.8kB for a database, and gives room for about 30 entries.<br />
+ This is a very rough upper estimate, but if the app is expected to hold a much larger amount of data items, add a few more zeros.</p>
+<p>For this database, we then create a table with entry names matching the json entries.</p>
+<pre class="cpp" translate="no">db<span class="operator">.</span>transaction(function(tx) {
+    tx<span class="operator">.</span>executeSql(<span class="char">'CREATE TABLE IF NOT EXISTS Collection(title TEXT, '</span> <span class="operator">+</span>
+                  <span class="char">'origin TEXT, originColor TEXT, '</span> <span class="operator">+</span>
+                  <span class="char">'type TEXT, '</span> <span class="operator">+</span>
+                  <span class="char">'age NUMERIC, ageUnit TEXT, '</span> <span class="operator">+</span>
+                  <span class="char">'weightTotal NUMERIC, weightLeft NUMERIC, '</span> <span class="operator">+</span>
+                  <span class="char">'weightUnit TEXT, '</span> <span class="operator">+</span>
+                  <span class="char">'cost NUMERIC, secondaryCost NUMERIC, '</span> <span class="operator">+</span>
+                  <span class="char">'primaryColor TEXT, secondaryColor TEXT, '</span> <span class="operator">+</span>
+                  <span class="char">'tags TEXT)'</span>);
+});</pre>
+<p>Then we return the database object <code translate="no">db</code> to be able to use it for more transaction calls.</p>
+<h2 id="fill-database-with-sample-data">Fill database with sample data</h2>
+<p>In the same transaction as the table is created, we can also check for an empty table and populate it with the sample data.</p>
+<pre class="cpp" translate="no">var rs <span class="operator">=</span> tx<span class="operator">.</span>executeSql(<span class="char">'SELECT * FROM Collection'</span>);
+<span class="keyword">if</span> (rs<span class="operator">.</span>rows<span class="operator">.</span>length <span class="operator">=</span><span class="operator">=</span><span class="operator">=</span> <span class="number">0</span>) {
+    Data<span class="operator">.</span>fillDatabase(db);
+}</pre>
+<p>Add the method <code translate="no">fillDatabase</code>, taking the database as parameter (<code translate="no">db</code>), again in the same file.</p>
+<p>First we will retrieve the sample data via the method we already wrote, <code translate="no">parseSampleData</code>, then we write a transaction in which every item is inserted into the table. It would also be good to do another check, if the method is not called on an already filled database. Otherwise the entries will get duplicated.</p>
+<p>All together, the method can look like this:</p>
+<pre class="cpp" translate="no">function fillDatabase(db)
+{
+    var data <span class="operator">=</span> parseSampleData();
+
+    db<span class="operator">.</span>transaction(
+        function(tx) {
+            var res <span class="operator">=</span> tx<span class="operator">.</span>executeSql(<span class="char">'SELECT * FROM Collection'</span>);
+            <span class="keyword">if</span> (res<span class="operator">.</span>rows<span class="operator">.</span>length <span class="operator">!</span><span class="operator">=</span><span class="operator">=</span> <span class="number">0</span>)
+                <span class="keyword">return</span>;
+
+            data<span class="operator">.</span>forEach(function(item) {
+                tx<span class="operator">.</span>executeSql(
+                    <span class="char">'INSERT INTO Collection VALUES(?,?,?,?,?,?,?,?,?,?,?,?,?,?)'</span><span class="operator">,</span>
+                    <span class="operator">[</span>item<span class="operator">.</span>title<span class="operator">,</span>
+                     item<span class="operator">.</span>origin<span class="operator">,</span> item<span class="operator">.</span>originColor<span class="operator">,</span>
+                     item<span class="operator">.</span>type<span class="operator">,</span>
+                     item<span class="operator">.</span>age<span class="operator">,</span> item<span class="operator">.</span>ageUnit<span class="operator">,</span>
+                     item<span class="operator">.</span>weightTotal<span class="operator">,</span> item<span class="operator">.</span>weightLeft<span class="operator">,</span>
+                     item<span class="operator">.</span>weightUnit<span class="operator">,</span>
+                     item<span class="operator">.</span>cost<span class="operator">,</span> item<span class="operator">.</span>secondaryCost<span class="operator">,</span>
+                     item<span class="operator">.</span>primaryColor<span class="operator">,</span> item<span class="operator">.</span>secondaryColor<span class="operator">,</span>
+                     tagStr(item<span class="operator">.</span>tags)<span class="operator">]</span>
+                );
+            });
+        }
+    );
+}</pre>
+<p>The tag list is (for simplicity) concatenated into a string. The string will have to be split again when reading the entry later on.</p>
+<pre class="cpp" translate="no">function tagStr(tags)
+{
+    var tagStr <span class="operator">=</span> <span class="string">&quot;&quot;</span>;
+    tags<span class="operator">.</span>forEach(function (s) {
+        tagStr <span class="operator">=</span> tagStr <span class="operator">+</span> s <span class="operator">+</span> <span class="string">&quot;|&quot;</span>;
+    });
+
+    <span class="keyword">if</span> (tagStr<span class="operator">.</span>length <span class="operator">&gt;</span> <span class="number">0</span> <span class="operator">&amp;</span><span class="operator">&amp;</span> tagStr<span class="operator">[</span>tagStr<span class="operator">.</span>length <span class="operator">-</span> <span class="number">1</span><span class="operator">]</span> <span class="operator">=</span><span class="operator">=</span><span class="operator">=</span> <span class="string">&quot;|&quot;</span>)
+        tagStr <span class="operator">=</span> tagStr<span class="operator">.</span>substring(<span class="number">0</span><span class="operator">,</span> tagStr<span class="operator">.</span>length <span class="operator">-</span> <span class="number">1</span>);
+
+    <span class="keyword">return</span> tagStr;
+}</pre>
+<p>Now the data is available in a database, and the next step is reading it: it is needed in form of a list model.</p>
+<h2 id="read-database-into-list-model">Read database into list model</h2>
+<p>Define a method <code translate="no">get</code> in <code translate="no">data.js</code>, with the parameter <code translate="no">model</code>. This method should be the only one to call when getting the data, so the first line would be opening the database:</p>
+<pre class="cpp" translate="no">var db <span class="operator">=</span> openDatabase();</pre>
+<p>On this database object, define a transaction, that gets the items and appends them to a list model, given by <code translate="no">model</code>.</p>
+<pre class="cpp" translate="no">db<span class="operator">.</span>transaction(function(tx) {
+    var res <span class="operator">=</span> tx<span class="operator">.</span>executeSql(<span class="char">'SELECT * FROM Collection'</span>);
+    <span class="keyword">for</span> (var i <span class="operator">=</span> <span class="number">0</span>; i <span class="operator">&lt;</span> res<span class="operator">.</span>rows<span class="operator">.</span>length; i<span class="operator">+</span><span class="operator">+</span>) {
+        var item <span class="operator">=</span> res<span class="operator">.</span>rows<span class="operator">.</span>item(i);
+        model<span class="operator">.</span>append(
+            { title: item<span class="operator">.</span>title<span class="operator">,</span>
+              origin: item<span class="operator">.</span>origin<span class="operator">,</span> originColor: item<span class="operator">.</span>originColor<span class="operator">,</span>
+              type: item<span class="operator">.</span>type<span class="operator">,</span>
+              age: item<span class="operator">.</span>age<span class="operator">,</span> ageUnit: item<span class="operator">.</span>ageUnit<span class="operator">,</span>
+              weightTotal: item<span class="operator">.</span>weightTotal<span class="operator">,</span>
+              weightLeft: item<span class="operator">.</span>weightLeft<span class="operator">,</span>
+              weightUnit: item<span class="operator">.</span>weightUnit<span class="operator">,</span>
+              cost: item<span class="operator">.</span>cost<span class="operator">,</span> secondaryCost: item<span class="operator">.</span>secondaryCost<span class="operator">,</span>
+              primaryColor: item<span class="operator">.</span>primaryColor<span class="operator">,</span>
+              secondaryColor: item<span class="operator">.</span>secondaryColor<span class="operator">,</span>
+              tagStr: item<span class="operator">.</span>tags
+            } );
+    };
+});</pre>
+<p>The tags will be split in the UI component later on. We can already add the method for getting the string list:</p>
+<pre class="cpp" translate="no">function tagList(tagStr)
+{
+    var tags <span class="operator">=</span> tagStr<span class="operator">.</span>split(<span class="string">&quot;|&quot;</span>);
+    <span class="keyword">return</span> tags;
+}</pre>
+<p>Now we have data available to fill a list view, and a single method to retrieve said data: <code translate="no">get(model)</code>. In the next chapter we will create the UI components for a list view to display the data.</p>
+</div>
+<!-- @@@01-data.html -->
+<p class="naviNextPrevious footerNavi">
+<a class="nextPage" href="02-listview.html">Display Data in List View</a>
+</p>
+</body>
+</html>

@@ -1,0 +1,30 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE QDOCINDEX>
+<INDEX url="" title="An app for entering a catalogue of items, for items that can be measured in grams, liters etc." version="" project="WareLog">
+    <namespace name="" status="active" access="public" module="warelog">
+        <page name="03-delete.html" href="03-delete.html" status="active" location="delete_item.qdoc" filepath="/home/maja/Desktop/ware-log/doc/tutorial-files/delete_item.qdoc" lineno="1" documented="true" subtype="page" title="Delete Item" fulltitle="Delete Item" subtitle="" brief="Steps for deleting a list item">
+            <contents name="add-the-delete-button" title="Add the delete button" level="1"/>
+            <contents name="write-delete-methods" title="Write delete methods" level="1"/>
+        </page>
+        <page name="02-listview.html" href="02-listview.html" status="active" location="display_data.qdoc" filepath="/home/maja/Desktop/ware-log/doc/tutorial-files/display_data.qdoc" lineno="1" documented="true" subtype="page" title="Display Data in List View" fulltitle="Display Data in List View" subtitle="" brief="Steps for showing the (example) data">
+            <contents name="add-basic-list-view" title="Add basic list view" level="1"/>
+            <contents name="add-detailed-component-for-delegate" title="Add detailed component for delegate" level="1"/>
+            <contents name="specify-model-data" title="Specify model data" level="2"/>
+            <contents name="general-structure-of-the-layout" title="General structure of the layout" level="2"/>
+            <contents name="layout-of-properties-title-and-origin" title="Layout of properties title and origin" level="2"/>
+            <contents name="layout-of-the-type-property" title="Layout of the type property" level="2"/>
+            <contents name="layout-of-the-price" title="Layout of the price" level="2"/>
+            <contents name="layout-of-the-age-property" title="Layout of the age property" level="2"/>
+            <contents name="layout-for-the-tag-list" title="Layout for the tag list" level="2"/>
+            <contents name="use-delegate-component" title="Use delegate component" level="1"/>
+        </page>
+        <page name="01-data.html" href="01-data.html" status="active" location="prepare_data.qdoc" filepath="/home/maja/Desktop/ware-log/doc/tutorial-files/prepare_data.qdoc" lineno="1" documented="true" subtype="page" title="Prepare Data" fulltitle="Prepare Data" subtitle="" brief="Steps for preparing example data">
+            <contents name="add-sample-data" title="Add sample data" level="1"/>
+            <contents name="parse-json-file" title="Parse json file" level="1"/>
+            <contents name="create-database" title="Create database" level="1"/>
+            <contents name="fill-database-with-sample-data" title="Fill database with sample data" level="1"/>
+            <contents name="read-database-into-list-model" title="Read database into list model" level="1"/>
+        </page>
+        <page name="tutorial.html" href="tutorial.html" status="active" location="home.qdoc" filepath="/home/maja/Desktop/ware-log/doc/tutorial-files/home.qdoc" lineno="1" documented="true" subtype="page" title="Tutorial for the WareLog App" fulltitle="Tutorial for the WareLog App" subtitle="" brief="Steps for creating an app for entering a catalogue of items"/>
+    </namespace>
+</INDEX>
