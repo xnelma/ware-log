@@ -38,6 +38,12 @@ App {
                     width: root.width
                 }
             }
+
+            FloatingActionButton {
+                iconType: IconType.plussquareo
+                onClicked: console.log("clicked");
+                visible: true
+            }
         }
     }
 }

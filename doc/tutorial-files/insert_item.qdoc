@@ -1,0 +1,34 @@
+/*!
+    \page 05-insert.html
+    \previouspage {Set Theme Colors}
+    \title Insert Item
+
+    \brief provides steps for inserting an item into the database
+
+    It is now possible to view the database items, and delete items.
+    Inserting items is not implemented yet.
+    For that we will add a floating button and the navigation to another page,
+    write a layout for the page and implement inserting the item into the
+    database.
+
+    \section1 Add floating button for navigation
+
+    In Felgo there is the \c{FloatingActionButton} component, which will
+    not require manual positioning but add the button to the bottom right
+    corner by default.
+    Add this button to \c{AppPage} in \c{Main.qml}.
+
+    \code
+    FloatingActionButton {
+        iconType: IconType.plussquareo
+        onClicked: console.log("clicked");
+        visible: true
+    }
+    \endcode
+
+    The property \c{visible: true} is necessary, as it is not the default on
+    all platforms.
+
+    \image {insert_button.jpg} { Floating button in the bottom right corner }
+
+*/

@@ -1,0 +1,41 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+<!-- insert_item.qdoc -->
+  <meta name="description" content="provides steps for inserting an item into the database">
+  <title>Insert Item | WareLog</title>
+<link rel="stylesheet" type="text/css" href="style/style.css"/>
+</head>
+<body>
+  <link rel="prev" href="04-theme.html" />
+<p class="naviNextPrevious headerNavi">
+<a class="prevPage" href="04-theme.html">Set Theme Colors</a>
+</p>
+<div class="sidebar">
+<div class="toc">
+<h3 id="toc">Contents</h3>
+<ul>
+<li class="level1"><a href="#add-floating-button-for-navigation">Add floating button for navigation</a></li>
+</ul>
+</div>
+<div class="sidebar-content" id="sidebar-content"></div></div>
+<h1 class="title">Insert Item</h1>
+<!-- $$$05-insert.html-description -->
+<div class="descr" id="details">
+<p>It is now possible to view the database items, and delete items. Inserting items is not implemented yet. For that we will add a floating button and the navigation to another page, write a layout for the page and implement inserting the item into the database.</p>
+<h2 id="add-floating-button-for-navigation">Add floating button for navigation</h2>
+<p>In Felgo there is the <code translate="no">FloatingActionButton</code> component, which will not require manual positioning but add the button to the bottom right corner by default. Add this button to <code translate="no">AppPage</code> in <code translate="no">Main.qml</code>.</p>
+<pre class="cpp" translate="no">FloatingActionButton {
+    iconType: IconType<span class="operator">.</span>plussquareo
+    onClicked: console<span class="operator">.</span>log(<span class="string">&quot;clicked&quot;</span>);
+    visible: <span class="keyword">true</span>
+}</pre>
+<p>The property <code translate="no">visible: true</code> is necessary, as it is not the default on all platforms.</p>
+<p class="centerAlign"><img src="images/insert_button.jpg" alt="{ Floating button in the bottom right corner }" /></p></div>
+<!-- @@@05-insert.html -->
+<p class="naviNextPrevious footerNavi">
+<a class="prevPage" href="04-theme.html">Set Theme Colors</a>
+</p>
+</body>
+</html>

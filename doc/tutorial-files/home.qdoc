@@ -42,5 +42,6 @@
          \li \l {02-listview.html} {Display Data in List View}
          \li \l {03-delete.html} {Delete Item}
          \li \l {04-theme.html} {Set Theme Colors}
+         \li \l {05-insert.html} {Insert Item}
      \endlist
 */
