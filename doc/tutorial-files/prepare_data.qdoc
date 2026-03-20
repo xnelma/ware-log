@@ -1,0 +1,264 @@
+/*!
+    \page 01-data.html
+    \title Prepare Data
+
+    \brief provides steps for preparing and showing example data.
+
+    First we will add some sample data. This data will then be
+    parsed and used to fill a database.
+    As it will be displayed later on by a list view, we will also write a
+    method to read it from the database into a list model.
+
+    \section1 Add sample data
+
+    Create an assets folder (if not available already), and add a json file
+    \c{sample_data.json} with the following structure:
+
+    \code
+    {
+        "collection": [
+            {
+                "title": "",
+                "origin": "", "originColor": "",
+                "type": "",
+                "age": 0, "ageUnit": "years",
+                "weightTotal": 0, "weightLeft": 0, "weightUnit": "g",
+                "cost": 0, "secondaryCost": 0,
+                "primaryColor: "#000", "secondaryColor": "#000",
+                "tags": ["", "", ...]
+            },
+            ...
+        ]
+    }
+    \endcode
+
+    Add as many or few entries as you want, for a domain of your choice.
+    You can also always come back later to add more.
+    This is to have some initial data to try out the layout for a
+    \l {https://doc.qt.io/qt-6/qml-qtquick-listview.html#example-usage}
+       {list delegate}.
+
+    \section1 Parse json file
+
+    Next, create a file \c{data.js} in the \c{qml} folder. This file will
+    contain the methods for reading, writing and saving data.
+    As a first method, we add \c{parseSampleData}, to parse the json file
+    created in the previous step.
+
+    To read the file, there is a Felgo component '\c{FileUtils}', which we will
+    use. There would be the QML object \c{XMLHttpRequest} that can also be used
+    to read files, but would require setting a build flag
+    (\c{QML_XHR_ALLOW_FILE_READ}), and would be more verbose.
+
+    For parsing a JSON file, the JavaScript method \c{JSON.parse()} is
+    available.
+
+    A minimalist implementation would be:
+
+    \code
+    var json = FileUtils.readFile(Qt.resolvedUrl("../assets/sample_data.json"));
+    var obj = JSON.parse(json);
+    return obj.collection;
+    \endcode
+
+    But some error checks would be good, so the function could look like this:
+
+    \code
+    function parseSampleData()
+    {
+        var path = "assets/sample_data.json";
+        if (!FileUtils.existsFile(path)) {
+            console.log("File " + path + " not found");
+            return "";
+        }
+
+        var json = FileUtils.readFile(Qt.resolvedUrl("../" + path));
+        var obj = JSON.parse(json);
+        if (!obj) {
+            console.log("JSON data " + json + " could not be parsed");
+            return "";
+        }
+
+        return obj.collection;
+    }
+    \endcode
+
+    For the error messages I attempted to match the sentence format usually
+    seen in Qt console output.
+
+    \section1 Create database
+
+    As we also want to be able to change data, we cannot just use data from
+    the static json file, but will use a database.
+
+    For that there is the LocalStorage object in the Qt Quick module, which
+    can be imported using \c{import QtQuick.LocalStorage}.
+
+    Then create a method \c{openDatabase} in the same file \c{data.js}.
+    First, the database needs to be opened:
+
+    \code
+    var db = LocalStorage.openDatabaseSync("WareLogDB",
+                                           "1.0",
+                                           "The database used by WareLog.",
+                                           10e4);
+    \endcode
+
+    It will have a name (e.g. "WareLogDB"), version and description, and we
+    estimate it's size to be 10kB:\br
+    let's say one character is 2 Bytes,
+    and the average string length is 10 characters, and most entries are
+    strings, and numerics are smaller anyways. That would be 20 Bytes for
+    the average entry. There are 14 entries per item, which makes a generous
+    average of 280 Byte per item.\br
+    If there are about 10 items, that is 2.8kB for a database, and gives
+    room for about 30 entries.\br
+    This is a very rough upper estimate, but if the app is expected to hold a
+    much larger amount of data items, add a few more zeros.
+
+    For this database, we then create a table with entry names matching the
+    json entries.
+
+    \code
+    db.transaction(function(tx) {
+        tx.executeSql('CREATE TABLE IF NOT EXISTS Collection(title TEXT, ' +
+                      'origin TEXT, originColor TEXT, ' +
+                      'type TEXT, ' +
+                      'age NUMERIC, ageUnit TEXT, ' +
+                      'weightTotal NUMERIC, weightLeft NUMERIC, ' +
+                      'weightUnit TEXT, ' +
+                      'cost NUMERIC, secondaryCost NUMERIC, ' +
+                      'primaryColor TEXT, secondaryColor TEXT, ' +
+                      'tags TEXT)');
+    });
+    \endcode
+
+    Then we return the database object \c{db} to be able to use it for more
+    transaction calls.
+
+    \section1 Fill database with sample data
+
+    In the same transaction as the table is created, we can also check for
+    an empty table and populate it with the sample data.
+
+    \code
+    var rs = tx.executeSql('SELECT * FROM Collection');
+    if (rs.rows.length === 0) {
+        Data.fillDatabase(db);
+    }
+    \endcode
+
+    Add the method \c{fillDatabase}, taking the database as parameter (\c{db}),
+    again in the same file.
+
+    First we will retrieve the sample data via the method we already wrote,
+    \c{parseSampleData}, then we write a transaction in which every item
+    is inserted into the table.
+    It would also be good to do another check, if the method is not called
+    on an already filled database. Otherwise the entries will get
+    duplicated.
+
+    All together, the method can look like this:
+
+    \code
+    function fillDatabase(db)
+    {
+        var data = parseSampleData();
+
+        db.transaction(
+            function(tx) {
+                var res = tx.executeSql('SELECT * FROM Collection');
+                if (res.rows.length !== 0)
+                    return;
+
+                data.forEach(function(item) {
+                    tx.executeSql(
+                        'INSERT INTO Collection VALUES(?,?,?,?,?,?,?,?,?,?,?,?,?,?)',
+                        [item.title,
+                         item.origin, item.originColor,
+                         item.type,
+                         item.age, item.ageUnit,
+                         item.weightTotal, item.weightLeft,
+                         item.weightUnit,
+                         item.cost, item.secondaryCost,
+                         item.primaryColor, item.secondaryColor,
+                         tagStr(item.tags)]
+                    );
+                });
+            }
+        );
+    }
+    \endcode
+
+    The tag list is (for simplicity) concatenated into a string. The string
+    will have to be split again when reading the entry later on.
+
+    \code
+    function tagStr(tags)
+    {
+        var tagStr = "";
+        tags.forEach(function (s) {
+            tagStr = tagStr + s + "|";
+        });
+
+        if (tagStr.length > 0 && tagStr[tagStr.length - 1] === "|")
+            tagStr = tagStr.substring(0, tagStr.length - 1);
+
+        return tagStr;
+    }
+    \endcode
+
+    Now the data is available in a database, and the next step is reading it:
+    it is needed in form of a list model.
+
+    \section1 Read database into list model
+
+    Define a method \c{get} in \c{data.js}, with the parameter \c{model}.
+    This method should be the only one to call when getting the data, so the
+    first line would be opening the database:
+
+    \code
+    var db = openDatabase();
+    \endcode
+
+    On this database object, define a transaction, that gets the items and
+    appends them to a list model, given by \c{model}.
+
+    \code
+    db.transaction(function(tx) {
+        var res = tx.executeSql('SELECT * FROM Collection');
+        for (var i = 0; i < res.rows.length; i++) {
+            var item = res.rows.item(i);
+            model.append(
+                { title: item.title,
+                  origin: item.origin, originColor: item.originColor,
+                  type: item.type,
+                  age: item.age, ageUnit: item.ageUnit,
+                  weightTotal: item.weightTotal,
+                  weightLeft: item.weightLeft,
+                  weightUnit: item.weightUnit,
+                  cost: item.cost, secondaryCost: item.secondaryCost,
+                  primaryColor: item.primaryColor,
+                  secondaryColor: item.secondaryColor,
+                  tagStr: item.tags
+                } );
+        };
+    });
+    \endcode
+
+    The tags will be split in the UI component later on.
+    We can already add the method for getting the string list:
+
+    \code
+    function tagList(tagStr)
+    {
+        var tags = tagStr.split("|");
+        return tags;
+    }
+    \endcode
+
+    Now we have data available to fill a list view, and a single method to
+    retrieve said data: \c{get(model)}.
+    In the next chapter we will create the UI components for a list view
+    to display the data.
+*/
