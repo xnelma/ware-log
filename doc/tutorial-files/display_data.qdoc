@@ -4,4 +4,74 @@
     \title Display Data in List View
 
     \brief provides steps for showing the (example) data
+
+    In this chapter we will define a list view, using the Felgo component
+    \c{AppListView}, and a component for its delegate.
+
+    \section1 Add basic list view
+
+    For starters, we will show the title of each item in a list view.
+    Add the \c{AppListView} component inside \c{AppPage}.
+    A margin between entries of 10 units would be good, so add the spacing
+    property with value 10, and a top anchor with a top margin of 10.
+
+    \code
+    AppListView {
+        spacing: 10
+        anchors.top: parent.top
+        anchors.topMargin: 10
+    }
+    \endcode
+
+    Then add a model and delegate:
+    The model will be a \c{ListModel}, which will be filled on
+    \c{Component.onCompleted}:
+
+    \code
+    AppListView {
+        ...
+
+        model: ListModel {
+            id: listModel
+
+            Component.onCompleted: Data.get(listModel);
+        }
+    }
+    \endcode
+
+    "\c{Data}" comes from the import of the javascript file:
+
+    \code
+    import "data.js" as Data
+    \endcode
+
+    For a basic delegate, add an \c{Item} with the parents width (I defined
+    \c{root} as id of \c{AppPage}) and a text components
+    height plus some margin.
+    As text component, use the Felgo component \c{AppText}, aligned to the
+    left with a margin of 10, and centered vertically.
+
+    The model data is specified as required property for \c{Item}, and then
+    assigned to the text property of the \c{AppText} component:
+
+    \code
+    delegate: Item {
+        required property string title
+
+        width: root.width;
+        height: txtTitle.height + 10
+
+        AppText {
+            id: txtTitle
+
+            text: title
+
+            anchors.verticalCenter: parent.verticalCenter
+            anchors.left: parent.left
+            anchors.leftMargin: 10
+        }
+    }
+    \endcode
+
+    Building and deploying the app now should show a list of titles.
 */
