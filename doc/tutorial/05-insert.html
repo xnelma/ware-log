@@ -34,8 +34,8 @@
 }</pre>
 <p>The property <code translate="no">visible: true</code> is necessary, as it is not the default on all platforms.</p>
 <p class="centerAlign"><img src="images/insert_button.jpg" alt="{ Floating button in the bottom right corner }" /></p><h2 id="navigate-to-new-page">Navigate to new page</h2>
-<p>Add another <code translate="no">qml</code> file in the <code translate="no">qml</code> folder with the title <code translate="no">EditItemView</code>. This will be the view we will navigate to for editing an item; in this case a editing a new item to insert.</p>
-<p>The base item should be an <code translate="no">AppPage</code>, and have a title to show in the toolbar. For now, just put a text item (and imports for <code translate="no">QtQuick</code>, <code translate="no">QtQuick.Layouts</code> und <code translate="no">Felgo</code>) in it.</p>
+<p>Add another <code translate="no">qml</code> file in the <code translate="no">qml</code> folder with the title <code translate="no">EditItemView</code>. This will be the view we will navigate to for editing an item; in this case editing a new item to insert.</p>
+<p>The base item should be an <code translate="no">AppPage</code>, and might have a title that would get shown in a toolbar. Put a text item (and imports for <code translate="no">QtQuick</code>, <code translate="no">QtQuick.Layouts</code> und <code translate="no">Felgo</code>) in it.</p>
 <pre class="cpp" translate="no">AppPage {
     title: qsTr(<span class="string">&quot;Add New Item&quot;</span>)
 
@@ -44,21 +44,83 @@
         anchors<span class="operator">.</span>centerIn: parent
     }
 }</pre>
-<p>In <code translate="no">Main.qml</code>, this page is added inside a <code translate="no">Component</code>. The id of the component will be used to address it when pushing it onto the stack.</p>
-<pre class="cpp" translate="no">Component {
-    id: editItemComponent
+<p>Navigating to the view could be done via the navigation stack, or for example by showing it inside a dialog, preferably a <a href="https://doc.qt.io/Qt-6/qml-qtquick-controls-dialog.html#modal-dialogs">modal dialog</a>, so a dialog that blocks the UI beneath it. In the Felgo SDK there is the <code translate="no">AppModal</code> type. It does not inherit from Dialog but Item, so dialog buttons are not part of its properties and will have to be added to the view.</p>
+<p>Add two <code translate="no">AppButton</code>s in a <code translate="no">Row</code>, with alignment to the right. Remove margins, and add a row spacing, so they will align well with other page content.</p>
+<pre class="cpp" translate="no">AppPage {
+    title: qsTr(<span class="string">&quot;Add New Item&quot;</span>)
 
-    EditItemView {
+    <span class="operator">.</span><span class="operator">.</span><span class="operator">.</span>
+
+    Row {
+        spacing: <span class="number">10</span>
+        anchors<span class="operator">.</span>right: parent<span class="operator">.</span>right
+
+        AppButton {
+            text: qsTr(<span class="string">&quot;Cancel&quot;</span>)
+            horizontalMargin: <span class="number">0</span>
+            verticalMargin: <span class="number">0</span>
+            onClicked: {
+                modalAddItem<span class="operator">.</span>close()
+            }
+        }
+
+        AppButton {
+            text: qsTr(<span class="string">&quot;Add item&quot;</span>)
+            horizontalMargin: <span class="number">0</span>
+            verticalMargin: <span class="number">0</span>
+            onClicked: {
+                modalAddItem<span class="operator">.</span>close();
+                console<span class="operator">.</span>log(<span class="string">&quot;Add item&quot;</span>);
+            }
+        }
+    } <span class="comment">// Row</span>
+}</pre>
+<p>In <code translate="no">Main.qml</code>, add <code translate="no">AppModal</code> with id <code translate="no">modalAddItem</code> as child of <code translate="no">AppPage</code>:</p>
+<pre class="cpp" translate="no">AppModal {
+    id: modalAddItem
+    pushBackContent: root<span class="operator">.</span>navigationStack
+    fullscreen: <span class="keyword">false</span>
+    modalHeight: modalContent<span class="operator">.</span>contentHeight
+
+    EditItemView { id: modalContent }
+}</pre>
+<p>It will not cover the whole screen, so the height needs to be set. Add a property <code translate="no">contentHeight</code> to the view, and move the buttons and text (remove the anchor from text!) into a column, with spacing and margins of 10. <code translate="no">contentHeight</code> will then be set with the column height, plus some margin.</p>
+<pre class="cpp" translate="no">AppPage {
+    title: qsTr(<span class="string">&quot;Add New Item&quot;</span>)
+
+    property <span class="type">int</span> contentHeight: col<span class="operator">.</span>height
+                                <span class="operator">+</span> <span class="number">40</span> <span class="comment">// add bottom margin</span>
+
+    Column {
+        id: col
+        spacing: <span class="number">10</span>
+        width: parent<span class="operator">.</span>width
+        anchors<span class="operator">.</span>top: parent<span class="operator">.</span>top
+        anchors<span class="operator">.</span>left: parent<span class="operator">.</span>left
+        anchors<span class="operator">.</span>right: parent<span class="operator">.</span>right
+        anchors<span class="operator">.</span>margins: <span class="number">10</span>
+
+        AppText { <span class="operator">.</span><span class="operator">.</span><span class="operator">.</span> }
+
+        Row { AppButton { <span class="operator">.</span><span class="operator">.</span><span class="operator">.</span> } <span class="operator">.</span><span class="operator">.</span><span class="operator">.</span> }
     }
 }</pre>
-<p>The stack is already available as <code translate="no">NavigationStack</code> by Felgo, as it was generated by the setup wizard. It can be addressed with <code translate="no">root.navigationStack</code> (<code translate="no">root</code> was the id I gave to the <code translate="no">AppPage</code> component). So we can now navigate to the editing page on clicking the floating button.</p>
+<p>Separate the row of buttons and text visually with a <code translate="no">MenuSeparator</code>. We now also require the import for <code translate="no">QtQuick.Controls</code>. Remove the padding from the separator, too, so it aligns with the buttons.</p>
+<pre class="cpp" translate="no">AppText { <span class="operator">.</span><span class="operator">.</span><span class="operator">.</span> }
+
+MenuSeparator {
+    width: parent<span class="operator">.</span>width
+    padding: <span class="number">0</span>
+}
+
+Row { AppButton { <span class="operator">.</span><span class="operator">.</span><span class="operator">.</span> } <span class="operator">.</span><span class="operator">.</span><span class="operator">.</span> }</pre>
+<p>Then open the dialog when clicking the floating button:</p>
 <pre class="cpp" translate="no">FloatingActionButton {
     <span class="operator">.</span><span class="operator">.</span><span class="operator">.</span>
-    onClicked: root<span class="operator">.</span>navigationStack<span class="operator">.</span>push(editItemComponent)
+    onClicked: modalAddItem<span class="operator">.</span>open()
     <span class="operator">.</span><span class="operator">.</span><span class="operator">.</span>
 }</pre>
-<p>The <code translate="no">NavigationStack</code> will already handle navigation button clicks and gestures, so navigation should now fully work.</p>
-</div>
+<p class="centerAlign"><img src="images/add_item_1.jpg" alt="{Intermediate dialog for adding an item}" /></p></div>
 <!-- @@@05-insert.html -->
 <p class="naviNextPrevious footerNavi">
 <a class="prevPage" href="04-theme.html">Set Theme Colors</a>

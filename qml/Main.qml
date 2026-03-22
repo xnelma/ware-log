@@ -11,10 +11,8 @@ App {
     }
 
     NavigationStack {
-
         AppPage {
             id: root
-
             title: qsTr("Ware Log")
 
             AppListView {
@@ -41,16 +39,18 @@ App {
 
             FloatingActionButton {
                 iconType: IconType.plussquareo
-                onClicked: root.navigationStack.push(editItemComponent)
+                onClicked: modalAddItem.open()
                 visible: true
             }
-        }
-    }
 
-    Component {
-        id: editItemComponent
+            AppModal {
+                id: modalAddItem
+                pushBackContent: root.navigationStack
+                fullscreen: false
+                modalHeight: modalContent.contentHeight
 
-        EditItemView {
-        }
-    }
+                EditItemView { id: modalContent }
+            }
+        } // root
+    } // NavigationStack
 }
