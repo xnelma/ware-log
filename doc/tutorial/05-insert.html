@@ -18,6 +18,12 @@
 <ul>
 <li class="level1"><a href="#add-floating-button-for-navigation">Add floating button for navigation</a></li>
 <li class="level1"><a href="#navigate-to-new-page">Navigate to new page</a></li>
+<li class="level1"><a href="#add-layout-for-new-page">Add layout for new page</a></li>
+<li class="level2"><a href="#layout-title-and-origin-input">Layout title and origin input</a></li>
+<li class="level2"><a href="#layout-type-selection">Layout type selection</a></li>
+<li class="level2"><a href="#layout-color-selection">Layout color selection</a></li>
+<li class="level2"><a href="#layout-cost-weight-and-age-input">Layout cost, weight and age input</a></li>
+<li class="level2"><a href="#layout-tags-selection">Layout tags selection</a></li>
 </ul>
 </div>
 <div class="sidebar-content" id="sidebar-content"></div></div>
@@ -120,7 +126,159 @@ Row { AppButton { <span class="operator">.</span><span class="operator">.</span>
     onClicked: modalAddItem<span class="operator">.</span>open()
     <span class="operator">.</span><span class="operator">.</span><span class="operator">.</span>
 }</pre>
-<p class="centerAlign"><img src="images/add_item_1.jpg" alt="{Intermediate dialog for adding an item}" /></p></div>
+<p class="centerAlign"><img src="images/add_item_1.jpg" alt="{Intermediate dialog for adding an item}" /></p><h2 id="add-layout-for-new-page">Add layout for new page</h2>
+<p>The layout for the item input follows the structure of a list item.</p>
+<h3 id="layout-title-and-origin-input">Layout title and origin input</h3>
+<p>As title and origin will be on the same line in a list item, we could put them on the same line here, too. This might give an impression for word length. We can use a <code translate="no">Row</code> for that, and center its items vertically, in case they have different heights. The input width should be the same for both, but not depend on each other, so we add a property <code translate="no">inputWidth</code> that computes it by parent width, color button width and the margin.<br />
+ The color button would be for setting a 'signature color' for origin. Both the origin text (and its placeholder) and the button should show the current color. Choose a placeholder color for now. For <code translate="no">AppButton</code> the text margin can get removed by setting a low minimum width.</p>
+<p>All in all, for the first line of the column in the dialog, we add the following <code translate="no">Row</code>:</p>
+<pre class="cpp" translate="no">Row {
+    id: rowTitle
+    spacing: <span class="number">10</span>
+    width: parent<span class="operator">.</span>width
+    property string placeholderOriginColor: <span class="string">&quot;#457&quot;</span> <span class="comment">// Dark softer blue</span>
+
+    property <span class="type">int</span> inputWidth:
+        (parent<span class="operator">.</span>width <span class="operator">-</span> btnSetOriginColor<span class="operator">.</span>width <span class="operator">-</span> <span class="number">10</span>) <span class="operator">/</span> <span class="number">2</span>;
+
+    AppTextField {
+        placeholderText: qsTr(<span class="string">&quot;Item title&quot;</span>)
+        width: rowTitle<span class="operator">.</span>inputWidth
+        anchors<span class="operator">.</span>verticalCenter: parent<span class="operator">.</span>verticalCenter
+    }
+
+    AppTextField {
+        placeholderText: qsTr(<span class="string">&quot;Origin&quot;</span>)
+        color: rowTitle<span class="operator">.</span>placeholderOriginColor
+        placeholderColor: rowTitle<span class="operator">.</span>placeholderOriginColor
+        width: rowTitle<span class="operator">.</span>inputWidth
+        anchors<span class="operator">.</span>verticalCenter: parent<span class="operator">.</span>verticalCenter
+
+    }
+
+    AppButton {
+        id: btnSetOriginColor
+        text: <span class="string">&quot;Color&quot;</span>
+        backgroundColor: rowTitle<span class="operator">.</span>placeholderOriginColor
+        minimumWidth: <span class="number">10</span>
+        anchors<span class="operator">.</span>verticalCenter: parent<span class="operator">.</span>verticalCenter
+    }
+} <span class="comment">// rowTitle</span></pre>
+<h3 id="layout-type-selection">Layout type selection</h3>
+<p>Next in a list item comes the type. Add an editable <code translate="no">ComboBox</code> with some placeholder types.</p>
+<pre class="cpp" translate="no">ComboBox {
+    model: <span class="operator">[</span><span class="string">&quot;Type 1&quot;</span><span class="operator">,</span> <span class="string">&quot;Type 2&quot;</span><span class="operator">]</span>
+    editable: <span class="keyword">true</span>
+}</pre>
+<h3 id="layout-color-selection">Layout color selection</h3>
+<p>Now we add a row for setting the colors for a list item. There will be two colors, so add two buttons. Remove their margins, so they will align well with other ui elements. Also, pick two placeholder colors and set them as the buttons' background colors.</p>
+<pre class="cpp" translate="no">Row {
+    id: rowColors
+    spacing: <span class="number">10</span>
+
+    property string placeholderPrimaryColor: <span class="string">&quot;#e3aae3&quot;</span> <span class="comment">// light pink</span>
+    property string placeholderSecondaryColor: <span class="string">&quot;#a353a3&quot;</span> <span class="comment">// darker pink</span>
+
+    AppButton {
+        text: <span class="string">&quot;Color 1&quot;</span>
+        backgroundColor: rowColors<span class="operator">.</span>placeholderPrimaryColor
+        horizontalMargin: <span class="number">0</span>
+        verticalMargin: <span class="number">0</span>
+    }
+
+    AppButton {
+        text: <span class="string">&quot;Color 2&quot;</span>
+        backgroundColor: rowColors<span class="operator">.</span>placeholderSecondaryColor
+        horizontalMargin: <span class="number">0</span>
+        verticalMargin: <span class="number">0</span>
+    }
+} <span class="comment">// rowColors</span></pre>
+<h3 id="layout-cost-weight-and-age-input">Layout cost, weight and age input</h3>
+<p>The following three rows will set a number input, and a unit for it. The input width should be the same, so first add a property to the <code translate="no">Column</code>, after <code translate="no">rowColors</code>:</p>
+<pre class="cpp" translate="no">property <span class="type">int</span> numFieldWidth: <span class="number">100</span></pre>
+<p>Each of the inputs will be inside a <code translate="no">Row</code>, together with a <code translate="no">ComboBox</code> and maybe a label, with all elements centered vertically in the <code translate="no">Row</code>.</p>
+<pre class="cpp" translate="no">Row {
+    spacing: <span class="number">10</span>
+
+    AppTextField {
+        placeholderText: qsTr(<span class="string">&quot;Cost&quot;</span>)
+        inputMethodHints: <span class="type">Qt</span><span class="operator">.</span>ImhDigitsOnly
+        width: col<span class="operator">.</span>numFieldWidth
+        anchors<span class="operator">.</span>verticalCenter: parent<span class="operator">.</span>verticalCenter
+    }
+
+    AppText {
+        text: <span class="string">&quot;€ / &quot;</span>
+        anchors<span class="operator">.</span>verticalCenter: parent<span class="operator">.</span>verticalCenter
+    }
+
+    ComboBox {
+        model: <span class="operator">[</span><span class="string">&quot;10g&quot;</span><span class="operator">,</span> <span class="string">&quot;100g&quot;</span><span class="operator">,</span> <span class="string">&quot;1kg&quot;</span><span class="operator">,</span> <span class="string">&quot;10ml&quot;</span><span class="operator">,</span> <span class="string">&quot;100ml&quot;</span><span class="operator">,</span> <span class="string">&quot;1l&quot;</span><span class="operator">]</span>
+        anchors<span class="operator">.</span>verticalCenter: parent<span class="operator">.</span>verticalCenter
+    }
+} <span class="comment">// Row</span>
+
+Row {
+    spacing: <span class="number">10</span>
+
+    AppTextField {
+        placeholderText: qsTr(<span class="string">&quot;Weight&quot;</span>)
+        inputMethodHints: <span class="type">Qt</span><span class="operator">.</span>ImhDigitsOnly
+        width: col<span class="operator">.</span>numFieldWidth
+        anchors<span class="operator">.</span>verticalCenter: parent<span class="operator">.</span>verticalCenter
+    }
+
+    ComboBox {
+        id: comboWeightUnit
+        model: <span class="operator">[</span><span class="string">&quot;g&quot;</span><span class="operator">,</span> <span class="string">&quot;kg&quot;</span><span class="operator">,</span> <span class="string">&quot;l&quot;</span><span class="operator">,</span> <span class="string">&quot;ml&quot;</span><span class="operator">]</span>
+        anchors<span class="operator">.</span>verticalCenter: parent<span class="operator">.</span>verticalCenter
+    }
+} <span class="comment">// Row</span>
+
+Row {
+    spacing: <span class="number">10</span>
+
+    AppTextField {
+        placeholderText: qsTr(<span class="string">&quot;Age&quot;</span>)
+        inputMethodHints: <span class="type">Qt</span><span class="operator">.</span>ImhDigitsOnly
+        width: col<span class="operator">.</span>numFieldWidth
+        anchors<span class="operator">.</span>verticalCenter: parent<span class="operator">.</span>verticalCenter
+    }
+
+    ComboBox {
+        id: comboAgeUnit
+        model: <span class="operator">[</span><span class="string">&quot;months&quot;</span><span class="operator">,</span> <span class="string">&quot;years&quot;</span><span class="operator">]</span>
+        anchors<span class="operator">.</span>verticalCenter: parent<span class="operator">.</span>verticalCenter
+    }
+} <span class="comment">// Row</span></pre>
+<h3 id="layout-tags-selection">Layout tags selection</h3>
+<p>For the tags, we use a <code translate="no">Repeater</code> inside a <code translate="no">Flow</code> item, with a <code translate="no">checkable</code> <code translate="no">AppButton</code> as delegate. The <code translate="no">Flow</code> item will distribute the items over multiple lines as needed. The button is styled to look similar to the tags in a list item: the background color is a grey tone (darker, if a tag is selected), the shadow is removed, the corners are rounded, and the text margin is removed to wrap its text. The model will be set to placeholder tags for now.</p>
+<p>The last item in the <code translate="no">Repeater</code> is a text field to add a new tag.</p>
+<pre class="cpp" translate="no">Flow {
+    width: parent<span class="operator">.</span>width
+    spacing: <span class="number">10</span>
+
+    Repeater {
+        anchors<span class="operator">.</span>horizontalCenter: parent<span class="operator">.</span>horizontalCenter
+        model: <span class="operator">[</span><span class="string">&quot;Tag 1&quot;</span><span class="operator">,</span> <span class="string">&quot;Tag 2&quot;</span><span class="operator">,</span> <span class="string">&quot;Tag 3&quot;</span><span class="operator">]</span>
+        delegate: AppButton {
+            text: modelData
+            checkable: <span class="keyword">true</span>
+            backgroundColor: checked<span class="operator">?</span> <span class="string">&quot;#737373&quot;</span> : <span class="string">&quot;#c3c3c3&quot;</span>
+            dropShadow: <span class="keyword">false</span>
+            radius: height<span class="operator">/</span><span class="number">2</span> <span class="operator">-</span> <span class="number">5</span>
+            minimumWidth: <span class="number">10</span>
+            horizontalMargin: <span class="number">0</span>
+            verticalMargin: <span class="number">0</span>
+        }
+    } <span class="comment">// Repeater</span>
+
+    AppTextField {
+        placeholderText: qsTr(<span class="string">&quot;+ New tag&quot;</span>)
+    }
+} <span class="comment">// Flow</span></pre>
+<p>The next item in the column should be the separator we added in a previous section.</p>
+<p class="centerAlign"><img src="images/add_item_2.jpg" alt="{Layout for editing an item or adding a new item}" /></p></div>
 <!-- @@@05-insert.html -->
 <p class="naviNextPrevious footerNavi">
 <a class="prevPage" href="04-theme.html">Set Theme Colors</a>
