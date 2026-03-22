@@ -1,0 +1,385 @@
+/*!
+    \page 05-insert.html
+    \previouspage {Set Theme Colors}
+    \title Insert Item
+
+    \brief provides steps for inserting an item into the database
+
+    It is now possible to view the database items, and delete items.
+    Inserting items is not implemented yet.
+    For that we will add a floating button and the navigation to another page,
+    write a layout for the page and implement inserting the item into the
+    database.
+
+    \section1 Add floating button for navigation
+
+    In Felgo there is the \c{FloatingActionButton} component, which will
+    not require manual positioning but add the button to the bottom right
+    corner by default.
+    Add this button to \c{AppPage} in \c{Main.qml}.
+
+    \code
+    FloatingActionButton {
+        iconType: IconType.plussquareo
+        onClicked: console.log("clicked");
+        visible: true
+    }
+    \endcode
+
+    The property \c{visible: true} is necessary, as it is not the default on
+    all platforms.
+
+    \image {insert_button.jpg} { Floating button in the bottom right corner }
+
+    \section1 Navigate to new page
+
+    Add another \c{qml} file in the \c{qml} folder with the title
+    \c{EditItemView}. This will be the view we will navigate to for editing
+    an item; in this case editing a new item to insert.
+
+    The base item should be an \c{AppPage}, and might have a title that would
+    get shown in a toolbar.
+    Put a text item (and imports for \c{QtQuick},
+    \c{QtQuick.Layouts} und \c{Felgo}) in it.
+
+    \code
+    AppPage {
+        title: qsTr("Add New Item")
+
+        AppText {
+            text: "navigated to EditItemView"
+            anchors.centerIn: parent
+        }
+    }
+    \endcode
+
+    Navigating to the view could be done via the navigation stack, or for
+    example by showing it inside a dialog, preferably a
+    \l{https://doc.qt.io/Qt-6/qml-qtquick-controls-dialog.html#modal-dialogs}
+      {modal dialog}, so a dialog that blocks the UI beneath it.
+    In the Felgo SDK there is the \c{AppModal} type. It does not inherit from
+    Dialog but Item, so dialog buttons are not part of its properties
+    and will have to be added to the view.
+
+    Add two \c{AppButton}s in a \c{Row}, with alignment to the right.
+    Remove margins, and add a row spacing, so they will align well with other
+    page content.
+
+    \code
+    AppPage {
+        title: qsTr("Add New Item")
+
+        ...
+
+        Row {
+            spacing: 10
+            anchors.right: parent.right
+
+            AppButton {
+                text: qsTr("Cancel")
+                horizontalMargin: 0
+                verticalMargin: 0
+                onClicked: {
+                    modalAddItem.close()
+                }
+            }
+
+            AppButton {
+                text: qsTr("Add item")
+                horizontalMargin: 0
+                verticalMargin: 0
+                onClicked: {
+                    modalAddItem.close();
+                    console.log("Add item");
+                }
+            }
+        } // Row
+    }
+    \endcode
+
+    In \c{Main.qml}, add \c{AppModal} with id \c{modalAddItem} as child of
+    \c{AppPage}:
+
+    \code
+    AppModal {
+        id: modalAddItem
+        pushBackContent: root.navigationStack
+        fullscreen: false
+        modalHeight: modalContent.contentHeight
+
+        EditItemView { id: modalContent }
+    }
+    \endcode
+
+    It will not cover the whole screen, so the height needs to be set.
+    Add a property \c{contentHeight} to the view, and move the buttons
+    and text (remove the anchor from text!) into a column, with spacing and
+    margins of 10.
+    \c{contentHeight} will then be set with the column height, plus some margin.
+
+    \code
+    AppPage {
+        title: qsTr("Add New Item")
+
+        property int contentHeight: col.height
+                                    + 40 // add bottom margin
+
+        Column {
+            id: col
+            spacing: 10
+            width: parent.width
+            anchors.top: parent.top
+            anchors.left: parent.left
+            anchors.right: parent.right
+            anchors.margins: 10
+
+            AppText { ... }
+
+            Row { AppButton { ... } ... }
+        }
+    }
+    \endcode
+
+    Separate the row of buttons and text visually with a \c{MenuSeparator}.
+    We now also require the import for \c{QtQuick.Controls}.
+    Remove the padding from the separator, too, so it aligns with the buttons.
+
+    \code
+    AppText { ... }
+
+    MenuSeparator {
+        width: parent.width
+        padding: 0
+    }
+
+    Row { AppButton { ... } ... }
+    \endcode
+
+    Then open the dialog when clicking the floating button:
+
+    \code
+    FloatingActionButton {
+        ...
+        onClicked: modalAddItem.open()
+        ...
+    }
+    \endcode
+
+    \image {add_item_1.jpg} {Intermediate dialog for adding an item}
+
+    \section1 Add layout for new page
+
+    The layout for the item input follows the structure of a list item.
+
+    \section2 Layout title and origin input
+
+    As title and origin will be on the same line in a list item, we could
+    put them on the same line here, too. This might give an impression
+    for word length. We can use a \c{Row} for that, and center its items
+    vertically, in case they have different heights.
+    The input width should be the same for both, but not depend on each other,
+    so we add a property \c{inputWidth} that computes it by parent width,
+    color button width and the margin.\br
+    The color button would be for setting a 'signature color' for origin.
+    Both the origin text (and its placeholder) and the button should show
+    the current color.
+    Choose a placeholder color for now.
+    For \c{AppButton} the text margin can get removed by setting a low
+    minimum width.
+
+    All in all, for the first line of the column in the dialog, we add the
+    following \c{Row}:
+
+    \code
+    Row {
+        id: rowTitle
+        spacing: 10
+        width: parent.width
+        property string placeholderOriginColor: "#457" // Dark softer blue
+
+        property int inputWidth:
+            (parent.width - btnSetOriginColor.width - 10) / 2;
+
+        AppTextField {
+            placeholderText: qsTr("Item title")
+            width: rowTitle.inputWidth
+            anchors.verticalCenter: parent.verticalCenter
+        }
+
+        AppTextField {
+            placeholderText: qsTr("Origin")
+            color: rowTitle.placeholderOriginColor
+            placeholderColor: rowTitle.placeholderOriginColor
+            width: rowTitle.inputWidth
+            anchors.verticalCenter: parent.verticalCenter
+
+        }
+
+        AppButton {
+            id: btnSetOriginColor
+            text: "Color"
+            backgroundColor: rowTitle.placeholderOriginColor
+            minimumWidth: 10
+            anchors.verticalCenter: parent.verticalCenter
+        }
+    } // rowTitle
+    \endcode
+
+    \section2 Layout type selection
+
+    Next in a list item comes the type. Add an editable \c{ComboBox} with
+    some placeholder types.
+
+    \code
+    ComboBox {
+        model: ["Type 1", "Type 2"]
+        editable: true
+    }
+    \endcode
+
+    \section2 Layout color selection
+
+    Now we add a row for setting the colors for a list item.
+    There will be two colors, so add two buttons.
+    Remove their margins, so they will align well with other ui elements.
+    Also, pick two placeholder colors and set them as the buttons' background
+    colors.
+
+    \code
+    Row {
+        id: rowColors
+        spacing: 10
+
+        property string placeholderPrimaryColor: "#e3aae3" // light pink
+        property string placeholderSecondaryColor: "#a353a3" // darker pink
+
+        AppButton {
+            text: "Color 1"
+            backgroundColor: rowColors.placeholderPrimaryColor
+            horizontalMargin: 0
+            verticalMargin: 0
+        }
+
+        AppButton {
+            text: "Color 2"
+            backgroundColor: rowColors.placeholderSecondaryColor
+            horizontalMargin: 0
+            verticalMargin: 0
+        }
+    } // rowColors
+    \endcode
+
+    \section2 Layout cost, weight and age input
+
+    The following three rows will set a number input, and a unit for it.
+    The input width should be the same, so first add a property to the
+    \c{Column}, after \c{rowColors}:
+
+    \code
+    property int numFieldWidth: 100
+    \endcode
+
+    Each of the inputs will be inside a \c{Row}, together with a \c{ComboBox}
+    and maybe a label, with all elements centered vertically in the \c{Row}.
+
+    \code
+    Row {
+        spacing: 10
+
+        AppTextField {
+            placeholderText: qsTr("Cost")
+            inputMethodHints: Qt.ImhDigitsOnly
+            width: col.numFieldWidth
+            anchors.verticalCenter: parent.verticalCenter
+        }
+
+        AppText {
+            text: "€ / "
+            anchors.verticalCenter: parent.verticalCenter
+        }
+
+        ComboBox {
+            model: ["10g", "100g", "1kg", "10ml", "100ml", "1l"]
+            anchors.verticalCenter: parent.verticalCenter
+        }
+    } // Row
+
+    Row {
+        spacing: 10
+
+        AppTextField {
+            placeholderText: qsTr("Weight")
+            inputMethodHints: Qt.ImhDigitsOnly
+            width: col.numFieldWidth
+            anchors.verticalCenter: parent.verticalCenter
+        }
+
+        ComboBox {
+            id: comboWeightUnit
+            model: ["g", "kg", "l", "ml"]
+            anchors.verticalCenter: parent.verticalCenter
+        }
+    } // Row
+
+    Row {
+        spacing: 10
+
+        AppTextField {
+            placeholderText: qsTr("Age")
+            inputMethodHints: Qt.ImhDigitsOnly
+            width: col.numFieldWidth
+            anchors.verticalCenter: parent.verticalCenter
+        }
+
+        ComboBox {
+            id: comboAgeUnit
+            model: ["months", "years"]
+            anchors.verticalCenter: parent.verticalCenter
+        }
+    } // Row
+    \endcode
+
+    \section2 Layout tags selection
+
+    For the tags, we use a \c{Repeater} inside a \c{Flow} item, with a
+    \c{checkable} \c{AppButton} as delegate.
+    The \c{Flow} item will distribute the items over multiple lines as needed.
+    The button is styled to look similar to the tags in a list item:
+    the background color is a grey tone (darker, if a tag is selected),
+    the shadow is removed, the corners are rounded, and the text margin is
+    removed to wrap its text.
+    The model will be set to placeholder tags for now.
+
+    The last item in the \c{Repeater} is a text field to add a new tag.
+
+    \code
+    Flow {
+        width: parent.width
+        spacing: 10
+
+        Repeater {
+            anchors.horizontalCenter: parent.horizontalCenter
+            model: ["Tag 1", "Tag 2", "Tag 3"]
+            delegate: AppButton {
+                text: modelData
+                checkable: true
+                backgroundColor: checked? "#737373" : "#c3c3c3"
+                dropShadow: false
+                radius: height/2 - 5
+                minimumWidth: 10
+                horizontalMargin: 0
+                verticalMargin: 0
+            }
+        } // Repeater
+
+        AppTextField {
+            placeholderText: qsTr("+ New tag")
+        }
+    } // Flow
+    \endcode
+
+    The next item in the column should be the separator we added in a
+    previous section.
+
+    \image {add_item_2.jpg} {Layout for editing an item or adding a new item}
+*/

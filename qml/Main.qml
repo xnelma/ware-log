@@ -7,14 +7,13 @@ App {
 
     onInitTheme: {
         Theme.colors.tintColor = "#c7c7c7"
+        Theme.appButton.backgroundColor = "#a3a3a3"
         Theme.navigationBar.shadowHeight = 0
     }
 
     NavigationStack {
-
         AppPage {
             id: root
-
             title: qsTr("Ware Log")
 
             AppListView {
@@ -38,6 +37,21 @@ App {
                     width: root.width
                 }
             }
-        }
-    }
+
+            FloatingActionButton {
+                iconType: IconType.plussquareo
+                onClicked: modalAddItem.open()
+                visible: true
+            }
+
+            AppModal {
+                id: modalAddItem
+                pushBackContent: root.navigationStack
+                fullscreen: false
+                modalHeight: modalContent.contentHeight
+
+                EditItemView { id: modalContent }
+            }
+        } // root
+    } // NavigationStack
 }
