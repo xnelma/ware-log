@@ -7,6 +7,7 @@ App {
 
     onInitTheme: {
         Theme.colors.tintColor = "#c7c7c7"
+        Theme.appButton.backgroundColor = "#a3a3a3"
         Theme.navigationBar.shadowHeight = 0
     }
 
