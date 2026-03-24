@@ -142,6 +142,7 @@ AppPage {
             component TagButton : AppButton {
                 // font.capitalization: Font.MixedCase does not do anything.
                 // Only when setting it on the theme.
+                iconRight: checked? IconType.checksquareo : IconType.squareo
                 checkable: true
                 backgroundColor: checked? "#737373" : "#c3c3c3"
                 dropShadow: false

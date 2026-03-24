@@ -363,10 +363,13 @@
     The \c{AppButton} is styled to look similar to the tags in a list item:
     the background color is a grey tone (darker, if a tag is selected),
     the shadow is removed, the corners are rounded, and the minimum width
-    is set to a small value to match the width of its text.
+    is set to a small value to match the width of its text.\br
+    There will also be an icon to make it clearer that the tags (buttons)
+    need to be clicked to select them.
 
     \code
     component TagButton: AppButton {
+        iconRight: checked? IconType.checksquareo : IconType.squareo
         checkable: true
         backgroundColor: checked? "#737373" : "#c3c3c3"
         dropShadow: false
