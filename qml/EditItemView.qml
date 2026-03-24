@@ -137,25 +137,59 @@ AppPage {
 
         Flow {
             width: parent.width
-            spacing: 10
+            spacing: 5
+
+            component TagButton : AppButton {
+                // font.capitalization: Font.MixedCase does not do anything.
+                // Only when setting it on the theme.
+                checkable: true
+                backgroundColor: checked? "#737373" : "#c3c3c3"
+                dropShadow: false
+                radius: height/2 - 2
+                minimumWidth: 10
+                horizontalMargin: 0
+                verticalMargin: 0
+            }
 
             Repeater {
-                anchors.horizontalCenter: parent.horizontalCenter
                 model: ["Tag 1", "Tag 2", "Tag 3"]
-                delegate: AppButton {
+                delegate: TagButton {
                     text: modelData
-                    checkable: true
-                    backgroundColor: checked? "#737373" : "#c3c3c3"
-                    dropShadow: false
-                    radius: height/2 - 5
-                    minimumWidth: 10
-                    horizontalMargin: 0
-                    verticalMargin: 0
+                }
+            } // Repeater
+
+            Repeater {
+                id: repeaterNewTags
+
+                property list<string> newTags;
+
+                model: newTags
+                delegate: TagButton {
+                    text: modelData
+                    checked: true
                 }
             } // Repeater
 
             AppTextField {
-                placeholderText: qsTr("+ New tag")
+                id: inputNewTag
+                placeholderText: qsTr("New tag")
+            }
+
+            AppButton {
+                text: "+"
+                onClicked: {
+                    var newTag = inputNewTag.text;
+                    if (newTag === "")
+                        return;
+                    // The tag would only be added to the database, if the item
+                    // is added to it with the tag set.
+                    repeaterNewTags.newTags.push(newTag);
+                    inputNewTag.clear();
+                }
+                radius: height / 2
+                minimumWidth: 0
+                horizontalMargin: 0
+                verticalMargin: 0
             }
         } // Flow
 

@@ -252,29 +252,73 @@ Row {
     }
 } <span class="comment">// Row</span></pre>
 <h3 id="layout-tags-selection">Layout tags selection</h3>
-<p>For the tags, we use a <code translate="no">Repeater</code> inside a <code translate="no">Flow</code> item, with a <code translate="no">checkable</code> <code translate="no">AppButton</code> as delegate. The <code translate="no">Flow</code> item will distribute the items over multiple lines as needed. The button is styled to look similar to the tags in a list item: the background color is a grey tone (darker, if a tag is selected), the shadow is removed, the corners are rounded, and the text margin is removed to wrap its text. The model will be set to placeholder tags for now.</p>
-<p>The last item in the <code translate="no">Repeater</code> is a text field to add a new tag.</p>
+<p>For the tags, we use a <code translate="no">Repeater</code> inside a <code translate="no">Flow</code> item, with a <code translate="no">checkable</code> <code translate="no">AppButton</code> as delegate. The <code translate="no">Flow</code> item will distribute the items over multiple lines as needed. The model will be set to placeholder tags for now.</p>
 <pre class="cpp" translate="no">Flow {
     width: parent<span class="operator">.</span>width
-    spacing: <span class="number">10</span>
+    spacing: <span class="number">5</span>
+
+    <span class="operator">.</span><span class="operator">.</span><span class="operator">.</span>
 
     Repeater {
-        anchors<span class="operator">.</span>horizontalCenter: parent<span class="operator">.</span>horizontalCenter
         model: <span class="operator">[</span><span class="string">&quot;Tag 1&quot;</span><span class="operator">,</span> <span class="string">&quot;Tag 2&quot;</span><span class="operator">,</span> <span class="string">&quot;Tag 3&quot;</span><span class="operator">]</span>
-        delegate: AppButton {
+        delegate: <span class="operator">.</span><span class="operator">.</span><span class="operator">.</span>
+    } <span class="comment">// Repeater</span>
+}</pre>
+<p>The <code translate="no">AppButton</code> is styled to look similar to the tags in a list item: the background color is a grey tone (darker, if a tag is selected), the shadow is removed, the corners are rounded, and the minimum width is set to a small value to match the width of its text.</p>
+<pre class="cpp" translate="no">component TagButton: AppButton {
+    checkable: <span class="keyword">true</span>
+    backgroundColor: checked<span class="operator">?</span> <span class="string">&quot;#737373&quot;</span> : <span class="string">&quot;#c3c3c3&quot;</span>
+    dropShadow: <span class="keyword">false</span>
+    radius: height<span class="operator">/</span><span class="number">2</span> <span class="operator">-</span> <span class="number">2</span>
+    minimumWidth: <span class="number">10</span>
+    horizontalMargin: <span class="number">0</span>
+    verticalMargin: <span class="number">0</span>
+}</pre>
+<p>The last item in the <code translate="no">Repeater</code> is a text field and button to add a new tag. For simplicity, the new tags are added to a second repeater with by default enabled tags (checked buttons) as delegate. This is also why we defined an inline component for the <code translate="no">AppButton</code>: to not have to rewrite the delegate for both repeaters.</p>
+<p>The tag would not be added anywhere to the database yet. Only when the item is added to the database with the new tag enabled, it will be part of the tag list of the next item edit view; so when editing the next new item.</p>
+<pre class="cpp" translate="no">Flow {
+    width: parent<span class="operator">.</span>width
+    spacing: <span class="number">5</span>
+
+    component TagButton : AppButton { <span class="operator">.</span><span class="operator">.</span><span class="operator">.</span> }
+
+    Repeater {
+        model: <span class="operator">[</span><span class="string">&quot;Tag 1&quot;</span><span class="operator">,</span> <span class="string">&quot;Tag 2&quot;</span><span class="operator">,</span> <span class="string">&quot;Tag 3&quot;</span><span class="operator">]</span>
+        delegate: TagButton {
             text: modelData
-            checkable: <span class="keyword">true</span>
-            backgroundColor: checked<span class="operator">?</span> <span class="string">&quot;#737373&quot;</span> : <span class="string">&quot;#c3c3c3&quot;</span>
-            dropShadow: <span class="keyword">false</span>
-            radius: height<span class="operator">/</span><span class="number">2</span> <span class="operator">-</span> <span class="number">5</span>
-            minimumWidth: <span class="number">10</span>
-            horizontalMargin: <span class="number">0</span>
-            verticalMargin: <span class="number">0</span>
+        }
+    } <span class="comment">// Repeater</span>
+
+    Repeater {
+        id: repeaterNewTags
+
+        property list<span class="operator">&lt;</span>string<span class="operator">&gt;</span> newTags;
+
+        model: newTags
+        delegate: TagButton {
+            text: modelData
+            checked: <span class="keyword">true</span>
         }
     } <span class="comment">// Repeater</span>
 
     AppTextField {
-        placeholderText: qsTr(<span class="string">&quot;+ New tag&quot;</span>)
+        id: inputNewTag
+        placeholderText: qsTr(<span class="string">&quot;New tag&quot;</span>)
+    }
+
+    AppButton {
+        text: <span class="string">&quot;+&quot;</span>
+        onClicked: {
+            var newTag <span class="operator">=</span> inputNewTag<span class="operator">.</span>text;
+            <span class="keyword">if</span> (newTag <span class="operator">=</span><span class="operator">=</span><span class="operator">=</span> <span class="string">&quot;&quot;</span>)
+                <span class="keyword">return</span>;
+            repeaterNewTags<span class="operator">.</span>newTags<span class="operator">.</span>push(newTag);
+            inputNewTag<span class="operator">.</span>clear();
+        }
+        radius: height <span class="operator">/</span> <span class="number">2</span>
+        minimumWidth: <span class="number">0</span>
+        horizontalMargin: <span class="number">0</span>
+        verticalMargin: <span class="number">0</span>
     }
 } <span class="comment">// Flow</span></pre>
 <p>The next item in the column should be the separator we added in a previous section.</p>
