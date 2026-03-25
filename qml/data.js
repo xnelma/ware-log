@@ -34,8 +34,8 @@ function openDatabase()
                       'primaryColor TEXT, secondaryColor TEXT, ' +
                       'tags TEXT)');
 
-        var rs = tx.executeSql('SELECT * FROM Collection');
-        if (rs.rows.length === 0) {
+        var res = tx.executeSql('SELECT * FROM Collection');
+        if (res.rows.length === 0) {
             Data.fillDatabase(db);
         }
     });
@@ -122,4 +122,36 @@ function deleteItem(title)
     db.transaction(function(tx) {
         tx.executeSql('DELETE FROM Collection WHERE title = \'' + title + '\'');
     });
+}
+
+function getAllTags()
+{
+    const allTags = [];
+    var db = openDatabase();
+    db.transaction(function(tx) {
+        var res = tx.executeSql('SELECT tags FROM Collection');
+        for (var i = 0; i < res.rows.length; i++) {
+            var itemTags = tagList(res.rows.item(i).tags);
+            for (var j = 0; j < itemTags.length; j++) {
+                if (!allTags.includes(itemTags[j]))
+                    allTags.push(itemTags[j]);
+            }
+        }
+    });
+    return allTags;
+}
+
+function getAllTypes()
+{
+    const allTypes = [];
+    var db = openDatabase();
+    db.transaction(function(tx) {
+        var res = tx.executeSql('SELECT type FROM Collection');
+        for (var i = 0; i < res.rows.length; i++) {
+            var itemType = res.rows.item(i).type;
+            if (!allTypes.includes(itemType))
+                allTypes.push(itemType);
+        }
+    });
+    return allTypes;
 }

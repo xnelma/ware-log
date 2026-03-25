@@ -444,4 +444,55 @@
     previous section.
 
     \image {add_item_2.jpg} {Layout for editing an item or adding a new item}
+
+    \section2 Get tags and types model from database
+
+    Import the database javascript file for this qml component
+    (\c{import "data.js" as Data}).
+
+    Then add two methods to it, \c{getAllTags} and \c{getAllTypes} and replace
+    the placeholder models with calls to them:
+    \c{model: Data.getAllTypes()} and \c{model: Data.getAllTags()}.
+
+    The implementation will select the respective columns and add those values
+    to an array, that are not in it yet.
+    I used straight forward loops and an empty inital array, but there are
+    probably better ways to write this.
+
+    \code
+    function getAllTags()
+    {
+        const allTags = [];
+        var db = openDatabase();
+        db.transaction(function(tx) {
+            var res = tx.executeSql('SELECT tags FROM Collection');
+            for (var i = 0; i < res.rows.length; i++) {
+                var itemTags = tagList(res.rows.item(i).tags);
+                for (var j = 0; j < itemTags.length; j++) {
+                    if (!allTags.includes(itemTags[j]))
+                        allTags.push(itemTags[j]);
+                }
+            }
+        });
+        return allTags;
+    }
+
+    function getAllTypes()
+    {
+        const allTypes = [];
+        var db = openDatabase();
+        db.transaction(function(tx) {
+            var res = tx.executeSql('SELECT type FROM Collection');
+            for (var i = 0; i < res.rows.length; i++) {
+                var itemType = res.rows.item(i).type;
+                if (!allTypes.includes(itemType))
+                    allTypes.push(itemType);
+            }
+        });
+        return allTypes;
+    }
+    \endcode
+
+    Now you should have a selection for tags and types from what you have
+    picked for the sample database.
 */

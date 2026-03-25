@@ -2,6 +2,7 @@ import QtQuick
 import QtQuick.Layouts
 import QtQuick.Controls
 import Felgo
+import "data.js" as Data
 
 AppPage {
     title: qsTr("Add New Item")
@@ -52,7 +53,7 @@ AppPage {
         } // rowTitle
 
         ComboBox {
-            model: ["Type 1", "Type 2"]
+            model: Data.getAllTypes();
             editable: true
         }
 
@@ -153,7 +154,7 @@ AppPage {
             }
 
             Repeater {
-                model: ["Tag 1", "Tag 2", "Tag 3"]
+                model: Data.getAllTags();
                 delegate: TagButton {
                     text: modelData
                 }
