@@ -28,6 +28,7 @@
             <contents name="layout-color-selection" title="Layout color selection" level="2"/>
             <contents name="layout-cost-weight-and-age-input" title="Layout cost, weight and age input" level="2"/>
             <contents name="layout-tags-selection" title="Layout tags selection" level="2"/>
+            <contents name="add-color-dialogs" title="Add color dialogs" level="2"/>
         </page>
         <page name="01-data.html" href="01-data.html" status="active" location="prepare_data.qdoc" filepath="/home/maja/Desktop/ware-log/doc/tutorial-files/prepare_data.qdoc" lineno="1" documented="true" subtype="page" title="Prepare Data" fulltitle="Prepare Data" subtitle="" brief="Steps for preparing example data">
             <contents name="add-sample-data" title="Add sample data" level="1"/>

@@ -1,6 +1,7 @@
 import QtQuick
 import QtQuick.Layouts
 import QtQuick.Controls
+import QtQuick.Dialogs
 import Felgo
 import "data.js" as Data
 
@@ -43,10 +44,11 @@ AppPage {
 
             }
 
-            AppButton {
+            ColorButton {
                 id: btnSetOriginColor
                 text: "Color"
-                backgroundColor: rowTitle.originColor
+                colorName: rowTitle.originColor
+                onColorNameChanged: rowTitle.originColor = colorName
                 minimumWidth: 10
                 anchors.verticalCenter: parent.verticalCenter
             }
@@ -64,16 +66,18 @@ AppPage {
             property string primaryColor: "#000"
             property string secondaryColor: "#000"
 
-            AppButton {
+            ColorButton {
                 text: "Color 1"
-                backgroundColor: rowColors.primaryColor
+                colorName: rowColors.primaryColor
+                onColorNameChanged: rowColors.primaryColor = colorName
                 horizontalMargin: 0
                 verticalMargin: 0
             }
 
-            AppButton {
+            ColorButton {
                 text: "Color 2"
-                backgroundColor: rowColors.secondaryColor
+                colorName: rowColors.secondaryColor
+                onColorNameChanged: rowColors.secondaryColor = colorName
                 horizontalMargin: 0
                 verticalMargin: 0
             }
@@ -223,5 +227,29 @@ AppPage {
                 }
             }
         } // Row
+    } // col
+
+    component ColorButton : AppButton {
+        property string colorName
+        backgroundColor: colorName
+        onClicked: {
+            dialogColor.selectedColor = colorName;
+            connectDialogColor.enabled = true;
+            dialogColor.open();
+        }
+
+        Connections {
+            id: connectDialogColor
+            target: dialogColor
+            enabled: false
+            function onAccepted() {
+                colorName = dialogColor.selectedColor;
+                connectDialogColor.enabled = false;
+            }
+        }
     }
-}
+
+    ColorDialog {
+        id: dialogColor
+    }
+} // AppPage

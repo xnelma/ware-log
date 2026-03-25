@@ -497,4 +497,96 @@
     previous section.
 
     \image {add_item_2.jpg} {Layout for editing an item or adding a new item}
+
+    \section2 Add color dialogs
+
+    We still need to show e.g. a dialog when clicking the color buttons.
+    There is the QML Type \c{ColorDialog} we can use. Add it to the bottom
+    of the file, inside \c{AppPage}, after the \c{Column} and give it an id.
+    The type requires the import for \c{QtQuick.Dialogs}.
+
+    \code
+    ColorDialog {
+        id: dialogColor
+    }
+    \endcode
+
+    This dialog should be opened when one of the three buttons are clicked.
+    It already has a full layout, including 'Cancel' and 'OK' buttons that
+    close the dialog.
+    We will have to set the initial color of the dialog depending on the
+    clicked button, and get the selected color when the 'OK' button is clicked.
+    But first, because it will be the same behavior for three buttons, just
+    with different colors, we will add a component \c{ColorButton} to the
+    bottom of the file, above \c{ColorDialog}.
+
+    \code
+    component ColorButton : AppButton {
+        property string colorName
+        backgroundColor: colorName
+    }
+    \endcode
+
+    Replace the three buttons with this component, and set the color property
+    instead of their background color.\br
+    The color type of the dialog has the QML type \c{color}, but we will
+    keep using \c{string} because this is the only type we will use it as for
+    now, namely for setting color properties and saving it to the database.
+
+    Now for opening the dialog and getting the result.
+    Define a \c{Connection} for \c{onAccepted}, so we can set the
+    \c{colorName} property.
+
+    \code
+    Connections {
+        id: connectDialogColor
+        target: dialogColor
+        enabled: false
+        function onAccepted() {
+            colorName = dialogColor.selectedColor;
+            connectDialogColor.enabled = false;
+        }
+    }
+    \endcode
+
+    The connection also needs to be disabled again right away, so it does not
+    get the signal when one of the other buttons is clicked, too.
+
+    In the \c{onClicked} handler, set the color of the dialog, enable the
+    connection and open the dialog:
+
+    \code
+    onClicked: {
+        dialogColor.selectedColor = colorName;
+        connectDialogColor.enabled = true;
+        dialogColor.open();
+    }
+    \endcode
+
+    The overall structure of the inline component should now be as follows:
+
+    \code
+    component ColorButton : AppButton {
+        property string colorName
+        backgroundColor: colorName
+        onClicked: { ... }
+
+        Connections { }
+    }
+    \endcode
+
+    The three buttons also need to handle the color name change, as the
+    Property Bindings to it are one sided:
+
+    \code
+    ColorButton {
+        ...
+        colorName: rowTitle.originColor
+        onColorNameChanged: rowTitle.originColor = colorName
+        // or rowColors.primaryColor or rowColors.secondaryColor
+        ...
+    }
+    \endcode
+
+    Now the colors can be changed through a color dialog.
 */

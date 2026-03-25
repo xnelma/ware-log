@@ -25,6 +25,7 @@
 <li class="level2"><a href="#layout-color-selection">Layout color selection</a></li>
 <li class="level2"><a href="#layout-cost-weight-and-age-input">Layout cost, weight and age input</a></li>
 <li class="level2"><a href="#layout-tags-selection">Layout tags selection</a></li>
+<li class="level2"><a href="#add-color-dialogs">Add color dialogs</a></li>
 </ul>
 </div>
 <div class="sidebar-content" id="sidebar-content"></div></div>
@@ -361,7 +362,53 @@ Row {
     }
 } <span class="comment">// Flow</span></pre>
 <p>The next item in the column should be the separator we added in a previous section.</p>
-<p class="centerAlign"><img src="images/add_item_2.jpg" alt="{Layout for editing an item or adding a new item}" /></p></div>
+<p class="centerAlign"><img src="images/add_item_2.jpg" alt="{Layout for editing an item or adding a new item}" /></p><h3 id="add-color-dialogs">Add color dialogs</h3>
+<p>We still need to show e.g. a dialog when clicking the color buttons. There is the QML Type <code translate="no">ColorDialog</code> we can use. Add it to the bottom of the file, inside <code translate="no">AppPage</code>, after the <code translate="no">Column</code> and give it an id. The type requires the import for <code translate="no">QtQuick.Dialogs</code>.</p>
+<pre class="cpp" translate="no">ColorDialog {
+    id: dialogColor
+}</pre>
+<p>This dialog should be opened when one of the three buttons are clicked. It already has a full layout, including 'Cancel' and 'OK' buttons that close the dialog. We will have to set the initial color of the dialog depending on the clicked button, and get the selected color when the 'OK' button is clicked. But first, because it will be the same behavior for three buttons, just with different colors, we will add a component <code translate="no">ColorButton</code> to the bottom of the file, above <code translate="no">ColorDialog</code>.</p>
+<pre class="cpp" translate="no">component ColorButton : AppButton {
+    property string colorName
+    backgroundColor: colorName
+}</pre>
+<p>Replace the three buttons with this component, and set the color property instead of their background color.<br />
+ The color type of the dialog has the QML type <code translate="no">color</code>, but we will keep using <code translate="no">string</code> because this is the only type we will use it as for now, namely for setting color properties and saving it to the database.</p>
+<p>Now for opening the dialog and getting the result. Define a <code translate="no">Connection</code> for <code translate="no">onAccepted</code>, so we can set the <code translate="no">colorName</code> property.</p>
+<pre class="cpp" translate="no">Connections {
+    id: connectDialogColor
+    target: dialogColor
+    enabled: <span class="keyword">false</span>
+    function onAccepted() {
+        colorName <span class="operator">=</span> dialogColor<span class="operator">.</span>selectedColor;
+        connectDialogColor<span class="operator">.</span>enabled <span class="operator">=</span> <span class="keyword">false</span>;
+    }
+}</pre>
+<p>The connection also needs to be disabled again right away, so it does not get the signal when one of the other buttons is clicked, too.</p>
+<p>In the <code translate="no">onClicked</code> handler, set the color of the dialog, enable the connection and open the dialog:</p>
+<pre class="cpp" translate="no">onClicked: {
+    dialogColor<span class="operator">.</span>selectedColor <span class="operator">=</span> colorName;
+    connectDialogColor<span class="operator">.</span>enabled <span class="operator">=</span> <span class="keyword">true</span>;
+    dialogColor<span class="operator">.</span>open();
+}</pre>
+<p>The overall structure of the inline component should now be as follows:</p>
+<pre class="cpp" translate="no">component ColorButton : AppButton {
+    property string colorName
+    backgroundColor: colorName
+    onClicked: { <span class="operator">.</span><span class="operator">.</span><span class="operator">.</span> }
+
+    Connections { }
+}</pre>
+<p>The three buttons also need to handle the color name change, as the Property Bindings to it are one sided:</p>
+<pre class="cpp" translate="no">ColorButton {
+    <span class="operator">.</span><span class="operator">.</span><span class="operator">.</span>
+    colorName: rowTitle<span class="operator">.</span>originColor
+    onColorNameChanged: rowTitle<span class="operator">.</span>originColor <span class="operator">=</span> colorName
+    <span class="comment">// or rowColors.primaryColor or rowColors.secondaryColor</span>
+    <span class="operator">.</span><span class="operator">.</span><span class="operator">.</span>
+}</pre>
+<p>Now the colors can be changed through a color dialog.</p>
+</div>
 <!-- @@@05-insert.html -->
 <p class="naviNextPrevious footerNavi">
 <a class="prevPage" href="04-theme.html">Set Theme Colors</a>
