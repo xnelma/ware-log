@@ -19,12 +19,12 @@
 <li class="level1"><a href="#add-floating-button-for-navigation">Add floating button for navigation</a></li>
 <li class="level1"><a href="#navigate-to-new-page">Navigate to new page</a></li>
 <li class="level1"><a href="#add-layout-for-new-page">Add layout for new page</a></li>
+<li class="level2"><a href="#get-tags-and-types-model-from-database">Get tags and types model from database</a></li>
 <li class="level2"><a href="#layout-title-and-origin-input">Layout title and origin input</a></li>
 <li class="level2"><a href="#layout-type-selection">Layout type selection</a></li>
 <li class="level2"><a href="#layout-color-selection">Layout color selection</a></li>
 <li class="level2"><a href="#layout-cost-weight-and-age-input">Layout cost, weight and age input</a></li>
 <li class="level2"><a href="#layout-tags-selection">Layout tags selection</a></li>
-<li class="level2"><a href="#get-tags-and-types-model-from-database">Get tags and types model from database</a></li>
 </ul>
 </div>
 <div class="sidebar-content" id="sidebar-content"></div></div>
@@ -129,6 +129,42 @@ Row { AppButton { <span class="operator">.</span><span class="operator">.</span>
 }</pre>
 <p class="centerAlign"><img src="images/add_item_1.jpg" alt="{Intermediate dialog for adding an item}" /></p><h2 id="add-layout-for-new-page">Add layout for new page</h2>
 <p>The layout for the item input follows the structure of a list item.</p>
+<h3 id="get-tags-and-types-model-from-database">Get tags and types model from database</h3>
+<p>First, prepare a list of types and tags to choose from. This would be types and tags already set for another item in the database; though it will also be possible to add new values.</p>
+<p>Import the database javascript file for this qml component (<code translate="no">import &quot;data.js&quot; as Data</code>).</p>
+<p>Then add two methods to it, <code translate="no">getAllTags</code> and <code translate="no">getAllTypes</code>. They can then be used for the model properties with <code translate="no">model: Data.getAllTypes()</code> and <code translate="no">model: Data.getAllTags()</code>.</p>
+<p>The implementation will select the respective columns and add those values to an array, that are not in it yet. I used straight forward loops and an empty inital array, but there are probably better ways to write this.</p>
+<pre class="cpp" translate="no">function getAllTags()
+{
+    <span class="keyword">const</span> allTags <span class="operator">=</span> <span class="operator">[</span><span class="operator">]</span>;
+    var db <span class="operator">=</span> openDatabase();
+    db<span class="operator">.</span>transaction(function(tx) {
+        var res <span class="operator">=</span> tx<span class="operator">.</span>executeSql(<span class="char">'SELECT tags FROM Collection'</span>);
+        <span class="keyword">for</span> (var i <span class="operator">=</span> <span class="number">0</span>; i <span class="operator">&lt;</span> res<span class="operator">.</span>rows<span class="operator">.</span>length; i<span class="operator">+</span><span class="operator">+</span>) {
+            var itemTags <span class="operator">=</span> tagList(res<span class="operator">.</span>rows<span class="operator">.</span>item(i)<span class="operator">.</span>tags);
+            <span class="keyword">for</span> (var j <span class="operator">=</span> <span class="number">0</span>; j <span class="operator">&lt;</span> itemTags<span class="operator">.</span>length; j<span class="operator">+</span><span class="operator">+</span>) {
+                <span class="keyword">if</span> (<span class="operator">!</span>allTags<span class="operator">.</span>includes(itemTags<span class="operator">[</span>j<span class="operator">]</span>))
+                    allTags<span class="operator">.</span>push(itemTags<span class="operator">[</span>j<span class="operator">]</span>);
+            }
+        }
+    });
+    <span class="keyword">return</span> allTags;
+}
+
+function getAllTypes()
+{
+    <span class="keyword">const</span> allTypes <span class="operator">=</span> <span class="operator">[</span><span class="operator">]</span>;
+    var db <span class="operator">=</span> openDatabase();
+    db<span class="operator">.</span>transaction(function(tx) {
+        var res <span class="operator">=</span> tx<span class="operator">.</span>executeSql(<span class="char">'SELECT type FROM Collection'</span>);
+        <span class="keyword">for</span> (var i <span class="operator">=</span> <span class="number">0</span>; i <span class="operator">&lt;</span> res<span class="operator">.</span>rows<span class="operator">.</span>length; i<span class="operator">+</span><span class="operator">+</span>) {
+            var itemType <span class="operator">=</span> res<span class="operator">.</span>rows<span class="operator">.</span>item(i)<span class="operator">.</span>type;
+            <span class="keyword">if</span> (<span class="operator">!</span>allTypes<span class="operator">.</span>includes(itemType))
+                allTypes<span class="operator">.</span>push(itemType);
+        }
+    });
+    <span class="keyword">return</span> allTypes;
+}</pre>
 <h3 id="layout-title-and-origin-input">Layout title and origin input</h3>
 <p>As title and origin will be on the same line in a list item, we could put them on the same line here, too. This might give an impression for word length. We can use a <code translate="no">Row</code> for that, and center its items vertically, in case they have different heights. The input width should be the same for both, but not depend on each other, so we add a property <code translate="no">inputWidth</code> that computes it by parent width, color button width and the margin.<br />
  The color button would be for setting a 'signature color' for origin. Both the origin text (and its placeholder) and the button should show the current color. Choose a placeholder color for now. For <code translate="no">AppButton</code> the text margin can get removed by setting a low minimum width.</p>
@@ -166,9 +202,9 @@ Row { AppButton { <span class="operator">.</span><span class="operator">.</span>
     }
 } <span class="comment">// rowTitle</span></pre>
 <h3 id="layout-type-selection">Layout type selection</h3>
-<p>Next in a list item comes the type. Add an editable <code translate="no">ComboBox</code> with some placeholder types.</p>
+<p>Next in a list item comes the type. Add an editable <code translate="no">ComboBox</code> and use the javascript method for retrieving the types we wrote earlier.</p>
 <pre class="cpp" translate="no">ComboBox {
-    model: <span class="operator">[</span><span class="string">&quot;Type 1&quot;</span><span class="operator">,</span> <span class="string">&quot;Type 2&quot;</span><span class="operator">]</span>
+    model: Data<span class="operator">.</span>getAllTypes()
     editable: <span class="keyword">true</span>
 }</pre>
 <h3 id="layout-color-selection">Layout color selection</h3>
@@ -253,7 +289,7 @@ Row {
     }
 } <span class="comment">// Row</span></pre>
 <h3 id="layout-tags-selection">Layout tags selection</h3>
-<p>For the tags, we use a <code translate="no">Repeater</code> inside a <code translate="no">Flow</code> item, with a <code translate="no">checkable</code> <code translate="no">AppButton</code> as delegate. The <code translate="no">Flow</code> item will distribute the items over multiple lines as needed. The model will be set to placeholder tags for now.</p>
+<p>For the tags, we use a <code translate="no">Repeater</code> inside a <code translate="no">Flow</code> item, with a <code translate="no">checkable</code> <code translate="no">AppButton</code> as delegate. The <code translate="no">Flow</code> item will distribute the items over multiple lines as needed. For the model, we can now use the method for retrieving the types we wrote in a previous section.</p>
 <pre class="cpp" translate="no">Flow {
     width: parent<span class="operator">.</span>width
     spacing: <span class="number">5</span>
@@ -261,7 +297,7 @@ Row {
     <span class="operator">.</span><span class="operator">.</span><span class="operator">.</span>
 
     Repeater {
-        model: <span class="operator">[</span><span class="string">&quot;Tag 1&quot;</span><span class="operator">,</span> <span class="string">&quot;Tag 2&quot;</span><span class="operator">,</span> <span class="string">&quot;Tag 3&quot;</span><span class="operator">]</span>
+        model: Data<span class="operator">.</span>getAllTags()
         delegate: <span class="operator">.</span><span class="operator">.</span><span class="operator">.</span>
     } <span class="comment">// Repeater</span>
 }</pre>
@@ -286,7 +322,7 @@ Row {
     component TagButton : AppButton { <span class="operator">.</span><span class="operator">.</span><span class="operator">.</span> }
 
     Repeater {
-        model: <span class="operator">[</span><span class="string">&quot;Tag 1&quot;</span><span class="operator">,</span> <span class="string">&quot;Tag 2&quot;</span><span class="operator">,</span> <span class="string">&quot;Tag 3&quot;</span><span class="operator">]</span>
+        model: Data<span class="operator">.</span>getAllTags()
         delegate: TagButton {
             text: modelData
         }
@@ -325,43 +361,7 @@ Row {
     }
 } <span class="comment">// Flow</span></pre>
 <p>The next item in the column should be the separator we added in a previous section.</p>
-<p class="centerAlign"><img src="images/add_item_2.jpg" alt="{Layout for editing an item or adding a new item}" /></p><h3 id="get-tags-and-types-model-from-database">Get tags and types model from database</h3>
-<p>Import the database javascript file for this qml component (<code translate="no">import &quot;data.js&quot; as Data</code>).</p>
-<p>Then add two methods to it, <code translate="no">getAllTags</code> and <code translate="no">getAllTypes</code> and replace the placeholder models with calls to them: <code translate="no">model: Data.getAllTypes()</code> and <code translate="no">model: Data.getAllTags()</code>.</p>
-<p>The implementation will select the respective columns and add those values to an array, that are not in it yet. I used straight forward loops and an empty inital array, but there are probably better ways to write this.</p>
-<pre class="cpp" translate="no">function getAllTags()
-{
-    <span class="keyword">const</span> allTags <span class="operator">=</span> <span class="operator">[</span><span class="operator">]</span>;
-    var db <span class="operator">=</span> openDatabase();
-    db<span class="operator">.</span>transaction(function(tx) {
-        var res <span class="operator">=</span> tx<span class="operator">.</span>executeSql(<span class="char">'SELECT tags FROM Collection'</span>);
-        <span class="keyword">for</span> (var i <span class="operator">=</span> <span class="number">0</span>; i <span class="operator">&lt;</span> res<span class="operator">.</span>rows<span class="operator">.</span>length; i<span class="operator">+</span><span class="operator">+</span>) {
-            var itemTags <span class="operator">=</span> tagList(res<span class="operator">.</span>rows<span class="operator">.</span>item(i)<span class="operator">.</span>tags);
-            <span class="keyword">for</span> (var j <span class="operator">=</span> <span class="number">0</span>; j <span class="operator">&lt;</span> itemTags<span class="operator">.</span>length; j<span class="operator">+</span><span class="operator">+</span>) {
-                <span class="keyword">if</span> (<span class="operator">!</span>allTags<span class="operator">.</span>includes(itemTags<span class="operator">[</span>j<span class="operator">]</span>))
-                    allTags<span class="operator">.</span>push(itemTags<span class="operator">[</span>j<span class="operator">]</span>);
-            }
-        }
-    });
-    <span class="keyword">return</span> allTags;
-}
-
-function getAllTypes()
-{
-    <span class="keyword">const</span> allTypes <span class="operator">=</span> <span class="operator">[</span><span class="operator">]</span>;
-    var db <span class="operator">=</span> openDatabase();
-    db<span class="operator">.</span>transaction(function(tx) {
-        var res <span class="operator">=</span> tx<span class="operator">.</span>executeSql(<span class="char">'SELECT type FROM Collection'</span>);
-        <span class="keyword">for</span> (var i <span class="operator">=</span> <span class="number">0</span>; i <span class="operator">&lt;</span> res<span class="operator">.</span>rows<span class="operator">.</span>length; i<span class="operator">+</span><span class="operator">+</span>) {
-            var itemType <span class="operator">=</span> res<span class="operator">.</span>rows<span class="operator">.</span>item(i)<span class="operator">.</span>type;
-            <span class="keyword">if</span> (<span class="operator">!</span>allTypes<span class="operator">.</span>includes(itemType))
-                allTypes<span class="operator">.</span>push(itemType);
-        }
-    });
-    <span class="keyword">return</span> allTypes;
-}</pre>
-<p>Now you should have a selection for tags and types from what you have picked for the sample database.</p>
-</div>
+<p class="centerAlign"><img src="images/add_item_2.jpg" alt="{Layout for editing an item or adding a new item}" /></p></div>
 <!-- @@@05-insert.html -->
 <p class="naviNextPrevious footerNavi">
 <a class="prevPage" href="04-theme.html">Set Theme Colors</a>

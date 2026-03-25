@@ -171,6 +171,58 @@
 
     The layout for the item input follows the structure of a list item.
 
+    \section2 Get tags and types model from database
+
+    First, prepare a list of types and tags to choose from. This would be
+    types and tags already set for another item in the database; though it
+    will also be possible to add new values.
+
+    Import the database javascript file for this qml component
+    (\c{import "data.js" as Data}).
+
+    Then add two methods to it, \c{getAllTags} and \c{getAllTypes}. They
+    can then be used for the model properties with
+    \c{model: Data.getAllTypes()} and \c{model: Data.getAllTags()}.
+
+    The implementation will select the respective columns and add those values
+    to an array, that are not in it yet.
+    I used straight forward loops and an empty inital array, but there are
+    probably better ways to write this.
+
+    \code
+    function getAllTags()
+    {
+        const allTags = [];
+        var db = openDatabase();
+        db.transaction(function(tx) {
+            var res = tx.executeSql('SELECT tags FROM Collection');
+            for (var i = 0; i < res.rows.length; i++) {
+                var itemTags = tagList(res.rows.item(i).tags);
+                for (var j = 0; j < itemTags.length; j++) {
+                    if (!allTags.includes(itemTags[j]))
+                        allTags.push(itemTags[j]);
+                }
+            }
+        });
+        return allTags;
+    }
+
+    function getAllTypes()
+    {
+        const allTypes = [];
+        var db = openDatabase();
+        db.transaction(function(tx) {
+            var res = tx.executeSql('SELECT type FROM Collection');
+            for (var i = 0; i < res.rows.length; i++) {
+                var itemType = res.rows.item(i).type;
+                if (!allTypes.includes(itemType))
+                    allTypes.push(itemType);
+            }
+        });
+        return allTypes;
+    }
+    \endcode
+
     \section2 Layout title and origin input
 
     As title and origin will be on the same line in a list item, we could
@@ -227,12 +279,12 @@
 
     \section2 Layout type selection
 
-    Next in a list item comes the type. Add an editable \c{ComboBox} with
-    some placeholder types.
+    Next in a list item comes the type. Add an editable \c{ComboBox} and use
+    the javascript method for retrieving the types we wrote earlier.
 
     \code
     ComboBox {
-        model: ["Type 1", "Type 2"]
+        model: Data.getAllTypes()
         editable: true
     }
     \endcode
@@ -344,7 +396,8 @@
     For the tags, we use a \c{Repeater} inside a \c{Flow} item, with a
     \c{checkable} \c{AppButton} as delegate.
     The \c{Flow} item will distribute the items over multiple lines as needed.
-    The model will be set to placeholder tags for now.
+    For the model, we can now use the method for retrieving the types we
+    wrote in a previous section.
 
     \code
     Flow {
@@ -354,7 +407,7 @@
         ...
 
         Repeater {
-            model: ["Tag 1", "Tag 2", "Tag 3"]
+            model: Data.getAllTags()
             delegate: ...
         } // Repeater
     }
@@ -400,7 +453,7 @@
         component TagButton : AppButton { ... }
 
         Repeater {
-            model: ["Tag 1", "Tag 2", "Tag 3"]
+            model: Data.getAllTags()
             delegate: TagButton {
                 text: modelData
             }
@@ -444,55 +497,4 @@
     previous section.
 
     \image {add_item_2.jpg} {Layout for editing an item or adding a new item}
-
-    \section2 Get tags and types model from database
-
-    Import the database javascript file for this qml component
-    (\c{import "data.js" as Data}).
-
-    Then add two methods to it, \c{getAllTags} and \c{getAllTypes} and replace
-    the placeholder models with calls to them:
-    \c{model: Data.getAllTypes()} and \c{model: Data.getAllTags()}.
-
-    The implementation will select the respective columns and add those values
-    to an array, that are not in it yet.
-    I used straight forward loops and an empty inital array, but there are
-    probably better ways to write this.
-
-    \code
-    function getAllTags()
-    {
-        const allTags = [];
-        var db = openDatabase();
-        db.transaction(function(tx) {
-            var res = tx.executeSql('SELECT tags FROM Collection');
-            for (var i = 0; i < res.rows.length; i++) {
-                var itemTags = tagList(res.rows.item(i).tags);
-                for (var j = 0; j < itemTags.length; j++) {
-                    if (!allTags.includes(itemTags[j]))
-                        allTags.push(itemTags[j]);
-                }
-            }
-        });
-        return allTags;
-    }
-
-    function getAllTypes()
-    {
-        const allTypes = [];
-        var db = openDatabase();
-        db.transaction(function(tx) {
-            var res = tx.executeSql('SELECT type FROM Collection');
-            for (var i = 0; i < res.rows.length; i++) {
-                var itemType = res.rows.item(i).type;
-                if (!allTypes.includes(itemType))
-                    allTypes.push(itemType);
-            }
-        });
-        return allTypes;
-    }
-    \endcode
-
-    Now you should have a selection for tags and types from what you have
-    picked for the sample database.
 */

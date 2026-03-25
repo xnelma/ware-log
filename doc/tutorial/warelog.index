@@ -22,12 +22,12 @@
             <contents name="add-floating-button-for-navigation" title="Add floating button for navigation" level="1"/>
             <contents name="navigate-to-new-page" title="Navigate to new page" level="1"/>
             <contents name="add-layout-for-new-page" title="Add layout for new page" level="1"/>
+            <contents name="get-tags-and-types-model-from-database" title="Get tags and types model from database" level="2"/>
             <contents name="layout-title-and-origin-input" title="Layout title and origin input" level="2"/>
             <contents name="layout-type-selection" title="Layout type selection" level="2"/>
             <contents name="layout-color-selection" title="Layout color selection" level="2"/>
             <contents name="layout-cost-weight-and-age-input" title="Layout cost, weight and age input" level="2"/>
             <contents name="layout-tags-selection" title="Layout tags selection" level="2"/>
-            <contents name="get-tags-and-types-model-from-database" title="Get tags and types model from database" level="2"/>
         </page>
         <page name="01-data.html" href="01-data.html" status="active" location="prepare_data.qdoc" filepath="/home/maja/Desktop/ware-log/doc/tutorial-files/prepare_data.qdoc" lineno="1" documented="true" subtype="page" title="Prepare Data" fulltitle="Prepare Data" subtitle="" brief="Steps for preparing example data">
             <contents name="add-sample-data" title="Add sample data" level="1"/>
