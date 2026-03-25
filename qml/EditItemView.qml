@@ -23,7 +23,7 @@ AppPage {
             id: rowTitle
             spacing: 10
             width: parent.width
-            property string placeholderOriginColor: "#457" // Dark softer blue
+            property string originColor: "#000"
 
             property int inputWidth:
                 (parent.width - btnSetOriginColor.width - 10) / 2;
@@ -36,8 +36,8 @@ AppPage {
 
             AppTextField {
                 placeholderText: qsTr("Origin")
-                color: rowTitle.placeholderOriginColor
-                placeholderColor: rowTitle.placeholderOriginColor
+                color: rowTitle.originColor
+                placeholderColor: rowTitle.originColor
                 width: rowTitle.inputWidth
                 anchors.verticalCenter: parent.verticalCenter
 
@@ -46,7 +46,7 @@ AppPage {
             AppButton {
                 id: btnSetOriginColor
                 text: "Color"
-                backgroundColor: rowTitle.placeholderOriginColor
+                backgroundColor: rowTitle.originColor
                 minimumWidth: 10
                 anchors.verticalCenter: parent.verticalCenter
             }
@@ -61,19 +61,19 @@ AppPage {
             id: rowColors
             spacing: 10
 
-            property string placeholderPrimaryColor: "#e3aae3" // light pink
-            property string placeholderSecondaryColor: "#a353a3" // darker pink
+            property string primaryColor: "#000"
+            property string secondaryColor: "#000"
 
             AppButton {
                 text: "Color 1"
-                backgroundColor: rowColors.placeholderPrimaryColor
+                backgroundColor: rowColors.primaryColor
                 horizontalMargin: 0
                 verticalMargin: 0
             }
 
             AppButton {
                 text: "Color 2"
-                backgroundColor: rowColors.placeholderSecondaryColor
+                backgroundColor: rowColors.secondaryColor
                 horizontalMargin: 0
                 verticalMargin: 0
             }

@@ -235,7 +235,7 @@
     The color button would be for setting a 'signature color' for origin.
     Both the origin text (and its placeholder) and the button should show
     the current color.
-    Choose a placeholder color for now.
+    The default color will be black.
     For \c{AppButton} the text margin can get removed by setting a low
     minimum width.
 
@@ -247,7 +247,7 @@
         id: rowTitle
         spacing: 10
         width: parent.width
-        property string placeholderOriginColor: "#457" // Dark softer blue
+        property string originColor: "#000"
 
         property int inputWidth:
             (parent.width - btnSetOriginColor.width - 10) / 2;
@@ -260,8 +260,8 @@
 
         AppTextField {
             placeholderText: qsTr("Origin")
-            color: rowTitle.placeholderOriginColor
-            placeholderColor: rowTitle.placeholderOriginColor
+            color: rowTitle.originColor
+            placeholderColor: rowTitle.originColor
             width: rowTitle.inputWidth
             anchors.verticalCenter: parent.verticalCenter
 
@@ -270,7 +270,7 @@
         AppButton {
             id: btnSetOriginColor
             text: "Color"
-            backgroundColor: rowTitle.placeholderOriginColor
+            backgroundColor: rowTitle.originColor
             minimumWidth: 10
             anchors.verticalCenter: parent.verticalCenter
         }
@@ -293,28 +293,28 @@
 
     Now we add a row for setting the colors for a list item.
     There will be two colors, so add two buttons.
-    Remove their margins, so they will align well with other ui elements.
-    Also, pick two placeholder colors and set them as the buttons' background
-    colors.
+    Remove their margins, so they will align well with other UI elements.
+    Add the colors as properties, so they can be changed and accessed later on,
+    when writing the item to the database.
 
     \code
     Row {
         id: rowColors
         spacing: 10
 
-        property string placeholderPrimaryColor: "#e3aae3" // light pink
-        property string placeholderSecondaryColor: "#a353a3" // darker pink
+        property string primaryColor: "#000"
+        property string secondaryColor: "#000"
 
         AppButton {
             text: "Color 1"
-            backgroundColor: rowColors.placeholderPrimaryColor
+            backgroundColor: rowColors.primaryColor
             horizontalMargin: 0
             verticalMargin: 0
         }
 
         AppButton {
             text: "Color 2"
-            backgroundColor: rowColors.placeholderSecondaryColor
+            backgroundColor: rowColors.secondaryColor
             horizontalMargin: 0
             verticalMargin: 0
         }

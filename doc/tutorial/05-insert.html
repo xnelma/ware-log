@@ -167,13 +167,13 @@ function getAllTypes()
 }</pre>
 <h3 id="layout-title-and-origin-input">Layout title and origin input</h3>
 <p>As title and origin will be on the same line in a list item, we could put them on the same line here, too. This might give an impression for word length. We can use a <code translate="no">Row</code> for that, and center its items vertically, in case they have different heights. The input width should be the same for both, but not depend on each other, so we add a property <code translate="no">inputWidth</code> that computes it by parent width, color button width and the margin.<br />
- The color button would be for setting a 'signature color' for origin. Both the origin text (and its placeholder) and the button should show the current color. Choose a placeholder color for now. For <code translate="no">AppButton</code> the text margin can get removed by setting a low minimum width.</p>
+ The color button would be for setting a 'signature color' for origin. Both the origin text (and its placeholder) and the button should show the current color. The default color will be black. For <code translate="no">AppButton</code> the text margin can get removed by setting a low minimum width.</p>
 <p>All in all, for the first line of the column in the dialog, we add the following <code translate="no">Row</code>:</p>
 <pre class="cpp" translate="no">Row {
     id: rowTitle
     spacing: <span class="number">10</span>
     width: parent<span class="operator">.</span>width
-    property string placeholderOriginColor: <span class="string">&quot;#457&quot;</span> <span class="comment">// Dark softer blue</span>
+    property string originColor: <span class="string">&quot;#000&quot;</span>
 
     property <span class="type">int</span> inputWidth:
         (parent<span class="operator">.</span>width <span class="operator">-</span> btnSetOriginColor<span class="operator">.</span>width <span class="operator">-</span> <span class="number">10</span>) <span class="operator">/</span> <span class="number">2</span>;
@@ -186,8 +186,8 @@ function getAllTypes()
 
     AppTextField {
         placeholderText: qsTr(<span class="string">&quot;Origin&quot;</span>)
-        color: rowTitle<span class="operator">.</span>placeholderOriginColor
-        placeholderColor: rowTitle<span class="operator">.</span>placeholderOriginColor
+        color: rowTitle<span class="operator">.</span>originColor
+        placeholderColor: rowTitle<span class="operator">.</span>originColor
         width: rowTitle<span class="operator">.</span>inputWidth
         anchors<span class="operator">.</span>verticalCenter: parent<span class="operator">.</span>verticalCenter
 
@@ -196,7 +196,7 @@ function getAllTypes()
     AppButton {
         id: btnSetOriginColor
         text: <span class="string">&quot;Color&quot;</span>
-        backgroundColor: rowTitle<span class="operator">.</span>placeholderOriginColor
+        backgroundColor: rowTitle<span class="operator">.</span>originColor
         minimumWidth: <span class="number">10</span>
         anchors<span class="operator">.</span>verticalCenter: parent<span class="operator">.</span>verticalCenter
     }
@@ -208,24 +208,24 @@ function getAllTypes()
     editable: <span class="keyword">true</span>
 }</pre>
 <h3 id="layout-color-selection">Layout color selection</h3>
-<p>Now we add a row for setting the colors for a list item. There will be two colors, so add two buttons. Remove their margins, so they will align well with other ui elements. Also, pick two placeholder colors and set them as the buttons' background colors.</p>
+<p>Now we add a row for setting the colors for a list item. There will be two colors, so add two buttons. Remove their margins, so they will align well with other UI elements. Add the colors as properties, so they can be changed and accessed later on, when writing the item to the database.</p>
 <pre class="cpp" translate="no">Row {
     id: rowColors
     spacing: <span class="number">10</span>
 
-    property string placeholderPrimaryColor: <span class="string">&quot;#e3aae3&quot;</span> <span class="comment">// light pink</span>
-    property string placeholderSecondaryColor: <span class="string">&quot;#a353a3&quot;</span> <span class="comment">// darker pink</span>
+    property string primaryColor: <span class="string">&quot;#000&quot;</span>
+    property string secondaryColor: <span class="string">&quot;#000&quot;</span>
 
     AppButton {
         text: <span class="string">&quot;Color 1&quot;</span>
-        backgroundColor: rowColors<span class="operator">.</span>placeholderPrimaryColor
+        backgroundColor: rowColors<span class="operator">.</span>primaryColor
         horizontalMargin: <span class="number">0</span>
         verticalMargin: <span class="number">0</span>
     }
 
     AppButton {
         text: <span class="string">&quot;Color 2&quot;</span>
-        backgroundColor: rowColors<span class="operator">.</span>placeholderSecondaryColor
+        backgroundColor: rowColors<span class="operator">.</span>secondaryColor
         horizontalMargin: <span class="number">0</span>
         verticalMargin: <span class="number">0</span>
     }
