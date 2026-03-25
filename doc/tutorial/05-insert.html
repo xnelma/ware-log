@@ -26,6 +26,8 @@
 <li class="level2"><a href="#layout-cost-weight-and-age-input">Layout cost, weight and age input</a></li>
 <li class="level2"><a href="#layout-tags-selection">Layout tags selection</a></li>
 <li class="level2"><a href="#add-color-dialogs">Add color dialogs</a></li>
+<li class="level1"><a href="#add-item-to-database">Add item to database</a></li>
+<li class="level2"><a href="#check-input-fields">Check input fields</a></li>
 </ul>
 </div>
 <div class="sidebar-content" id="sidebar-content"></div></div>
@@ -408,6 +410,47 @@ Row {
     <span class="operator">.</span><span class="operator">.</span><span class="operator">.</span>
 }</pre>
 <p>Now the colors can be changed through a color dialog.</p>
+<h2 id="add-item-to-database">Add item to database</h2>
+<p>The last step for this view is adding the item to the database on clicking the 'Add Item' button.</p>
+<p>This again requires a change in the UI components.</p>
+<h3 id="check-input-fields">Check input fields</h3>
+<p>If a field is empty, it should be highlighted until edited. An item with empty fields should not be created. For that, add another component <code translate="no">CheckedTextField</code> with a method to check and set a red color on the field. It will also have a connection that is enabled until the field is edited: it resets the highlight color to the previous color.<br />
+ If it is already enabled, just return false to avoid resetting properties, especially the cached color that would then be overriden with the highlight color.</p>
+<pre class="cpp" translate="no"> component CheckedTextField : AppTextField {
+    id: inputChecked
+    property color prevPlaceholderColor
+
+    function ok() {
+        <span class="keyword">if</span> (inputChecked<span class="operator">.</span>text <span class="operator">!</span><span class="operator">=</span><span class="operator">=</span> <span class="string">&quot;&quot;</span>)
+            <span class="keyword">return</span> <span class="keyword">true</span>;
+        <span class="keyword">if</span> (resetPlaceholderColor<span class="operator">.</span>enabled)
+            <span class="keyword">return</span> <span class="keyword">false</span>;
+        inputChecked<span class="operator">.</span>prevPlaceholderColor <span class="operator">=</span> inputChecked<span class="operator">.</span>placeholderColor;
+        inputChecked<span class="operator">.</span>placeholderColor <span class="operator">=</span> <span class="string">&quot;red&quot;</span>;
+        resetPlaceholderColor<span class="operator">.</span>enabled <span class="operator">=</span> <span class="keyword">true</span>;
+        <span class="keyword">return</span> <span class="keyword">false</span>;
+    }
+
+    Connections {
+        id: resetPlaceholderColor
+        target: inputChecked
+        enabled: <span class="keyword">false</span>
+        function onFocusChanged() {
+            inputChecked<span class="operator">.</span>placeholderColor <span class="operator">=</span> inputChecked<span class="operator">.</span>prevPlaceholderColor
+            resetPlaceholderColor<span class="operator">.</span>enabled <span class="operator">=</span> <span class="keyword">false</span>;
+        }
+    }
+}</pre>
+<p>Then replace the <code translate="no">AppTextField</code> for title, origin, cost, weight and age with <code translate="no">CheckedTextField</code> and add ids to the fields.</p>
+<p>With the ids, add and call a method <code translate="no">fieldsAreFilled</code> to the 'Add item' button.</p>
+<pre class="cpp" translate="no">function fieldsAreFilled() {
+    var titleOk <span class="operator">=</span> inputTitle<span class="operator">.</span>ok();
+    var originOk <span class="operator">=</span> inputOrigin<span class="operator">.</span>ok();
+    var costOk <span class="operator">=</span> inputCost<span class="operator">.</span>ok();
+    var weightOk <span class="operator">=</span> inputWeight<span class="operator">.</span>ok();
+    var ageOk <span class="operator">=</span> inputAge<span class="operator">.</span>ok();
+    <span class="keyword">return</span> titleOk <span class="operator">&amp;</span><span class="operator">&amp;</span> originOk <span class="operator">&amp;</span><span class="operator">&amp;</span> costOk <span class="operator">&amp;</span><span class="operator">&amp;</span> weightOk <span class="operator">&amp;</span><span class="operator">&amp;</span> ageOk;
+}</pre>
 </div>
 <!-- @@@05-insert.html -->
 <p class="naviNextPrevious footerNavi">

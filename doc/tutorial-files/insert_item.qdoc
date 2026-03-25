@@ -589,4 +589,68 @@
     \endcode
 
     Now the colors can be changed through a color dialog.
+
+    \section1 Add item to database
+
+    The last step for this view is adding the item to the database on clicking
+    the 'Add Item' button.
+
+    This again requires a change in the UI components.
+
+    \section2 Check input fields
+
+    If a field is empty, it should be highlighted until edited. An item with
+    empty fields should not be created.
+    For that, add another component \c{CheckedTextField} with a method
+    to check and set a red color on the field.
+    It will also have a connection that is enabled until the field is edited:
+    it resets the highlight color to the previous color.\br
+    If it is already enabled, just return false to avoid resetting properties,
+    especially the cached color that would then be overriden with the
+    highlight color.
+
+    \code
+     component CheckedTextField : AppTextField {
+        id: inputChecked
+        property color prevPlaceholderColor
+
+        function ok() {
+            if (inputChecked.text !== "")
+                return true;
+            if (resetPlaceholderColor.enabled)
+                return false;
+            inputChecked.prevPlaceholderColor = inputChecked.placeholderColor;
+            inputChecked.placeholderColor = "red";
+            resetPlaceholderColor.enabled = true;
+            return false;
+        }
+
+        Connections {
+            id: resetPlaceholderColor
+            target: inputChecked
+            enabled: false
+            function onFocusChanged() {
+                inputChecked.placeholderColor = inputChecked.prevPlaceholderColor
+                resetPlaceholderColor.enabled = false;
+            }
+        }
+    }
+    \endcode
+
+    Then replace the \c{AppTextField} for title, origin, cost, weight and age
+    with \c{CheckedTextField} and add ids to the fields.
+
+    With the ids, add and call a method \c{fieldsAreFilled} to the 'Add item'
+    button.
+
+    \code
+    function fieldsAreFilled() {
+        var titleOk = inputTitle.ok();
+        var originOk = inputOrigin.ok();
+        var costOk = inputCost.ok();
+        var weightOk = inputWeight.ok();
+        var ageOk = inputAge.ok();
+        return titleOk && originOk && costOk && weightOk && ageOk;
+    }
+    \endcode
 */

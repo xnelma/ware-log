@@ -29,19 +29,20 @@ AppPage {
             property int inputWidth:
                 (parent.width - btnSetOriginColor.width - 10) / 2;
 
-            AppTextField {
+            CheckedTextField {
+                id: inputTitle
                 placeholderText: qsTr("Item title")
                 width: rowTitle.inputWidth
                 anchors.verticalCenter: parent.verticalCenter
             }
 
-            AppTextField {
+            CheckedTextField {
+                id: inputOrigin
                 placeholderText: qsTr("Origin")
                 color: rowTitle.originColor
                 placeholderColor: rowTitle.originColor
                 width: rowTitle.inputWidth
                 anchors.verticalCenter: parent.verticalCenter
-
             }
 
             ColorButton {
@@ -88,7 +89,8 @@ AppPage {
         Row {
             spacing: 10
 
-            AppTextField {
+            CheckedTextField {
+                id: inputCost
                 placeholderText: qsTr("Cost")
                 inputMethodHints: Qt.ImhDigitsOnly
                 width: col.numFieldWidth
@@ -109,7 +111,8 @@ AppPage {
         Row {
             spacing: 10
 
-            AppTextField {
+            CheckedTextField {
+                id: inputWeight
                 placeholderText: qsTr("Weight")
                 inputMethodHints: Qt.ImhDigitsOnly
                 width: col.numFieldWidth
@@ -126,7 +129,8 @@ AppPage {
         Row {
             spacing: 10
 
-            AppTextField {
+            CheckedTextField {
+                id: inputAge
                 placeholderText: qsTr("Age")
                 inputMethodHints: Qt.ImhDigitsOnly
                 width: col.numFieldWidth
@@ -222,12 +226,55 @@ AppPage {
                 horizontalMargin: 0
                 verticalMargin: 0
                 onClicked: {
-                    modalAddItem.close();
-                    console.log("Add item");
+                    if (fieldsAreFilled()) {
+                        modalAddItem.close();
+                        console.log("Add item");
+                    }
+                }
+
+                function fieldsAreFilled() {
+                    // go over all fields instead of just highlighting the first
+                    // field.
+                    var titleOk = inputTitle.ok();
+                    var originOk = inputOrigin.ok();
+                    var costOk = inputCost.ok();
+                    var weightOk = inputWeight.ok();
+                    var ageOk = inputAge.ok();
+                    // TODO also check for an empty type input.
+                    return titleOk && originOk && costOk && weightOk && ageOk;
                 }
             }
         } // Row
     } // col
+
+    component CheckedTextField : AppTextField {
+        id: inputChecked
+        property color prevPlaceholderColor
+
+        function ok() {
+            if (inputChecked.text !== "")
+                return true;
+            if (resetPlaceholderColor.enabled)
+                // Only highlight once.
+                // Otherwise the highlight color would override
+                // prevPlaceholderColor.
+                return false;
+            inputChecked.prevPlaceholderColor = inputChecked.placeholderColor;
+            inputChecked.placeholderColor = "red";
+            resetPlaceholderColor.enabled = true;
+            return false;
+        }
+
+        Connections {
+            id: resetPlaceholderColor
+            target: inputChecked
+            enabled: false
+            function onFocusChanged() {
+                inputChecked.placeholderColor = inputChecked.prevPlaceholderColor
+                resetPlaceholderColor.enabled = false;
+            }
+        }
+    }
 
     component ColorButton : AppButton {
         property string colorName
