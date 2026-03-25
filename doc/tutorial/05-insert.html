@@ -451,6 +451,44 @@ Row {
     var ageOk <span class="operator">=</span> inputAge<span class="operator">.</span>ok();
     <span class="keyword">return</span> titleOk <span class="operator">&amp;</span><span class="operator">&amp;</span> originOk <span class="operator">&amp;</span><span class="operator">&amp;</span> costOk <span class="operator">&amp;</span><span class="operator">&amp;</span> weightOk <span class="operator">&amp;</span><span class="operator">&amp;</span> ageOk;
 }</pre>
+<p>As the type selection is editable, it can also have an empty field that is not checked for yet. We do something similar as for the text edit fields, but as there is not a straight forward property to set for colors on the combo box, we just show an exclamation mark next to it. For that, move the <code translate="no">ComboBox</code> into a <code translate="no">Row</code>, add an <code translate="no">AppIcon</code> component and center it vertically in the row.</p>
+<pre class="cpp" translate="no">Row {
+    spacing: <span class="number">10</span>
+
+    ComboBox {
+        id: comboTypes
+        model: Data<span class="operator">.</span>getAllTypes();
+        editable: <span class="keyword">true</span>
+
+        function ok() {
+            <span class="keyword">if</span> (comboTypes<span class="operator">.</span>editText <span class="operator">!</span><span class="operator">=</span><span class="operator">=</span> <span class="string">&quot;&quot;</span>)
+                <span class="keyword">return</span> <span class="keyword">true</span>;
+            <span class="keyword">if</span> (txtComboHighlight<span class="operator">.</span>visible)
+                <span class="keyword">return</span> <span class="keyword">false</span>;
+            txtComboHighlight<span class="operator">.</span>visible <span class="operator">=</span> <span class="keyword">true</span>;
+            resetHighlight<span class="operator">.</span>enabled <span class="operator">=</span> <span class="keyword">true</span>;
+        }
+
+        Connections {
+            id: resetHighlight
+            target: comboTypes
+            enabled: <span class="keyword">false</span>
+            function onEditTextChanged() {
+                txtComboHighlight<span class="operator">.</span>visible <span class="operator">=</span> <span class="keyword">false</span>;
+                resetHighlight<span class="operator">.</span>enabled <span class="operator">=</span> <span class="keyword">false</span>;
+            }
+        }
+    }
+
+    AppIcon {
+        id: txtComboHighlight
+        iconType: IconType<span class="operator">.</span>exclamation
+        color: <span class="string">&quot;red&quot;</span>
+        visible: <span class="keyword">false</span>
+        anchors<span class="operator">.</span>verticalCenter: parent<span class="operator">.</span>verticalCenter
+    }
+}</pre>
+<p>With that check, the <code translate="no">fieldsAreFilled</code> method is complete: we would only save an item, if no fields are empty.</p>
 </div>
 <!-- @@@05-insert.html -->
 <p class="naviNextPrevious footerNavi">

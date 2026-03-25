@@ -653,4 +653,54 @@
         return titleOk && originOk && costOk && weightOk && ageOk;
     }
     \endcode
+
+    As the type selection is editable, it can also have an empty field that
+    is not checked for yet.
+    We do something similar as for the text edit fields, but as there is not
+    a straight forward property to set for colors on the combo box,
+    we just show an exclamation mark next to it.
+    For that, move the \c{ComboBox} into a \c{Row}, add an \c{AppIcon}
+    component and center it vertically in the row.
+
+    \code
+    Row {
+        spacing: 10
+
+        ComboBox {
+            id: comboTypes
+            model: Data.getAllTypes();
+            editable: true
+
+            function ok() {
+                if (comboTypes.editText !== "")
+                    return true;
+                if (txtComboHighlight.visible)
+                    return false;
+                txtComboHighlight.visible = true;
+                resetHighlight.enabled = true;
+            }
+
+            Connections {
+                id: resetHighlight
+                target: comboTypes
+                enabled: false
+                function onEditTextChanged() {
+                    txtComboHighlight.visible = false;
+                    resetHighlight.enabled = false;
+                }
+            }
+        }
+
+        AppIcon {
+            id: txtComboHighlight
+            iconType: IconType.exclamation
+            color: "red"
+            visible: false
+            anchors.verticalCenter: parent.verticalCenter
+        }
+    }
+    \endcode
+
+    With that check, the \c{fieldsAreFilled} method is complete: we would
+    only save an item, if no fields are empty.
 */

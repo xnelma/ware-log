@@ -55,9 +55,41 @@ AppPage {
             }
         } // rowTitle
 
-        ComboBox {
-            model: Data.getAllTypes();
-            editable: true
+        Row {
+            spacing: 10
+
+            ComboBox {
+                id: comboTypes
+                model: Data.getAllTypes();
+                editable: true
+
+                function ok() {
+                    if (comboTypes.editText !== "")
+                        return true;
+                    if (txtComboHighlight.visible)
+                        return false;
+                    txtComboHighlight.visible = true;
+                    resetHighlight.enabled = true;
+                }
+
+                Connections {
+                    id: resetHighlight
+                    target: comboTypes
+                    enabled: false
+                    function onEditTextChanged() {
+                        txtComboHighlight.visible = false;
+                        resetHighlight.enabled = false;
+                    }
+                }
+            }
+
+            AppIcon {
+                id: txtComboHighlight
+                iconType: IconType.exclamation
+                color: "red"
+                visible: false
+                anchors.verticalCenter: parent.verticalCenter
+            }
         }
 
         Row {
@@ -237,11 +269,13 @@ AppPage {
                     // field.
                     var titleOk = inputTitle.ok();
                     var originOk = inputOrigin.ok();
+                    var typesOk = comboTypes.ok();
                     var costOk = inputCost.ok();
                     var weightOk = inputWeight.ok();
                     var ageOk = inputAge.ok();
-                    // TODO also check for an empty type input.
-                    return titleOk && originOk && costOk && weightOk && ageOk;
+                    return titleOk && originOk
+                           && typesOk
+                           && costOk && weightOk && ageOk;
                 }
             }
         } // Row
