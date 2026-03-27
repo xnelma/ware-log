@@ -765,4 +765,102 @@
     tags.concat(repeaterNewTags.selectedTags());
     \endcode
 
+    \section2 Insert item into database
+
+    The method \c{fillDatabase} already contains code for inserting an item,
+    so move it into a method \c{insertItem} depending on \c{tx}
+    and \c{item} and call it instead.
+
+    \code
+    function insertItem(tx, item)
+    {
+        tx.executeSql(
+            'INSERT INTO Collection VALUES(?,?,?,?,?,?,?,?,?,?,?,?,?,?)',
+            [item.title,
+             item.origin, item.originColor,
+             item.type,
+             item.age, item.ageUnit,
+             item.weightTotal, item.weightLeft,
+             item.weightUnit,
+             item.cost, item.secondaryCost,
+             item.primaryColor, item.secondaryColor,
+             tagStr(item.tags)]
+        );
+    }
+    \endcode
+
+    Overload the method to also take only the one argument \c{item} using a
+    switch statement. The implementation for one argument opens
+    a database and calls a transaction with \c{insertItem(item, tx)}.
+
+    \code
+    function insertItem(item, tx)
+    {
+        switch (arguments.length) {
+        case 1: {
+            var db = openDatabase();
+            db.transaction(function(tx) {
+                insertItem(item, tx);
+            });
+            break;
+        }
+        case 2: {
+            tx.executeSql(
+                'INSERT INTO Collection VALUES(?,?,?,?,?,?,?,?,?,?,?,?,?,?)',
+                [item.title,
+                 item.origin, item.originColor,
+                 item.type,
+                 item.age, item.ageUnit,
+                 item.weightTotal, item.weightLeft,
+                 item.weightUnit,
+                 item.cost, item.secondaryCost,
+                 item.primaryColor, item.secondaryColor,
+                 tagStr(item.tags)]
+            );
+            break;
+        }
+        default:
+            break;
+    }
+    \endcode
+
+    Then call that method on clicking the 'Add item' button, if every field
+    is filled:
+
+    \code
+    onClicked: {
+        if (fieldsAreFilled()) {
+            var tags = repeaterTags.selectedTags();
+            tags.concat(repeaterNewTags.selectedTags());
+            var item = {
+                title: inputTitle.text,
+                origin: inputOrigin.text,
+                originColor: rowTitle.originColor,
+                type: comboTypes.editText,
+                primaryColor: rowColors.primaryColor,
+                secondaryColor: rowColors.secondaryColor,
+                cost: Number(inputCost.text),
+                secondaryCost: Number(inputCost.text),
+                weightTotal: Number(inputWeight.text),
+                weightLeft: Number(inputWeight.text),
+                weightUnit: comboWeightUnit.editText,
+                age: Number(inputAge.text),
+                ageUnit: comboAgeUnit.editText,
+                tags: tags};
+
+            Data.insertItem(item);
+            // The list view takes the stringified tags, not an
+            // array for now.
+            item.tagStr = Data.tagStr(tags);
+            listModel.append(item);
+
+            modalAddItem.close();
+        }
+    }
+    \endcode
+
+    We also add the item to the list model. As the delegate for the list
+    model takes a stringified tag list for now, we also add the field for it.
+
+    This concludes the implementation of inserting an item.
 */

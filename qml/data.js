@@ -43,6 +43,36 @@ function openDatabase()
     return db;
 }
 
+function insertItem(item, tx)
+{
+    switch (arguments.length) {
+    case 1: {
+        var db = openDatabase();
+        db.transaction(function(tx) {
+            insertItem(item, tx);
+        });
+        break;
+    }
+    case 2: {
+        tx.executeSql(
+            'INSERT INTO Collection VALUES(?,?,?,?,?,?,?,?,?,?,?,?,?,?)',
+            [item.title,
+             item.origin, item.originColor,
+             item.type,
+             item.age, item.ageUnit,
+             item.weightTotal, item.weightLeft,
+             item.weightUnit,
+             item.cost, item.secondaryCost,
+             item.primaryColor, item.secondaryColor,
+             tagStr(item.tags)]
+        );
+        break;
+    }
+    default:
+        break;
+    }
+}
+
 function fillDatabase(db)
 {
     var data = parseSampleData();
@@ -53,18 +83,7 @@ function fillDatabase(db)
             return;
 
         data.forEach(function(item) {
-            tx.executeSql(
-                'INSERT INTO Collection VALUES(?,?,?,?,?,?,?,?,?,?,?,?,?,?)',
-                [item.title,
-                 item.origin, item.originColor,
-                 item.type,
-                 item.age, item.ageUnit,
-                 item.weightTotal, item.weightLeft,
-                 item.weightUnit,
-                 item.cost, item.secondaryCost,
-                 item.primaryColor, item.secondaryColor,
-                 tagStr(item.tags)]
-            );
+            insertItem(item, tx);
         });
     });
 }

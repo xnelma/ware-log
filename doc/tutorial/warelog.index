@@ -32,6 +32,7 @@
             <contents name="add-item-to-database" title="Add item to database" level="1"/>
             <contents name="check-input-fields" title="Check input fields" level="2"/>
             <contents name="get-selected-tags" title="Get selected tags" level="2"/>
+            <contents name="insert-item-into-database" title="Insert item into database" level="2"/>
         </page>
         <page name="01-data.html" href="01-data.html" status="active" location="prepare_data.qdoc" filepath="/home/maja/Desktop/ware-log/doc/tutorial-files/prepare_data.qdoc" lineno="1" documented="true" subtype="page" title="Prepare Data" fulltitle="Prepare Data" subtitle="" brief="Steps for preparing example data">
             <contents name="add-sample-data" title="Add sample data" level="1"/>

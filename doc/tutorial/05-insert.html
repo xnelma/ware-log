@@ -29,6 +29,7 @@
 <li class="level1"><a href="#add-item-to-database">Add item to database</a></li>
 <li class="level2"><a href="#check-input-fields">Check input fields</a></li>
 <li class="level2"><a href="#get-selected-tags">Get selected tags</a></li>
+<li class="level2"><a href="#insert-item-into-database">Insert item into database</a></li>
 </ul>
 </div>
 <div class="sidebar-content" id="sidebar-content"></div></div>
@@ -526,6 +527,84 @@ Row {
 <p>Now we can get the tags using:</p>
 <pre class="cpp" translate="no">var tags <span class="operator">=</span> repeaterTags<span class="operator">.</span>selectedTags();
 tags<span class="operator">.</span>concat(repeaterNewTags<span class="operator">.</span>selectedTags());</pre>
+<h3 id="insert-item-into-database">Insert item into database</h3>
+<p>The method <code translate="no">fillDatabase</code> already contains code for inserting an item, so move it into a method <code translate="no">insertItem</code> depending on <code translate="no">tx</code> and <code translate="no">item</code> and call it instead.</p>
+<pre class="cpp" translate="no">function insertItem(tx<span class="operator">,</span> item)
+{
+    tx<span class="operator">.</span>executeSql(
+        <span class="char">'INSERT INTO Collection VALUES(?,?,?,?,?,?,?,?,?,?,?,?,?,?)'</span><span class="operator">,</span>
+        <span class="operator">[</span>item<span class="operator">.</span>title<span class="operator">,</span>
+         item<span class="operator">.</span>origin<span class="operator">,</span> item<span class="operator">.</span>originColor<span class="operator">,</span>
+         item<span class="operator">.</span>type<span class="operator">,</span>
+         item<span class="operator">.</span>age<span class="operator">,</span> item<span class="operator">.</span>ageUnit<span class="operator">,</span>
+         item<span class="operator">.</span>weightTotal<span class="operator">,</span> item<span class="operator">.</span>weightLeft<span class="operator">,</span>
+         item<span class="operator">.</span>weightUnit<span class="operator">,</span>
+         item<span class="operator">.</span>cost<span class="operator">,</span> item<span class="operator">.</span>secondaryCost<span class="operator">,</span>
+         item<span class="operator">.</span>primaryColor<span class="operator">,</span> item<span class="operator">.</span>secondaryColor<span class="operator">,</span>
+         tagStr(item<span class="operator">.</span>tags)<span class="operator">]</span>
+    );
+}</pre>
+<p>Overload the method to also take only the one argument <code translate="no">item</code> using a switch statement. The implementation for one argument opens a database and calls a transaction with <code translate="no">insertItem(item, tx)</code>.</p>
+<pre class="cpp" translate="no">function insertItem(item<span class="operator">,</span> tx)
+{
+    <span class="keyword">switch</span> (arguments<span class="operator">.</span>length) {
+    <span class="keyword">case</span> <span class="number">1</span>: {
+        var db <span class="operator">=</span> openDatabase();
+        db<span class="operator">.</span>transaction(function(tx) {
+            insertItem(item<span class="operator">,</span> tx);
+        });
+        <span class="keyword">break</span>;
+    }
+    <span class="keyword">case</span> <span class="number">2</span>: {
+        tx<span class="operator">.</span>executeSql(
+            <span class="char">'INSERT INTO Collection VALUES(?,?,?,?,?,?,?,?,?,?,?,?,?,?)'</span><span class="operator">,</span>
+            <span class="operator">[</span>item<span class="operator">.</span>title<span class="operator">,</span>
+             item<span class="operator">.</span>origin<span class="operator">,</span> item<span class="operator">.</span>originColor<span class="operator">,</span>
+             item<span class="operator">.</span>type<span class="operator">,</span>
+             item<span class="operator">.</span>age<span class="operator">,</span> item<span class="operator">.</span>ageUnit<span class="operator">,</span>
+             item<span class="operator">.</span>weightTotal<span class="operator">,</span> item<span class="operator">.</span>weightLeft<span class="operator">,</span>
+             item<span class="operator">.</span>weightUnit<span class="operator">,</span>
+             item<span class="operator">.</span>cost<span class="operator">,</span> item<span class="operator">.</span>secondaryCost<span class="operator">,</span>
+             item<span class="operator">.</span>primaryColor<span class="operator">,</span> item<span class="operator">.</span>secondaryColor<span class="operator">,</span>
+             tagStr(item<span class="operator">.</span>tags)<span class="operator">]</span>
+        );
+        <span class="keyword">break</span>;
+    }
+    <span class="keyword">default</span>:
+        <span class="keyword">break</span>;
+}</pre>
+<p>Then call that method on clicking the 'Add item' button, if every field is filled:</p>
+<pre class="cpp" translate="no">onClicked: {
+    <span class="keyword">if</span> (fieldsAreFilled()) {
+        var tags <span class="operator">=</span> repeaterTags<span class="operator">.</span>selectedTags();
+        tags<span class="operator">.</span>concat(repeaterNewTags<span class="operator">.</span>selectedTags());
+        var item <span class="operator">=</span> {
+            title: inputTitle<span class="operator">.</span>text<span class="operator">,</span>
+            origin: inputOrigin<span class="operator">.</span>text<span class="operator">,</span>
+            originColor: rowTitle<span class="operator">.</span>originColor<span class="operator">,</span>
+            type: comboTypes<span class="operator">.</span>editText<span class="operator">,</span>
+            primaryColor: rowColors<span class="operator">.</span>primaryColor<span class="operator">,</span>
+            secondaryColor: rowColors<span class="operator">.</span>secondaryColor<span class="operator">,</span>
+            cost: Number(inputCost<span class="operator">.</span>text)<span class="operator">,</span>
+            secondaryCost: Number(inputCost<span class="operator">.</span>text)<span class="operator">,</span>
+            weightTotal: Number(inputWeight<span class="operator">.</span>text)<span class="operator">,</span>
+            weightLeft: Number(inputWeight<span class="operator">.</span>text)<span class="operator">,</span>
+            weightUnit: comboWeightUnit<span class="operator">.</span>editText<span class="operator">,</span>
+            age: Number(inputAge<span class="operator">.</span>text)<span class="operator">,</span>
+            ageUnit: comboAgeUnit<span class="operator">.</span>editText<span class="operator">,</span>
+            tags: tags};
+
+        Data<span class="operator">.</span>insertItem(item);
+        <span class="comment">// The list view takes the stringified tags, not an</span>
+        <span class="comment">// array for now.</span>
+        item<span class="operator">.</span>tagStr <span class="operator">=</span> Data<span class="operator">.</span>tagStr(tags);
+        listModel<span class="operator">.</span>append(item);
+
+        modalAddItem<span class="operator">.</span>close();
+    }
+}</pre>
+<p>We also add the item to the list model. As the delegate for the list model takes a stringified tag list for now, we also add the field for it.</p>
+<p>This concludes the implementation of inserting an item.</p>
 </div>
 <!-- @@@05-insert.html -->
 <p class="naviNextPrevious footerNavi">

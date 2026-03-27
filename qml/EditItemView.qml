@@ -135,6 +135,7 @@ AppPage {
             }
 
             ComboBox {
+                id: comboCostPerWeightUnit
                 model: ["10g", "100g", "1kg", "10ml", "100ml", "1l"]
                 anchors.verticalCenter: parent.verticalCenter
             }
@@ -294,11 +295,30 @@ AppPage {
                 verticalMargin: 0
                 onClicked: {
                     if (fieldsAreFilled()) {
-                        modalAddItem.close();
-                        console.log("Add item");
-
                         var tags = repeaterTags.selectedTags();
                         tags.concat(repeaterNewTags.selectedTags());
+                        var item = {
+                            title: inputTitle.text,
+                            origin: inputOrigin.text,
+                            originColor: rowTitle.originColor,
+                            type: comboTypes.editText,
+                            primaryColor: rowColors.primaryColor,
+                            secondaryColor: rowColors.secondaryColor,
+                            cost: Number(inputCost.text),
+                            secondaryCost: Number(inputCost.text),
+                            weightTotal: Number(inputWeight.text),
+                            weightLeft: Number(inputWeight.text),
+                            weightUnit: comboWeightUnit.editText,
+                            age: Number(inputAge.text),
+                            ageUnit: comboAgeUnit.editText,
+                            tags: tags};
+
+                        Data.insertItem(item);
+                        // The list view takes the stringified tags, not an
+                        // array for now.
+                        item.tagStr = Data.tagStr(tags);
+                        listModel.append(item);
+                        modalAddItem.close();
                     }
                 }
 
