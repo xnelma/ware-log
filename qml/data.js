@@ -131,6 +131,9 @@ function get(model)
 
 function tagList(tagStr)
 {
+    if (tagStr.length === 0)
+        // split() would otherwise produce [""]
+        return [];
     var tags = tagStr.split("|");
     return tags;
 }

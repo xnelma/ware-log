@@ -253,10 +253,15 @@
     \code
     function tagList(tagStr)
     {
+        if (tagStr.length === 0)
+            return [];
         var tags = tagStr.split("|");
         return tags;
     }
     \endcode
+
+    The check for an empty string is necessary, because \c{split()} would
+    otherwise \l{https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/String/split#using_split}{produce [""]}.
 
     Now we have data available to fill a list view, and a single method to
     retrieve said data: \c{get(model)}.
