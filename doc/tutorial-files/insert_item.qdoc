@@ -863,4 +863,80 @@
     model takes a stringified tag list for now, we also add the field for it.
 
     This concludes the implementation of inserting an item.
+
+    \section2 Resetting input
+
+    There is one more UI related thing to do:
+    after adding an item and closing the view, \c{AppModal} is not reset.
+    Adding the next item would require emptying the fields first, which is
+    not convenient.
+    Add the handler for \c{onClosed} to \c{AppModal}, and call a reset method
+    we will write next.
+
+    \code
+    AppModal {
+        id: modalAddItem
+        ...
+        onClosed: modalContent.reset();
+        ...
+    }
+    \endcode
+
+    The reset method empties the input fields, sets combo boxes to index 0,
+    unselects all tags and reloads types and tags from the database
+    (which would then also load newly added types and tags).
+
+    \code
+    AppPage {
+        title: qsTs("Add New Item")
+        ...
+        function reset() {
+            inputTitle.text = "";
+            inputOrigin.text = "";
+            rowTitle.originColor = "#000";
+            comboTypes.currentIndex = 0;
+            comboTypes.model = Data.getAllTypes();
+            rowColors.primaryColor = "#000";
+            rowColors.secondaryColor = "#000";
+            inputCost.text = "";
+            comboCostPerWeightUnit.currentIndex = 0;
+            inputWeight.text = "";
+            comboWeightUnit.currentIndex = 0;
+            inputAge.text = "";
+            comboAgeUnit.currentIndex = 0;
+            repeaterTags.reset();
+            repeaterTags.model = Data.getAllTags();
+            repeaterNewTags.reset();
+            repeaterNewTags.newTags = [];
+        }
+    } // AppPage
+    \endcode
+
+    If the binding for the color names of the \c{ColorButton} does not work
+    right away, so the button colors are not reset, redo it on changing the
+    color properties:
+
+    \code
+    Row {
+        id: rowTitle
+        ...
+        onOriginColorChanged: btnSetOriginColor.colorName
+                              = Qt.binding(function () {return originColor})
+        ...
+    }
+
+    ...
+
+    Row {
+        id: rowColors
+        ...
+        onPrimaryColorChanged: btnPrimaryColor.colorName
+            = Qt.binding(function () {return primaryColor})
+        onSecondaryColorChanged: btnSecondaryColor.colorName
+            = Qt.binding(function () {return secondaryColor})
+        ...
+    }
+    \endcode
+
+    Now, when adding another item, the fields are all empty again.
 */

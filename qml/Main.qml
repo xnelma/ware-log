@@ -49,6 +49,7 @@ App {
                 pushBackContent: root.navigationStack
                 fullscreen: false
                 modalHeight: modalContent.contentHeight
+                onClosed: modalContent.reset();
 
                 EditItemView { id: modalContent }
             }

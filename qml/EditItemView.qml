@@ -26,6 +26,12 @@ AppPage {
             width: parent.width
             property string originColor: "#000"
 
+            // Needed for reset().
+            // TODO Why does the property binding not propagate the color change
+            // without redoing it?
+            onOriginColorChanged: btnSetOriginColor.colorName
+                = Qt.binding(function () {return originColor})
+
             property int inputWidth:
                 (parent.width - btnSetOriginColor.width - 10) / 2;
 
@@ -48,7 +54,7 @@ AppPage {
             ColorButton {
                 id: btnSetOriginColor
                 text: "Color"
-                colorName: rowTitle.originColor
+                colorName: Qt.binding(function() { return rowTitle.originColor})
                 onColorNameChanged: rowTitle.originColor = colorName
                 minimumWidth: 10
                 anchors.verticalCenter: parent.verticalCenter
@@ -99,7 +105,15 @@ AppPage {
             property string primaryColor: "#000"
             property string secondaryColor: "#000"
 
+            // Needed for reset().
+            // TODO Why does the property binding have to be redone?
+            onPrimaryColorChanged: btnPrimaryColor.colorName
+                = Qt.binding(function () {return primaryColor})
+            onSecondaryColorChanged: btnSecondaryColor.colorName
+                = Qt.binding(function () {return secondaryColor})
+
             ColorButton {
+                id: btnPrimaryColor
                 text: "Color 1"
                 colorName: rowColors.primaryColor
                 onColorNameChanged: rowColors.primaryColor = colorName
@@ -108,6 +122,7 @@ AppPage {
             }
 
             ColorButton {
+                id: btnSecondaryColor
                 text: "Color 2"
                 colorName: rowColors.secondaryColor
                 onColorNameChanged: rowColors.secondaryColor = colorName
@@ -216,6 +231,12 @@ AppPage {
                             tags.push(tagRepeater.model[i]);
                     return tags;
                 }
+
+                function reset() {
+                    for (var i = 0; i < tagRepeater.model.length; i++)
+                        if (tagRepeater.itemAt(i).checked)
+                            tagRepeater.itemAt(i).checked = false;
+                }
             }
 
             TagRepeater {
@@ -318,6 +339,7 @@ AppPage {
                         // array for now.
                         item.tagStr = Data.tagStr(tags);
                         listModel.append(item);
+
                         modalAddItem.close();
                     }
                 }
@@ -390,5 +412,25 @@ AppPage {
 
     ColorDialog {
         id: dialogColor
+    }
+
+    function reset() {
+        inputTitle.text = "";
+        inputOrigin.text = "";
+        rowTitle.originColor = "#000";
+        comboTypes.currentIndex = 0;
+        comboTypes.model = Data.getAllTypes();
+        rowColors.primaryColor = "#000";
+        rowColors.secondaryColor = "#000";
+        inputCost.text = "";
+        comboCostPerWeightUnit.currentIndex = 0;
+        inputWeight.text = "";
+        comboWeightUnit.currentIndex = 0;
+        inputAge.text = "";
+        comboAgeUnit.currentIndex = 0;
+        repeaterTags.reset();
+        repeaterTags.model = Data.getAllTags();
+        repeaterNewTags.reset();
+        repeaterNewTags.newTags = [];
     }
 } // AppPage

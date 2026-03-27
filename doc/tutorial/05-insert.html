@@ -30,6 +30,7 @@
 <li class="level2"><a href="#check-input-fields">Check input fields</a></li>
 <li class="level2"><a href="#get-selected-tags">Get selected tags</a></li>
 <li class="level2"><a href="#insert-item-into-database">Insert item into database</a></li>
+<li class="level2"><a href="#resetting-input">Resetting input</a></li>
 </ul>
 </div>
 <div class="sidebar-content" id="sidebar-content"></div></div>
@@ -605,6 +606,59 @@ tags<span class="operator">.</span>concat(repeaterNewTags<span class="operator">
 }</pre>
 <p>We also add the item to the list model. As the delegate for the list model takes a stringified tag list for now, we also add the field for it.</p>
 <p>This concludes the implementation of inserting an item.</p>
+<h3 id="resetting-input">Resetting input</h3>
+<p>There is one more UI related thing to do: after adding an item and closing the view, <code translate="no">AppModal</code> is not reset. Adding the next item would require emptying the fields first, which is not convenient. Add the handler for <code translate="no">onClosed</code> to <code translate="no">AppModal</code>, and call a reset method we will write next.</p>
+<pre class="cpp" translate="no">AppModal {
+    id: modalAddItem
+    <span class="operator">.</span><span class="operator">.</span><span class="operator">.</span>
+    onClosed: modalContent<span class="operator">.</span>reset();
+    <span class="operator">.</span><span class="operator">.</span><span class="operator">.</span>
+}</pre>
+<p>The reset method empties the input fields, sets combo boxes to index 0, unselects all tags and reloads types and tags from the database (which would then also load newly added types and tags).</p>
+<pre class="cpp" translate="no">AppPage {
+    title: qsTs(<span class="string">&quot;Add New Item&quot;</span>)
+    <span class="operator">.</span><span class="operator">.</span><span class="operator">.</span>
+    function reset() {
+        inputTitle<span class="operator">.</span>text <span class="operator">=</span> <span class="string">&quot;&quot;</span>;
+        inputOrigin<span class="operator">.</span>text <span class="operator">=</span> <span class="string">&quot;&quot;</span>;
+        rowTitle<span class="operator">.</span>originColor <span class="operator">=</span> <span class="string">&quot;#000&quot;</span>;
+        comboTypes<span class="operator">.</span>currentIndex <span class="operator">=</span> <span class="number">0</span>;
+        comboTypes<span class="operator">.</span>model <span class="operator">=</span> Data<span class="operator">.</span>getAllTypes();
+        rowColors<span class="operator">.</span>primaryColor <span class="operator">=</span> <span class="string">&quot;#000&quot;</span>;
+        rowColors<span class="operator">.</span>secondaryColor <span class="operator">=</span> <span class="string">&quot;#000&quot;</span>;
+        inputCost<span class="operator">.</span>text <span class="operator">=</span> <span class="string">&quot;&quot;</span>;
+        comboCostPerWeightUnit<span class="operator">.</span>currentIndex <span class="operator">=</span> <span class="number">0</span>;
+        inputWeight<span class="operator">.</span>text <span class="operator">=</span> <span class="string">&quot;&quot;</span>;
+        comboWeightUnit<span class="operator">.</span>currentIndex <span class="operator">=</span> <span class="number">0</span>;
+        inputAge<span class="operator">.</span>text <span class="operator">=</span> <span class="string">&quot;&quot;</span>;
+        comboAgeUnit<span class="operator">.</span>currentIndex <span class="operator">=</span> <span class="number">0</span>;
+        repeaterTags<span class="operator">.</span>reset();
+        repeaterTags<span class="operator">.</span>model <span class="operator">=</span> Data<span class="operator">.</span>getAllTags();
+        repeaterNewTags<span class="operator">.</span>reset();
+        repeaterNewTags<span class="operator">.</span>newTags <span class="operator">=</span> <span class="operator">[</span><span class="operator">]</span>;
+    }
+} <span class="comment">// AppPage</span></pre>
+<p>If the binding for the color names of the <code translate="no">ColorButton</code> does not work right away, so the button colors are not reset, redo it on changing the color properties:</p>
+<pre class="cpp" translate="no">Row {
+    id: rowTitle
+    <span class="operator">.</span><span class="operator">.</span><span class="operator">.</span>
+    onOriginColorChanged: btnSetOriginColor<span class="operator">.</span>colorName
+                          <span class="operator">=</span> <span class="type">Qt</span><span class="operator">.</span>binding(function () {<span class="keyword">return</span> originColor})
+    <span class="operator">.</span><span class="operator">.</span><span class="operator">.</span>
+}
+
+<span class="operator">.</span><span class="operator">.</span><span class="operator">.</span>
+
+Row {
+    id: rowColors
+    <span class="operator">.</span><span class="operator">.</span><span class="operator">.</span>
+    onPrimaryColorChanged: btnPrimaryColor<span class="operator">.</span>colorName
+        <span class="operator">=</span> <span class="type">Qt</span><span class="operator">.</span>binding(function () {<span class="keyword">return</span> primaryColor})
+    onSecondaryColorChanged: btnSecondaryColor<span class="operator">.</span>colorName
+        <span class="operator">=</span> <span class="type">Qt</span><span class="operator">.</span>binding(function () {<span class="keyword">return</span> secondaryColor})
+    <span class="operator">.</span><span class="operator">.</span><span class="operator">.</span>
+}</pre>
+<p>Now, when adding another item, the fields are all empty again.</p>
 </div>
 <!-- @@@05-insert.html -->
 <p class="naviNextPrevious footerNavi">
