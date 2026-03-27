@@ -193,14 +193,31 @@ AppPage {
                 verticalMargin: 0
             }
 
-            Repeater {
+            component TagRepeater : Repeater {
+                id: tagRepeater
+                function enableMatchingTag(tag) {
+                    // Returns false if no matching tag is found.
+                    for (var i = 0; i < tagRepeater.model.length; i++)
+                        if (tagRepeater.model[i].toLowerCase()
+                            === tag.toLowerCase()) {
+                            // Check if not checked yet.
+                            if (tagRepeater.itemAt(i).checked !== true)
+                                tagRepeater.itemAt(i).checked = true;
+                            return true;
+                        }
+                    return false;
+                }
+            }
+
+            TagRepeater {
+                id: repeaterTags
                 model: Data.getAllTags();
                 delegate: TagButton {
                     text: modelData
                 }
-            } // Repeater
+            } // TagRepeater
 
-            Repeater {
+            TagRepeater {
                 id: repeaterNewTags
 
                 property list<string> newTags;
@@ -210,7 +227,7 @@ AppPage {
                     text: modelData
                     checked: true
                 }
-            } // Repeater
+            } // TagRepeater
 
             AppTextField {
                 id: inputNewTag
@@ -223,8 +240,18 @@ AppPage {
                     var newTag = inputNewTag.text;
                     if (newTag === "")
                         return;
-                    // The tag would only be added to the database, if the item
-                    // is added to it with the tag set.
+
+                    // Only add the new tag to the repeater, if it is not in
+                    // the existing tag list yet,
+                    // and not in the new tag list either.
+                    if (repeaterTags.enableMatchingTag(newTag)
+                        || repeaterNewTags.enableMatchingTag(newTag)) {
+                        inputNewTag.clear();
+                        return;
+                    }
+
+                    // The tag would not be added to the database yet. Only
+                    // indirectly later, when the item with the tag is inserted.
                     repeaterNewTags.newTags.push(newTag);
                     inputNewTag.clear();
                 }

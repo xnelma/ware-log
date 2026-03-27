@@ -317,21 +317,38 @@ Row {
     verticalMargin: <span class="number">0</span>
 }</pre>
 <p>The last item in the <code translate="no">Repeater</code> is a text field and button to add a new tag. For simplicity, the new tags are added to a second repeater with by default enabled tags (checked buttons) as delegate. This is also why we defined an inline component for the <code translate="no">AppButton</code>: to not have to rewrite the delegate for both repeaters.</p>
+<p>But, a tag should not be added if it is already in a model; either of the database tags or the new tags. Then the corresponding tag should be enabled. For that, define an inline component for the <code translate="no">Repeater</code>s, and write a method that looks for the tag in its model and enables the button (if it is not enabled yet).</p>
+<pre class="cpp" translate="no">component TagRepeater : Repeater {
+    id: tagRepeater
+    function enableMatchingTag(tag) {
+        <span class="comment">// Returns false if no matching tag is found.</span>
+        <span class="keyword">for</span> (var i <span class="operator">=</span> <span class="number">0</span>; i <span class="operator">&lt;</span> tagRepeater<span class="operator">.</span>model<span class="operator">.</span>length; i<span class="operator">+</span><span class="operator">+</span>)
+            <span class="keyword">if</span> (tagRepeater<span class="operator">.</span>model<span class="operator">[</span>i<span class="operator">]</span><span class="operator">.</span>toLowerCase()
+                <span class="operator">=</span><span class="operator">=</span><span class="operator">=</span> tag<span class="operator">.</span>toLowerCase()) {
+                <span class="comment">// Check if not checked yet.</span>
+                <span class="keyword">if</span> (tagRepeater<span class="operator">.</span>itemAt(i)<span class="operator">.</span>checked <span class="operator">!</span><span class="operator">=</span><span class="operator">=</span> <span class="keyword">true</span>)
+                    tagRepeater<span class="operator">.</span>itemAt(i)<span class="operator">.</span>checked <span class="operator">=</span> <span class="keyword">true</span>;
+                <span class="keyword">return</span> <span class="keyword">true</span>;
+            }
+        <span class="keyword">return</span> <span class="keyword">false</span>;
+    }
+}</pre>
 <p>The tag would not be added anywhere to the database yet. Only when the item is added to the database with the new tag enabled, it will be part of the tag list of the next item edit view; so when editing the next new item.</p>
 <pre class="cpp" translate="no">Flow {
     width: parent<span class="operator">.</span>width
     spacing: <span class="number">5</span>
 
     component TagButton : AppButton { <span class="operator">.</span><span class="operator">.</span><span class="operator">.</span> }
+    component TagRepeater : Repeater { <span class="operator">.</span><span class="operator">.</span><span class="operator">.</span> }
 
-    Repeater {
+    TagRepeater {
         model: Data<span class="operator">.</span>getAllTags()
         delegate: TagButton {
             text: modelData
         }
     } <span class="comment">// Repeater</span>
 
-    Repeater {
+    TagRepeater {
         id: repeaterNewTags
 
         property list<span class="operator">&lt;</span>string<span class="operator">&gt;</span> newTags;
@@ -354,6 +371,11 @@ Row {
             var newTag <span class="operator">=</span> inputNewTag<span class="operator">.</span>text;
             <span class="keyword">if</span> (newTag <span class="operator">=</span><span class="operator">=</span><span class="operator">=</span> <span class="string">&quot;&quot;</span>)
                 <span class="keyword">return</span>;
+            <span class="keyword">if</span> (repeaterTags<span class="operator">.</span>enableMatchingTag(newTag)
+                <span class="operator">|</span><span class="operator">|</span> repeaterNewTags<span class="operator">.</span>enableMatchingTag(newTag)) {
+                inputNewTag<span class="operator">.</span>clear();
+                <span class="keyword">return</span>;
+            }
             repeaterNewTags<span class="operator">.</span>newTags<span class="operator">.</span>push(newTag);
             inputNewTag<span class="operator">.</span>clear();
         }

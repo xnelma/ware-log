@@ -440,6 +440,31 @@
     This is also why we defined an inline component for the \c{AppButton}: to
     not have to rewrite the delegate for both repeaters.
 
+    But, a tag should not be added if it is already in a model; either of the
+    database tags or the new tags.
+    Then the corresponding tag should be enabled.
+    For that, define an inline component for the \c{Repeater}s, and write
+    a method that looks for the tag in its model and enables the button
+    (if it is not enabled yet).
+
+    \code
+    component TagRepeater : Repeater {
+        id: tagRepeater
+        function enableMatchingTag(tag) {
+            // Returns false if no matching tag is found.
+            for (var i = 0; i < tagRepeater.model.length; i++)
+                if (tagRepeater.model[i].toLowerCase()
+                    === tag.toLowerCase()) {
+                    // Check if not checked yet.
+                    if (tagRepeater.itemAt(i).checked !== true)
+                        tagRepeater.itemAt(i).checked = true;
+                    return true;
+                }
+            return false;
+        }
+    }
+    \endcode
+
     The tag would not be added anywhere to the database yet. Only when the
     item is added to the database with the new tag enabled, it will be
     part of the tag list of the next item edit view; so when
@@ -451,15 +476,16 @@
         spacing: 5
 
         component TagButton : AppButton { ... }
+        component TagRepeater : Repeater { ... }
 
-        Repeater {
+        TagRepeater {
             model: Data.getAllTags()
             delegate: TagButton {
                 text: modelData
             }
         } // Repeater
 
-        Repeater {
+        TagRepeater {
             id: repeaterNewTags
 
             property list<string> newTags;
@@ -482,6 +508,11 @@
                 var newTag = inputNewTag.text;
                 if (newTag === "")
                     return;
+                if (repeaterTags.enableMatchingTag(newTag)
+                    || repeaterNewTags.enableMatchingTag(newTag)) {
+                    inputNewTag.clear();
+                    return;
+                }
                 repeaterNewTags.newTags.push(newTag);
                 inputNewTag.clear();
             }
