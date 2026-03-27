@@ -207,6 +207,14 @@ AppPage {
                         }
                     return false;
                 }
+
+                function selectedTags() {
+                    const tags = [];
+                    for (var i = 0; i < tagRepeater.model.length; i++)
+                        if (tagRepeater.itemAt(i).checked)
+                            tags.push(tagRepeater.model[i]);
+                    return tags;
+                }
             }
 
             TagRepeater {
@@ -288,6 +296,9 @@ AppPage {
                     if (fieldsAreFilled()) {
                         modalAddItem.close();
                         console.log("Add item");
+
+                        var tags = repeaterTags.selectedTags();
+                        tags.concat(repeaterNewTags.selectedTags());
                     }
                 }
 

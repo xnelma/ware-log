@@ -479,6 +479,7 @@
         component TagRepeater : Repeater { ... }
 
         TagRepeater {
+            id: repeaterTags
             model: Data.getAllTags()
             delegate: TagButton {
                 text: modelData
@@ -734,4 +735,34 @@
 
     With that check, the \c{fieldsAreFilled} method is complete: we would
     only save an item, if no fields are empty.
+
+    \section2 Get selected tags
+
+    While data from text inputs and combo boxes is straight forward to
+    get, the tags will have to be extracted first from the \c{Repeater} for
+    database tags and new tags.
+    We could maintain lists of strings as properties of the repeaters, but
+    that means duplicate data and more code, so more work for maintenance.
+    For this app, no noticeable difference in performance is expected.
+
+    Add a method \c{selectedTags} to \c{TagRepeater}, that iterates over the
+    model indices, and collects tags for which the button is checked.
+
+    \code
+    function selectedTags() {
+        const tags = [];
+        for (var i = 0; i < tagRepeater.model.length; i++)
+            if (tagRepeater.itemAt(i).checked)
+                tags.push(tagRepeater.model[i]);
+        return tags;
+    }
+    \endcode
+
+    Now we can get the tags using:
+
+    \code
+    var tags = repeaterTags.selectedTags();
+    tags.concat(repeaterNewTags.selectedTags());
+    \endcode
+
 */

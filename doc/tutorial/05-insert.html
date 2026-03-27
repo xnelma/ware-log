@@ -28,6 +28,7 @@
 <li class="level2"><a href="#add-color-dialogs">Add color dialogs</a></li>
 <li class="level1"><a href="#add-item-to-database">Add item to database</a></li>
 <li class="level2"><a href="#check-input-fields">Check input fields</a></li>
+<li class="level2"><a href="#get-selected-tags">Get selected tags</a></li>
 </ul>
 </div>
 <div class="sidebar-content" id="sidebar-content"></div></div>
@@ -342,6 +343,7 @@ Row {
     component TagRepeater : Repeater { <span class="operator">.</span><span class="operator">.</span><span class="operator">.</span> }
 
     TagRepeater {
+        id: repeaterTags
         model: Data<span class="operator">.</span>getAllTags()
         delegate: TagButton {
             text: modelData
@@ -511,6 +513,19 @@ Row {
     }
 }</pre>
 <p>With that check, the <code translate="no">fieldsAreFilled</code> method is complete: we would only save an item, if no fields are empty.</p>
+<h3 id="get-selected-tags">Get selected tags</h3>
+<p>While data from text inputs and combo boxes is straight forward to get, the tags will have to be extracted first from the <code translate="no">Repeater</code> for database tags and new tags. We could maintain lists of strings as properties of the repeaters, but that means duplicate data and more code, so more work for maintenance. For this app, no noticeable difference in performance is expected.</p>
+<p>Add a method <code translate="no">selectedTags</code> to <code translate="no">TagRepeater</code>, that iterates over the model indices, and collects tags for which the button is checked.</p>
+<pre class="cpp" translate="no">function selectedTags() {
+    <span class="keyword">const</span> tags <span class="operator">=</span> <span class="operator">[</span><span class="operator">]</span>;
+    <span class="keyword">for</span> (var i <span class="operator">=</span> <span class="number">0</span>; i <span class="operator">&lt;</span> tagRepeater<span class="operator">.</span>model<span class="operator">.</span>length; i<span class="operator">+</span><span class="operator">+</span>)
+        <span class="keyword">if</span> (tagRepeater<span class="operator">.</span>itemAt(i)<span class="operator">.</span>checked)
+            tags<span class="operator">.</span>push(tagRepeater<span class="operator">.</span>model<span class="operator">[</span>i<span class="operator">]</span>);
+    <span class="keyword">return</span> tags;
+}</pre>
+<p>Now we can get the tags using:</p>
+<pre class="cpp" translate="no">var tags <span class="operator">=</span> repeaterTags<span class="operator">.</span>selectedTags();
+tags<span class="operator">.</span>concat(repeaterNewTags<span class="operator">.</span>selectedTags());</pre>
 </div>
 <!-- @@@05-insert.html -->
 <p class="naviNextPrevious footerNavi">
