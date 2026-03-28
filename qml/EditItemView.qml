@@ -317,7 +317,7 @@ AppPage {
                 onClicked: {
                     if (fieldsAreFilled()) {
                         var tags = repeaterTags.selectedTags();
-                        tags.concat(repeaterNewTags.selectedTags());
+                        tags = tags.concat(repeaterNewTags.selectedTags());
                         var item = {
                             title: inputTitle.text,
                             origin: inputOrigin.text,

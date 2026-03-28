@@ -527,7 +527,7 @@ Row {
 }</pre>
 <p>Now we can get the tags using:</p>
 <pre class="cpp" translate="no">var tags <span class="operator">=</span> repeaterTags<span class="operator">.</span>selectedTags();
-tags<span class="operator">.</span>concat(repeaterNewTags<span class="operator">.</span>selectedTags());</pre>
+tags <span class="operator">=</span> tags<span class="operator">.</span>concat(repeaterNewTags<span class="operator">.</span>selectedTags());</pre>
 <h3 id="insert-item-into-database">Insert item into database</h3>
 <p>The method <code translate="no">fillDatabase</code> already contains code for inserting an item, so move it into a method <code translate="no">insertItem</code> depending on <code translate="no">tx</code> and <code translate="no">item</code> and call it instead.</p>
 <pre class="cpp" translate="no">function insertItem(tx<span class="operator">,</span> item)
@@ -578,7 +578,7 @@ tags<span class="operator">.</span>concat(repeaterNewTags<span class="operator">
 <pre class="cpp" translate="no">onClicked: {
     <span class="keyword">if</span> (fieldsAreFilled()) {
         var tags <span class="operator">=</span> repeaterTags<span class="operator">.</span>selectedTags();
-        tags<span class="operator">.</span>concat(repeaterNewTags<span class="operator">.</span>selectedTags());
+        tags <span class="operator">=</span> tags<span class="operator">.</span>concat(repeaterNewTags<span class="operator">.</span>selectedTags());
         var item <span class="operator">=</span> {
             title: inputTitle<span class="operator">.</span>text<span class="operator">,</span>
             origin: inputOrigin<span class="operator">.</span>text<span class="operator">,</span>

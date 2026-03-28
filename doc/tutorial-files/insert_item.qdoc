@@ -762,7 +762,7 @@
 
     \code
     var tags = repeaterTags.selectedTags();
-    tags.concat(repeaterNewTags.selectedTags());
+    tags = tags.concat(repeaterNewTags.selectedTags());
     \endcode
 
     \section2 Insert item into database
@@ -831,7 +831,7 @@
     onClicked: {
         if (fieldsAreFilled()) {
             var tags = repeaterTags.selectedTags();
-            tags.concat(repeaterNewTags.selectedTags());
+            tags = tags.concat(repeaterNewTags.selectedTags());
             var item = {
                 title: inputTitle.text,
                 origin: inputOrigin.text,
