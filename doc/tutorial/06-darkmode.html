@@ -26,6 +26,30 @@
     }
     <span class="operator">.</span><span class="operator">.</span><span class="operator">.</span>
 }</pre>
+<p>Then add the <code translate="no">Menu</code> component with a <code translate="no">MenuItem</code> for toggling the dark mode setting. These components require the <code translate="no">QtQuick.Controls</code> import.</p>
+<pre class="cpp" translate="no">rightBarItem: IconButtonBarItem {
+    <span class="operator">.</span><span class="operator">.</span><span class="operator">.</span>
+    onClicked: menu<span class="operator">.</span>open()
+
+    Menu {
+        id: menu
+        y: parent<span class="operator">.</span>height
+
+        MenuItem {
+            text: qsTr(<span class="string">&quot;Turn Dark Mode %1&quot;</span>)
+                <span class="operator">.</span>arg(darkModeEnabled <span class="operator">?</span> qsTr(<span class="string">&quot;off&quot;</span>) : qsTr(<span class="string">&quot;on&quot;</span>))
+            onClicked: darkModeEnabled <span class="operator">=</span> <span class="operator">!</span>darkModeEnabled
+        }
+    }
+}</pre>
+<p>Add the <code translate="no">darkModeEnabled</code> property above <code translate="no">onInitTheme</code>:</p>
+<pre class="cpp" translate="no">App {
+    property <span class="type">bool</span> darkModeEnabled: <span class="keyword">false</span>
+
+    onInitTheme: {
+    <span class="operator">.</span><span class="operator">.</span><span class="operator">.</span>
+}</pre>
+<p class="centerAlign"><img src="images/dark_mode_1.jpg" alt="{Menu item for toggling dark mode}" /></p><p>Now the menu item should switch between 'on' and 'off'.</p>
 </div>
 <!-- @@@06-darkmode.html -->
 <p class="naviNextPrevious footerNavi">

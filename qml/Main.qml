@@ -1,9 +1,11 @@
 import Felgo
 import QtQuick
 import QtQuick.LocalStorage
+import QtQuick.Controls
 import "data.js" as Data
 
 App {
+    property bool darkModeEnabled: false
 
     onInitTheme: {
         Theme.colors.tintColor = "#c7c7c7"
@@ -18,6 +20,18 @@ App {
 
             rightBarItem: IconButtonBarItem {
                 iconType: IconType.bars
+                onClicked: menu.open()
+
+                Menu {
+                    id: menu
+                    y: parent.height
+
+                    MenuItem {
+                        text: qsTr("Turn Dark Mode %1")
+                            .arg(darkModeEnabled ? qsTr("off") : qsTr("on"))
+                        onClicked: darkModeEnabled = !darkModeEnabled
+                    }
+                }
             }
 
             AppListView {

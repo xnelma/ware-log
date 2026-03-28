@@ -20,4 +20,44 @@
         ...
     }
     \endcode
+
+    Then add the \c{Menu} component with a \c{MenuItem} for toggling the
+    dark mode setting.
+    These components require the \c{QtQuick.Controls} import.
+
+    \code
+    rightBarItem: IconButtonBarItem {
+        ...
+        onClicked: menu.open()
+
+        Menu {
+            id: menu
+            y: parent.height
+
+            MenuItem {
+                text: qsTr("Turn Dark Mode %1")
+                    .arg(darkModeEnabled ? qsTr("off") : qsTr("on"))
+                onClicked: darkModeEnabled = !darkModeEnabled
+            }
+        }
+    }
+    \endcode
+
+    Add the \c{darkModeEnabled} property above \c{onInitTheme}:
+
+    \code
+
+    App {
+        property bool darkModeEnabled: false
+
+        onInitTheme: {
+        ...
+    }
+    \endcode
+
+    \image {dark_mode_1.jpg} {Menu item for toggling dark mode}
+
+    Now the menu item should switch between 'on' and 'off'.
+
+
 */
