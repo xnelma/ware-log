@@ -8,9 +8,20 @@ import "data.js" as Data
 App {
     property bool darkModeEnabled: settings.darkModeEnabled
 
+    property string tintColor: darkModeEnabled? "#373737" : "#c7c7c7"
+    property string buttonColor: darkModeEnabled? "#373737" : "#a3a3a3"
+    property string backgroundColor: darkModeEnabled? "black" : "white"
+    property string textColor: darkModeEnabled? "white" : "black"
+
     onInitTheme: {
-        Theme.colors.tintColor = "#c7c7c7"
-        Theme.appButton.backgroundColor = "#a3a3a3"
+        Theme.colors.tintColor
+            = Qt.binding(function() { return tintColor; });
+        Theme.colors.backgroundColor
+            = Qt.binding(function() { return backgroundColor; });
+        Theme.colors.textColor
+            = Qt.binding(function() { return textColor; });
+        Theme.appButton.backgroundColor
+            = Qt.binding(function() { return buttonColor; });
         Theme.navigationBar.shadowHeight = 0
     }
 

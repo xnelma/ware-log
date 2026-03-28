@@ -103,4 +103,35 @@
     \endcode
 
     \section1 Set basic dark mode colors
+
+    We will use property bindings for switching between colors.
+    Add properties above \c{onInitTheme} that have bindings to colors
+    depending on \c{darkModeEnabled} and create bindings in \c{onInitTheme}
+    to them.
+    Now, apart from the tint and button color, we also need to define a
+    background and text color for light and dark mode.
+
+    \code
+    property string tintColor: darkModeEnabled? "#373737" : "#c7c7c7"
+    property string buttonColor: darkModeEnabled? "#373737" : "#a3a3a3"
+    property string backgroundColor: darkModeEnabled? "black" : "white"
+    property string textColor: darkModeEnabled? "white" : "black"
+
+    onInitTheme: {
+        Theme.colors.tintColor
+            = Qt.binding(function() { return tintColor; });
+        Theme.colors.backgroundColor
+            = Qt.binding(function() { return backgroundColor; });
+        Theme.colors.textColor
+            = Qt.binding(function() { return textColor; });
+        Theme.appButton.backgroundColor
+            = Qt.binding(function() { return buttonColor; });
+        Theme.navigationBar.shadowHeight = 0
+    }
+    \endcode
+
+    Toggling light and dark mode should now change colors to dark or light
+    respectively.
+
+    \image {dark_mode_2.jpg} {Dark mode for list view}
 */

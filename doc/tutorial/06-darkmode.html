@@ -93,7 +93,25 @@
     <span class="operator">.</span><span class="operator">.</span><span class="operator">.</span>
 }</pre>
 <h2 id="set-basic-dark-mode-colors">Set basic dark mode colors</h2>
-</div>
+<p>We will use property bindings for switching between colors. Add properties above <code translate="no">onInitTheme</code> that have bindings to colors depending on <code translate="no">darkModeEnabled</code> and create bindings in <code translate="no">onInitTheme</code> to them. Now, apart from the tint and button color, we also need to define a background and text color for light and dark mode.</p>
+<pre class="cpp" translate="no">property string tintColor: darkModeEnabled<span class="operator">?</span> <span class="string">&quot;#373737&quot;</span> : <span class="string">&quot;#c7c7c7&quot;</span>
+property string buttonColor: darkModeEnabled<span class="operator">?</span> <span class="string">&quot;#373737&quot;</span> : <span class="string">&quot;#a3a3a3&quot;</span>
+property string backgroundColor: darkModeEnabled<span class="operator">?</span> <span class="string">&quot;black&quot;</span> : <span class="string">&quot;white&quot;</span>
+property string textColor: darkModeEnabled<span class="operator">?</span> <span class="string">&quot;white&quot;</span> : <span class="string">&quot;black&quot;</span>
+
+onInitTheme: {
+    Theme<span class="operator">.</span>colors<span class="operator">.</span>tintColor
+        <span class="operator">=</span> <span class="type">Qt</span><span class="operator">.</span>binding(function() { <span class="keyword">return</span> tintColor; });
+    Theme<span class="operator">.</span>colors<span class="operator">.</span>backgroundColor
+        <span class="operator">=</span> <span class="type">Qt</span><span class="operator">.</span>binding(function() { <span class="keyword">return</span> backgroundColor; });
+    Theme<span class="operator">.</span>colors<span class="operator">.</span>textColor
+        <span class="operator">=</span> <span class="type">Qt</span><span class="operator">.</span>binding(function() { <span class="keyword">return</span> textColor; });
+    Theme<span class="operator">.</span>appButton<span class="operator">.</span>backgroundColor
+        <span class="operator">=</span> <span class="type">Qt</span><span class="operator">.</span>binding(function() { <span class="keyword">return</span> buttonColor; });
+    Theme<span class="operator">.</span>navigationBar<span class="operator">.</span>shadowHeight <span class="operator">=</span> <span class="number">0</span>
+}</pre>
+<p>Toggling light and dark mode should now change colors to dark or light respectively.</p>
+<p class="centerAlign"><img src="images/dark_mode_2.jpg" alt="{Dark mode for list view}" /></p></div>
 <!-- @@@06-darkmode.html -->
 <p class="naviNextPrevious footerNavi">
 <a class="prevPage" href="05-insert.html">Insert Item</a>
