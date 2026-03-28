@@ -2,15 +2,21 @@ import Felgo
 import QtQuick
 import QtQuick.LocalStorage
 import QtQuick.Controls
+import QtCore
 import "data.js" as Data
 
 App {
-    property bool darkModeEnabled: false
+    property bool darkModeEnabled: settings.darkModeEnabled
 
     onInitTheme: {
         Theme.colors.tintColor = "#c7c7c7"
         Theme.appButton.backgroundColor = "#a3a3a3"
         Theme.navigationBar.shadowHeight = 0
+    }
+
+    Settings {
+        id: settings
+        property bool darkModeEnabled: false
     }
 
     NavigationStack {
@@ -29,7 +35,8 @@ App {
                     MenuItem {
                         text: qsTr("Turn Dark Mode %1")
                             .arg(darkModeEnabled ? qsTr("off") : qsTr("on"))
-                        onClicked: darkModeEnabled = !darkModeEnabled
+                        onClicked: settings.darkModeEnabled
+                                   = !settings.darkModeEnabled
                     }
                 }
             }

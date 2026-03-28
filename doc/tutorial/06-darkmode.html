@@ -49,7 +49,39 @@
     onInitTheme: {
     <span class="operator">.</span><span class="operator">.</span><span class="operator">.</span>
 }</pre>
-<p class="centerAlign"><img src="images/dark_mode_1.jpg" alt="{Menu item for toggling dark mode}" /></p><p>Now the menu item should switch between 'on' and 'off'.</p>
+<p class="centerAlign"><img src="images/dark_mode_1.jpg" alt="{Menu item for toggling dark mode}" /></p><p>Now the menu item should switch between 'on' and 'off', but the state is not saved when closing the app.</p>
+<p>So add a <code translate="no">Settings</code> component (requires the <code translate="no">QtCore</code> import) and bind it to the property:</p>
+<pre class="cpp" translate="no">App {
+    property <span class="type">bool</span> darkModeEnabled: settings<span class="operator">.</span>darkModeEnabled
+
+    onInitTheme:  <span class="operator">.</span><span class="operator">.</span><span class="operator">.</span>
+
+    Settings {
+        id: settings
+        property <span class="type">bool</span> darkModeEnabled: <span class="keyword">false</span>
+    }
+
+    NavigationStack {
+        AppPage {
+            id: root
+            title: qsTr(<span class="string">&quot;Ware Log&quot;</span>)
+
+            rightBarItem: IconButtonBarItem {
+                <span class="operator">.</span><span class="operator">.</span><span class="operator">.</span>
+
+                Menu {
+                    <span class="operator">.</span><span class="operator">.</span><span class="operator">.</span>
+
+                    MenuItem {
+                        text: qsTr(<span class="string">&quot;Turn Dark Mode %1&quot;</span>)
+                            <span class="operator">.</span>arg(darkModeEnabled <span class="operator">?</span> qsTr(<span class="string">&quot;off&quot;</span>) : qsTr(<span class="string">&quot;on&quot;</span>))
+                        onClicked: settings<span class="operator">.</span>darkModeEnabled
+                                   <span class="operator">=</span> <span class="operator">!</span>settings<span class="operator">.</span>darkModeEnabled
+                    }
+                }
+            }
+    <span class="operator">.</span><span class="operator">.</span><span class="operator">.</span>
+}</pre>
 </div>
 <!-- @@@06-darkmode.html -->
 <p class="naviNextPrevious footerNavi">

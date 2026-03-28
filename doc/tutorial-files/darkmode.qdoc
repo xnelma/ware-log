@@ -57,7 +57,43 @@
 
     \image {dark_mode_1.jpg} {Menu item for toggling dark mode}
 
-    Now the menu item should switch between 'on' and 'off'.
+    Now the menu item should switch between 'on' and 'off', but the state
+    is not saved when closing the app.
 
+    So add a \c{Settings} component (requires the \c{QtCore} import) and
+    bind it to the property:
 
+    \code
+    App {
+        property bool darkModeEnabled: settings.darkModeEnabled
+
+        onInitTheme:  ...
+
+        Settings {
+            id: settings
+            property bool darkModeEnabled: false
+        }
+
+        NavigationStack {
+            AppPage {
+                id: root
+                title: qsTr("Ware Log")
+
+                rightBarItem: IconButtonBarItem {
+                    ...
+
+                    Menu {
+                        ...
+
+                        MenuItem {
+                            text: qsTr("Turn Dark Mode %1")
+                                .arg(darkModeEnabled ? qsTr("off") : qsTr("on"))
+                            onClicked: settings.darkModeEnabled
+                                       = !settings.darkModeEnabled
+                        }
+                    }
+                }
+        ...
+    }
+    \endcode
 */
