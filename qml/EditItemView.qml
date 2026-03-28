@@ -201,7 +201,10 @@ AppPage {
                 // Only when setting it on the theme.
                 iconRight: checked? IconType.checksquareo : IconType.squareo
                 checkable: true
-                backgroundColor: checked? tagButtonCheckedColor : tagButtonColor
+                opacity: 0.8
+                textColor: aRoot.textColor
+                backgroundColor: Qt.rgba(textColor.r, textColor.g, textColor.b,
+                                         checked? 0.3 : 0.1);
                 dropShadow: false
                 radius: height/2 - 2
                 minimumWidth: 10

@@ -309,12 +309,15 @@ Row {
         delegate: <span class="operator">.</span><span class="operator">.</span><span class="operator">.</span>
     } <span class="comment">// Repeater</span>
 }</pre>
-<p>The <code translate="no">AppButton</code> is styled to look similar to the tags in a list item: the background color is a grey tone (darker, if a tag is selected), the shadow is removed, the corners are rounded, and the minimum width is set to a small value to match the width of its text.<br />
+<p>The <code translate="no">AppButton</code> is styled to look similar to the tags in a list item: the background color is a grey tone (darker, if a tag is selected), determined via opacity, the shadow is removed, the corners are rounded, and the minimum width is set to a small value to match the width of its text.<br />
  There will also be an icon to make it clearer that the tags (buttons) need to be clicked to select them.</p>
 <pre class="cpp" translate="no">component TagButton: AppButton {
     iconRight: checked<span class="operator">?</span> IconType<span class="operator">.</span>checksquareo : IconType<span class="operator">.</span>squareo
     checkable: <span class="keyword">true</span>
-    backgroundColor: checked<span class="operator">?</span> <span class="string">&quot;#737373&quot;</span> : <span class="string">&quot;#c3c3c3&quot;</span>
+    opacity: <span class="number">0.8</span>
+    textColor: aRoot<span class="operator">.</span>textColor
+    backgroundColor: <span class="type">Qt</span><span class="operator">.</span>rgba(textColor<span class="operator">.</span>r<span class="operator">,</span> textColor<span class="operator">.</span>g<span class="operator">,</span> textColor<span class="operator">.</span>b<span class="operator">,</span>
+                             checked<span class="operator">?</span> <span class="number">0.3</span> : <span class="number">0.1</span>);
     dropShadow: <span class="keyword">false</span>
     radius: height<span class="operator">/</span><span class="number">2</span> <span class="operator">-</span> <span class="number">2</span>
     minimumWidth: <span class="number">10</span>

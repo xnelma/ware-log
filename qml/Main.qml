@@ -6,14 +6,14 @@ import QtCore
 import "data.js" as Data
 
 App {
+    id: aRoot
+
     property bool darkModeEnabled: settings.darkModeEnabled
 
     property string tintColor: darkModeEnabled? "#373737" : "#c7c7c7"
     property string buttonColor: darkModeEnabled? "#373737" : "#a3a3a3"
     property string backgroundColor: darkModeEnabled? "black" : "white"
     property string textColor: darkModeEnabled? "white" : "black"
-    property string tagButtonColor: darkModeEnabled? "#303030" : "#c3c3c3"
-    property string tagButtonCheckedColor: darkModeEnabled? "#505050" : "#737373"
 
     onInitTheme: {
         Theme.colors.tintColor
