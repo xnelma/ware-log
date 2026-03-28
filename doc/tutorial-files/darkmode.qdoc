@@ -154,4 +154,42 @@
         ...
     }
     \endcode
+
+    Similarly for the default color: create properties for the default color
+    and the button text color, and use them instead of the hardcoded
+    values.
+
+    \code
+    property string colorButtonTextColor: darkModeEnabled? "black" : "white"
+    property string defaultColor: darkModeEnabled? "white" : "black"
+    \endcode
+
+    and in \c{EditItemView.qml}:
+
+    \code
+    property string originColor: defaultColor
+    ...
+    property string primaryColor: defaultColor
+    property string secondaryColor: defaultColor
+    ...
+
+    component ColorButton : AppButton {
+        ...
+        textColor: colorButtonTextColor
+        ...
+    }
+    \endcode
+
+    Also assign bindings for the default color in the reset method:
+
+    \code
+    function reset() {
+        ...
+        rowTitle.originColor = Qt.binding(function() { return defaultColor });
+        ...
+        rowColors.primaryColor = Qt.binding(function() { return defaultColor });
+        rowColors.secondaryColor = Qt.binding(function() { return defaultColor });
+        ...
+    }
+    \endcode
 */

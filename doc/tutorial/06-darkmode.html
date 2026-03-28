@@ -120,6 +120,30 @@ property string tagButtonCheckedColor: darkModeEnabled<span class="operator">?</
     backgroundColor: checked<span class="operator">?</span> tagButtonCheckedColor : tagButtonColor
     <span class="operator">.</span><span class="operator">.</span><span class="operator">.</span>
 }</pre>
+<p>Similarly for the default color: create properties for the default color and the button text color, and use them instead of the hardcoded values.</p>
+<pre class="cpp" translate="no">property string colorButtonTextColor: darkModeEnabled<span class="operator">?</span> <span class="string">&quot;black&quot;</span> : <span class="string">&quot;white&quot;</span>
+property string defaultColor: darkModeEnabled<span class="operator">?</span> <span class="string">&quot;white&quot;</span> : <span class="string">&quot;black&quot;</span></pre>
+<p>and in <code translate="no">EditItemView.qml</code>:</p>
+<pre class="cpp" translate="no">property string originColor: defaultColor
+<span class="operator">.</span><span class="operator">.</span><span class="operator">.</span>
+property string primaryColor: defaultColor
+property string secondaryColor: defaultColor
+<span class="operator">.</span><span class="operator">.</span><span class="operator">.</span>
+
+component ColorButton : AppButton {
+    <span class="operator">.</span><span class="operator">.</span><span class="operator">.</span>
+    textColor: colorButtonTextColor
+    <span class="operator">.</span><span class="operator">.</span><span class="operator">.</span>
+}</pre>
+<p>Also assign bindings for the default color in the reset method:</p>
+<pre class="cpp" translate="no">function reset() {
+    <span class="operator">.</span><span class="operator">.</span><span class="operator">.</span>
+    rowTitle<span class="operator">.</span>originColor <span class="operator">=</span> <span class="type">Qt</span><span class="operator">.</span>binding(function() { <span class="keyword">return</span> defaultColor });
+    <span class="operator">.</span><span class="operator">.</span><span class="operator">.</span>
+    rowColors<span class="operator">.</span>primaryColor <span class="operator">=</span> <span class="type">Qt</span><span class="operator">.</span>binding(function() { <span class="keyword">return</span> defaultColor });
+    rowColors<span class="operator">.</span>secondaryColor <span class="operator">=</span> <span class="type">Qt</span><span class="operator">.</span>binding(function() { <span class="keyword">return</span> defaultColor });
+    <span class="operator">.</span><span class="operator">.</span><span class="operator">.</span>
+}</pre>
 </div>
 <!-- @@@06-darkmode.html -->
 <p class="naviNextPrevious footerNavi">

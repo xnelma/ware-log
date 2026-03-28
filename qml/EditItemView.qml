@@ -24,7 +24,16 @@ AppPage {
             id: rowTitle
             spacing: 10
             width: parent.width
-            property string originColor: "#000"
+
+            // FIXME The binding does not work properly with AppButton: when
+            // starting the app in dark mode, the default for the boolean
+            // property is false and when the setting is loaded to true, the
+            // new value is not propagated.
+            // So when the dialog is started the first time in dark mode, the
+            // color buttons are black, thus invisible.
+            // Closing and reopening the dialog recreates the binding in the
+            // reset() method, so afterwards the colors are correct.
+            property string originColor: defaultColor
 
             // Needed for reset().
             // TODO Why does the property binding not propagate the color change
@@ -54,7 +63,7 @@ AppPage {
             ColorButton {
                 id: btnSetOriginColor
                 text: "Color"
-                colorName: Qt.binding(function() { return rowTitle.originColor})
+                colorName: rowTitle.originColor
                 onColorNameChanged: rowTitle.originColor = colorName
                 minimumWidth: 10
                 anchors.verticalCenter: parent.verticalCenter
@@ -102,8 +111,8 @@ AppPage {
             id: rowColors
             spacing: 10
 
-            property string primaryColor: "#000"
-            property string secondaryColor: "#000"
+            property string primaryColor: defaultColor
+            property string secondaryColor: defaultColor
 
             // Needed for reset().
             // TODO Why does the property binding have to be redone?
@@ -116,7 +125,8 @@ AppPage {
                 id: btnPrimaryColor
                 text: "Color 1"
                 colorName: rowColors.primaryColor
-                onColorNameChanged: rowColors.primaryColor = colorName
+                onColorNameChanged: rowColors.primaryColor
+                    = Qt.binding(function() { return colorName })
                 horizontalMargin: 0
                 verticalMargin: 0
             }
@@ -125,7 +135,8 @@ AppPage {
                 id: btnSecondaryColor
                 text: "Color 2"
                 colorName: rowColors.secondaryColor
-                onColorNameChanged: rowColors.secondaryColor = colorName
+                onColorNameChanged: rowColors.secondaryColor
+                    = Qt.binding(function() { return colorName });
                 horizontalMargin: 0
                 verticalMargin: 0
             }
@@ -396,6 +407,7 @@ AppPage {
     component ColorButton : AppButton {
         property string colorName
         backgroundColor: colorName
+        textColor: colorButtonTextColor
         onClicked: {
             dialogColor.selectedColor = colorName;
             connectDialogColor.enabled = true;
@@ -420,11 +432,11 @@ AppPage {
     function reset() {
         inputTitle.text = "";
         inputOrigin.text = "";
-        rowTitle.originColor = "#000";
+        rowTitle.originColor = Qt.binding(function() { return defaultColor });
         comboTypes.currentIndex = 0;
         comboTypes.model = Data.getAllTypes();
-        rowColors.primaryColor = "#000";
-        rowColors.secondaryColor = "#000";
+        rowColors.primaryColor = Qt.binding(function() { return defaultColor });
+        rowColors.secondaryColor = Qt.binding(function() { return defaultColor });
         inputCost.text = "";
         comboCostPerWeightUnit.currentIndex = 0;
         inputWeight.text = "";
