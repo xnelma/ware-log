@@ -12,10 +12,20 @@
 <p class="naviNextPrevious headerNavi">
 <a class="prevPage" href="05-insert.html">Insert Item</a>
 </p>
-<div class="sidebar"><div class="sidebar-content" id="sidebar-content"></div></div>
+<div class="sidebar">
+<div class="toc">
+<h3 id="toc">Contents</h3>
+<ul>
+<li class="level1"><a href="#add-menu-button-for-dark-mode">Add menu button for dark mode</a></li>
+<li class="level1"><a href="#set-basic-dark-mode-colors">Set basic dark mode colors</a></li>
+</ul>
+</div>
+<div class="sidebar-content" id="sidebar-content"></div></div>
 <h1 class="title">Add Dark Mode</h1>
 <!-- $$$06-darkmode.html-description -->
 <div class="descr" id="details">
+<p>To enable switching to a dark theme, we will add a menu and menu item, save the state to settings and set dark mode colors.</p>
+<h2 id="add-menu-button-for-dark-mode">Add menu button for dark mode</h2>
 <p>First, add a menu icon to the app bar. <code translate="no">AppPage</code> by Felgo has the property <code translate="no">rightBarIcon</code> and can be used with an <code translate="no">IconButtonBarItem</code>, so let's add that.</p>
 <pre class="cpp" translate="no">AppPage {
     <span class="operator">.</span><span class="operator">.</span><span class="operator">.</span>
@@ -82,6 +92,7 @@
             }
     <span class="operator">.</span><span class="operator">.</span><span class="operator">.</span>
 }</pre>
+<h2 id="set-basic-dark-mode-colors">Set basic dark mode colors</h2>
 </div>
 <!-- @@@06-darkmode.html -->
 <p class="naviNextPrevious footerNavi">

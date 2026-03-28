@@ -2,7 +2,10 @@
 <!DOCTYPE QDOCINDEX>
 <INDEX url="" title="An app for entering a catalogue of items, for items that can be measured in grams, liters etc." version="" project="WareLog">
     <namespace name="" status="active" access="public" module="warelog">
-        <page name="06-darkmode.html" href="06-darkmode.html" status="active" location="darkmode.qdoc" filepath="/home/maja/Desktop/ware-log/doc/tutorial-files/darkmode.qdoc" lineno="1" documented="true" subtype="page" title="Add Dark Mode" fulltitle="Add Dark Mode" subtitle="" brief="Steps for adding and switching to a dark theme"/>
+        <page name="06-darkmode.html" href="06-darkmode.html" status="active" location="darkmode.qdoc" filepath="/home/maja/Desktop/ware-log/doc/tutorial-files/darkmode.qdoc" lineno="1" documented="true" subtype="page" title="Add Dark Mode" fulltitle="Add Dark Mode" subtitle="" brief="Steps for adding and switching to a dark theme">
+            <contents name="add-menu-button-for-dark-mode" title="Add menu button for dark mode" level="1"/>
+            <contents name="set-basic-dark-mode-colors" title="Set basic dark mode colors" level="1"/>
+        </page>
         <page name="03-delete.html" href="03-delete.html" status="active" location="delete_item.qdoc" filepath="/home/maja/Desktop/ware-log/doc/tutorial-files/delete_item.qdoc" lineno="1" documented="true" subtype="page" title="Delete Item" fulltitle="Delete Item" subtitle="" brief="Steps for deleting a list item">
             <contents name="add-the-delete-button" title="Add the delete button" level="1"/>
             <contents name="write-delete-methods" title="Write delete methods" level="1"/>

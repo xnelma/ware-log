@@ -5,6 +5,11 @@
 
     \brief provides steps for adding and switching to a dark theme
 
+    To enable switching to a dark theme, we will add a menu and menu item,
+    save the state to settings and set dark mode colors.
+
+    \section1 Add menu button for dark mode
+
     First, add a menu icon to the app bar.
     \c{AppPage} by Felgo has the property \c{rightBarIcon} and can be used
     with an \c{IconButtonBarItem}, so let's add that.
@@ -96,4 +101,6 @@
         ...
     }
     \endcode
+
+    \section1 Set basic dark mode colors
 */
