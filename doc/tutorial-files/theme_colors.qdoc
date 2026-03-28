@@ -1,13 +1,14 @@
 /*!
     \page 04-theme.html
     \previouspage {Delete Item}
+    \nextpage {Insert Item}
     \title Set Theme Colors
 
     \brief provides steps for setting theme colors
 
     In this step I would like to change to a different accent color.
     As list items will have colored rectangles as part of their layout, I will
-    choose a neutral grey tone, \c{#c7c7c7}.
+    choose a neutral but light grey tone, \c{#c7c7c7}.
 
     For the \c{App} component by Felgo, there is the \c{onInitTheme} property
     and the \c{Theme} component.
@@ -23,6 +24,14 @@
     }
     \endcode
 
+    As this grey is a bit too light for buttons, or more generally for UI
+    elements with text that needs to be read more often and quickly,
+    don't use the tint color for them, but a slightly darker grey:
+
+    \code
+    Theme.appButton.backgroundColor = "#a3a3a3"
+    \endcode
+
     Another property that can be set is the shadow height of the navigation
     bar. To remove the shadow, add the following line:
 
@@ -34,4 +43,7 @@
     set to grey, and the navigation bar has the shadow removed.
 
     \image {theme_color.jpg} {The theme has now a grey tint as accent color}
+
+    When we use buttons later on, they should show the slightly darker grey as
+    their background color.
 */

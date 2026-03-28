@@ -174,9 +174,12 @@ var obj <span class="operator">=</span> JSON<span class="operator">.</span>parse
 <p>The tags will be split in the UI component later on. We can already add the method for getting the string list:</p>
 <pre class="cpp" translate="no">function tagList(tagStr)
 {
+    <span class="keyword">if</span> (tagStr<span class="operator">.</span>length <span class="operator">=</span><span class="operator">=</span><span class="operator">=</span> <span class="number">0</span>)
+        <span class="keyword">return</span> <span class="operator">[</span><span class="operator">]</span>;
     var tags <span class="operator">=</span> tagStr<span class="operator">.</span>split(<span class="string">&quot;|&quot;</span>);
     <span class="keyword">return</span> tags;
 }</pre>
+<p>The check for an empty string is necessary, because <code translate="no">split()</code> would otherwise <a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/String/split#using_split">produce [&quot;&quot;]</a>.</p>
 <p>Now we have data available to fill a list view, and a single method to retrieve said data: <code translate="no">get(model)</code>. In the next chapter we will create the UI components for a list view to display the data.</p>
 </div>
 <!-- @@@01-data.html -->

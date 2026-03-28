@@ -1,0 +1,668 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+<!-- insert_item.qdoc -->
+  <meta name="description" content="provides steps for inserting an item into the database">
+  <title>Insert Item | WareLog</title>
+<link rel="stylesheet" type="text/css" href="style/style.css"/>
+</head>
+<body>
+  <link rel="prev" href="04-theme.html" />
+<p class="naviNextPrevious headerNavi">
+<a class="prevPage" href="04-theme.html">Set Theme Colors</a>
+</p>
+<div class="sidebar">
+<div class="toc">
+<h3 id="toc">Contents</h3>
+<ul>
+<li class="level1"><a href="#add-floating-button-for-navigation">Add floating button for navigation</a></li>
+<li class="level1"><a href="#navigate-to-new-page">Navigate to new page</a></li>
+<li class="level1"><a href="#add-layout-for-new-page">Add layout for new page</a></li>
+<li class="level2"><a href="#get-tags-and-types-model-from-database">Get tags and types model from database</a></li>
+<li class="level2"><a href="#layout-title-and-origin-input">Layout title and origin input</a></li>
+<li class="level2"><a href="#layout-type-selection">Layout type selection</a></li>
+<li class="level2"><a href="#layout-color-selection">Layout color selection</a></li>
+<li class="level2"><a href="#layout-cost-weight-and-age-input">Layout cost, weight and age input</a></li>
+<li class="level2"><a href="#layout-tags-selection">Layout tags selection</a></li>
+<li class="level2"><a href="#add-color-dialogs">Add color dialogs</a></li>
+<li class="level1"><a href="#add-item-to-database">Add item to database</a></li>
+<li class="level2"><a href="#check-input-fields">Check input fields</a></li>
+<li class="level2"><a href="#get-selected-tags">Get selected tags</a></li>
+<li class="level2"><a href="#insert-item-into-database">Insert item into database</a></li>
+<li class="level2"><a href="#resetting-input">Resetting input</a></li>
+</ul>
+</div>
+<div class="sidebar-content" id="sidebar-content"></div></div>
+<h1 class="title">Insert Item</h1>
+<!-- $$$05-insert.html-description -->
+<div class="descr" id="details">
+<p>It is now possible to view the database items, and delete items. Inserting items is not implemented yet. For that we will add a floating button and the navigation to another page, write a layout for the page and implement inserting the item into the database.</p>
+<h2 id="add-floating-button-for-navigation">Add floating button for navigation</h2>
+<p>In Felgo there is the <code translate="no">FloatingActionButton</code> component, which will not require manual positioning but add the button to the bottom right corner by default. Add this button to <code translate="no">AppPage</code> in <code translate="no">Main.qml</code>.</p>
+<pre class="cpp" translate="no">FloatingActionButton {
+    iconType: IconType<span class="operator">.</span>plussquareo
+    onClicked: console<span class="operator">.</span>log(<span class="string">&quot;clicked&quot;</span>);
+    visible: <span class="keyword">true</span>
+}</pre>
+<p>The property <code translate="no">visible: true</code> is necessary, as it is not the default on all platforms.</p>
+<p class="centerAlign"><img src="images/insert_button.jpg" alt="{ Floating button in the bottom right corner }" /></p><h2 id="navigate-to-new-page">Navigate to new page</h2>
+<p>Add another <code translate="no">qml</code> file in the <code translate="no">qml</code> folder with the title <code translate="no">EditItemView</code>. This will be the view we will navigate to for editing an item; in this case editing a new item to insert.</p>
+<p>The base item should be an <code translate="no">AppPage</code>, and might have a title that would get shown in a toolbar. Put a text item (and imports for <code translate="no">QtQuick</code>, <code translate="no">QtQuick.Layouts</code> und <code translate="no">Felgo</code>) in it.</p>
+<pre class="cpp" translate="no">AppPage {
+    title: qsTr(<span class="string">&quot;Add New Item&quot;</span>)
+
+    AppText {
+        text: <span class="string">&quot;navigated to EditItemView&quot;</span>
+        anchors<span class="operator">.</span>centerIn: parent
+    }
+}</pre>
+<p>Navigating to the view could be done via the navigation stack, or for example by showing it inside a dialog, preferably a <a href="https://doc.qt.io/Qt-6/qml-qtquick-controls-dialog.html#modal-dialogs">modal dialog</a>, so a dialog that blocks the UI beneath it. In the Felgo SDK there is the <code translate="no">AppModal</code> type. It does not inherit from Dialog but Item, so dialog buttons are not part of its properties and will have to be added to the view.</p>
+<p>Add two <code translate="no">AppButton</code>s in a <code translate="no">Row</code>, with alignment to the right. Remove margins, and add a row spacing, so they will align well with other page content.</p>
+<pre class="cpp" translate="no">AppPage {
+    title: qsTr(<span class="string">&quot;Add New Item&quot;</span>)
+
+    <span class="operator">.</span><span class="operator">.</span><span class="operator">.</span>
+
+    Row {
+        spacing: <span class="number">10</span>
+        anchors<span class="operator">.</span>right: parent<span class="operator">.</span>right
+
+        AppButton {
+            text: qsTr(<span class="string">&quot;Cancel&quot;</span>)
+            horizontalMargin: <span class="number">0</span>
+            verticalMargin: <span class="number">0</span>
+            onClicked: {
+                modalAddItem<span class="operator">.</span>close()
+            }
+        }
+
+        AppButton {
+            text: qsTr(<span class="string">&quot;Add item&quot;</span>)
+            horizontalMargin: <span class="number">0</span>
+            verticalMargin: <span class="number">0</span>
+            onClicked: {
+                modalAddItem<span class="operator">.</span>close();
+                console<span class="operator">.</span>log(<span class="string">&quot;Add item&quot;</span>);
+            }
+        }
+    } <span class="comment">// Row</span>
+}</pre>
+<p>In <code translate="no">Main.qml</code>, add <code translate="no">AppModal</code> with id <code translate="no">modalAddItem</code> as child of <code translate="no">AppPage</code>:</p>
+<pre class="cpp" translate="no">AppModal {
+    id: modalAddItem
+    pushBackContent: root<span class="operator">.</span>navigationStack
+    fullscreen: <span class="keyword">false</span>
+    modalHeight: modalContent<span class="operator">.</span>contentHeight
+
+    EditItemView { id: modalContent }
+}</pre>
+<p>It will not cover the whole screen, so the height needs to be set. Add a property <code translate="no">contentHeight</code> to the view, and move the buttons and text (remove the anchor from text!) into a column, with spacing and margins of 10. <code translate="no">contentHeight</code> will then be set with the column height, plus some margin.</p>
+<pre class="cpp" translate="no">AppPage {
+    title: qsTr(<span class="string">&quot;Add New Item&quot;</span>)
+
+    property <span class="type">int</span> contentHeight: col<span class="operator">.</span>height
+                                <span class="operator">+</span> <span class="number">40</span> <span class="comment">// add bottom margin</span>
+
+    Column {
+        id: col
+        spacing: <span class="number">10</span>
+        width: parent<span class="operator">.</span>width
+        anchors<span class="operator">.</span>top: parent<span class="operator">.</span>top
+        anchors<span class="operator">.</span>left: parent<span class="operator">.</span>left
+        anchors<span class="operator">.</span>right: parent<span class="operator">.</span>right
+        anchors<span class="operator">.</span>margins: <span class="number">10</span>
+
+        AppText { <span class="operator">.</span><span class="operator">.</span><span class="operator">.</span> }
+
+        Row { AppButton { <span class="operator">.</span><span class="operator">.</span><span class="operator">.</span> } <span class="operator">.</span><span class="operator">.</span><span class="operator">.</span> }
+    }
+}</pre>
+<p>Separate the row of buttons and text visually with a <code translate="no">MenuSeparator</code>. We now also require the import for <code translate="no">QtQuick.Controls</code>. Remove the padding from the separator, too, so it aligns with the buttons.</p>
+<pre class="cpp" translate="no">AppText { <span class="operator">.</span><span class="operator">.</span><span class="operator">.</span> }
+
+MenuSeparator {
+    width: parent<span class="operator">.</span>width
+    padding: <span class="number">0</span>
+}
+
+Row { AppButton { <span class="operator">.</span><span class="operator">.</span><span class="operator">.</span> } <span class="operator">.</span><span class="operator">.</span><span class="operator">.</span> }</pre>
+<p>Then open the dialog when clicking the floating button:</p>
+<pre class="cpp" translate="no">FloatingActionButton {
+    <span class="operator">.</span><span class="operator">.</span><span class="operator">.</span>
+    onClicked: modalAddItem<span class="operator">.</span>open()
+    <span class="operator">.</span><span class="operator">.</span><span class="operator">.</span>
+}</pre>
+<p class="centerAlign"><img src="images/add_item_1.jpg" alt="{Intermediate dialog for adding an item}" /></p><h2 id="add-layout-for-new-page">Add layout for new page</h2>
+<p>The layout for the item input follows the structure of a list item.</p>
+<h3 id="get-tags-and-types-model-from-database">Get tags and types model from database</h3>
+<p>First, prepare a list of types and tags to choose from. This would be types and tags already set for another item in the database; though it will also be possible to add new values.</p>
+<p>Import the database javascript file for this qml component (<code translate="no">import &quot;data.js&quot; as Data</code>).</p>
+<p>Then add two methods to it, <code translate="no">getAllTags</code> and <code translate="no">getAllTypes</code>. They can then be used for the model properties with <code translate="no">model: Data.getAllTypes()</code> and <code translate="no">model: Data.getAllTags()</code>.</p>
+<p>The implementation will select the respective columns and add those values to an array, that are not in it yet. I used straight forward loops and an empty inital array, but there are probably better ways to write this.</p>
+<pre class="cpp" translate="no">function getAllTags()
+{
+    <span class="keyword">const</span> allTags <span class="operator">=</span> <span class="operator">[</span><span class="operator">]</span>;
+    var db <span class="operator">=</span> openDatabase();
+    db<span class="operator">.</span>transaction(function(tx) {
+        var res <span class="operator">=</span> tx<span class="operator">.</span>executeSql(<span class="char">'SELECT tags FROM Collection'</span>);
+        <span class="keyword">for</span> (var i <span class="operator">=</span> <span class="number">0</span>; i <span class="operator">&lt;</span> res<span class="operator">.</span>rows<span class="operator">.</span>length; i<span class="operator">+</span><span class="operator">+</span>) {
+            var itemTags <span class="operator">=</span> tagList(res<span class="operator">.</span>rows<span class="operator">.</span>item(i)<span class="operator">.</span>tags);
+            <span class="keyword">for</span> (var j <span class="operator">=</span> <span class="number">0</span>; j <span class="operator">&lt;</span> itemTags<span class="operator">.</span>length; j<span class="operator">+</span><span class="operator">+</span>) {
+                <span class="keyword">if</span> (<span class="operator">!</span>allTags<span class="operator">.</span>includes(itemTags<span class="operator">[</span>j<span class="operator">]</span>))
+                    allTags<span class="operator">.</span>push(itemTags<span class="operator">[</span>j<span class="operator">]</span>);
+            }
+        }
+    });
+    <span class="keyword">return</span> allTags;
+}
+
+function getAllTypes()
+{
+    <span class="keyword">const</span> allTypes <span class="operator">=</span> <span class="operator">[</span><span class="operator">]</span>;
+    var db <span class="operator">=</span> openDatabase();
+    db<span class="operator">.</span>transaction(function(tx) {
+        var res <span class="operator">=</span> tx<span class="operator">.</span>executeSql(<span class="char">'SELECT type FROM Collection'</span>);
+        <span class="keyword">for</span> (var i <span class="operator">=</span> <span class="number">0</span>; i <span class="operator">&lt;</span> res<span class="operator">.</span>rows<span class="operator">.</span>length; i<span class="operator">+</span><span class="operator">+</span>) {
+            var itemType <span class="operator">=</span> res<span class="operator">.</span>rows<span class="operator">.</span>item(i)<span class="operator">.</span>type;
+            <span class="keyword">if</span> (<span class="operator">!</span>allTypes<span class="operator">.</span>includes(itemType))
+                allTypes<span class="operator">.</span>push(itemType);
+        }
+    });
+    <span class="keyword">return</span> allTypes;
+}</pre>
+<h3 id="layout-title-and-origin-input">Layout title and origin input</h3>
+<p>As title and origin will be on the same line in a list item, we could put them on the same line here, too. This might give an impression for word length. We can use a <code translate="no">Row</code> for that, and center its items vertically, in case they have different heights. The input width should be the same for both, but not depend on each other, so we add a property <code translate="no">inputWidth</code> that computes it by parent width, color button width and the margin.<br />
+ The color button would be for setting a 'signature color' for origin. Both the origin text (and its placeholder) and the button should show the current color. The default color will be black. For <code translate="no">AppButton</code> the text margin can get removed by setting a low minimum width.</p>
+<p>All in all, for the first line of the column in the dialog, we add the following <code translate="no">Row</code>:</p>
+<pre class="cpp" translate="no">Row {
+    id: rowTitle
+    spacing: <span class="number">10</span>
+    width: parent<span class="operator">.</span>width
+    property string originColor: <span class="string">&quot;#000&quot;</span>
+
+    property <span class="type">int</span> inputWidth:
+        (parent<span class="operator">.</span>width <span class="operator">-</span> btnSetOriginColor<span class="operator">.</span>width <span class="operator">-</span> <span class="number">10</span>) <span class="operator">/</span> <span class="number">2</span>;
+
+    AppTextField {
+        placeholderText: qsTr(<span class="string">&quot;Item title&quot;</span>)
+        width: rowTitle<span class="operator">.</span>inputWidth
+        anchors<span class="operator">.</span>verticalCenter: parent<span class="operator">.</span>verticalCenter
+    }
+
+    AppTextField {
+        placeholderText: qsTr(<span class="string">&quot;Origin&quot;</span>)
+        color: rowTitle<span class="operator">.</span>originColor
+        placeholderColor: rowTitle<span class="operator">.</span>originColor
+        width: rowTitle<span class="operator">.</span>inputWidth
+        anchors<span class="operator">.</span>verticalCenter: parent<span class="operator">.</span>verticalCenter
+
+    }
+
+    AppButton {
+        id: btnSetOriginColor
+        text: <span class="string">&quot;Color&quot;</span>
+        backgroundColor: rowTitle<span class="operator">.</span>originColor
+        minimumWidth: <span class="number">10</span>
+        anchors<span class="operator">.</span>verticalCenter: parent<span class="operator">.</span>verticalCenter
+    }
+} <span class="comment">// rowTitle</span></pre>
+<h3 id="layout-type-selection">Layout type selection</h3>
+<p>Next in a list item comes the type. Add an editable <code translate="no">ComboBox</code> and use the javascript method for retrieving the types we wrote earlier.</p>
+<pre class="cpp" translate="no">ComboBox {
+    model: Data<span class="operator">.</span>getAllTypes()
+    editable: <span class="keyword">true</span>
+}</pre>
+<h3 id="layout-color-selection">Layout color selection</h3>
+<p>Now we add a row for setting the colors for a list item. There will be two colors, so add two buttons. Remove their margins, so they will align well with other UI elements. Add the colors as properties, so they can be changed and accessed later on, when writing the item to the database.</p>
+<pre class="cpp" translate="no">Row {
+    id: rowColors
+    spacing: <span class="number">10</span>
+
+    property string primaryColor: <span class="string">&quot;#000&quot;</span>
+    property string secondaryColor: <span class="string">&quot;#000&quot;</span>
+
+    AppButton {
+        text: <span class="string">&quot;Color 1&quot;</span>
+        backgroundColor: rowColors<span class="operator">.</span>primaryColor
+        horizontalMargin: <span class="number">0</span>
+        verticalMargin: <span class="number">0</span>
+    }
+
+    AppButton {
+        text: <span class="string">&quot;Color 2&quot;</span>
+        backgroundColor: rowColors<span class="operator">.</span>secondaryColor
+        horizontalMargin: <span class="number">0</span>
+        verticalMargin: <span class="number">0</span>
+    }
+} <span class="comment">// rowColors</span></pre>
+<h3 id="layout-cost-weight-and-age-input">Layout cost, weight and age input</h3>
+<p>The following three rows will set a number input, and a unit for it. The input width should be the same, so first add a property to the <code translate="no">Column</code>, after <code translate="no">rowColors</code>:</p>
+<pre class="cpp" translate="no">property <span class="type">int</span> numFieldWidth: <span class="number">100</span></pre>
+<p>Each of the inputs will be inside a <code translate="no">Row</code>, together with a <code translate="no">ComboBox</code> and maybe a label, with all elements centered vertically in the <code translate="no">Row</code>.</p>
+<pre class="cpp" translate="no">Row {
+    spacing: <span class="number">10</span>
+
+    AppTextField {
+        placeholderText: qsTr(<span class="string">&quot;Cost&quot;</span>)
+        inputMethodHints: <span class="type">Qt</span><span class="operator">.</span>ImhDigitsOnly
+        width: col<span class="operator">.</span>numFieldWidth
+        anchors<span class="operator">.</span>verticalCenter: parent<span class="operator">.</span>verticalCenter
+    }
+
+    AppText {
+        text: <span class="string">&quot;€ / &quot;</span>
+        anchors<span class="operator">.</span>verticalCenter: parent<span class="operator">.</span>verticalCenter
+    }
+
+    ComboBox {
+        model: <span class="operator">[</span><span class="string">&quot;10g&quot;</span><span class="operator">,</span> <span class="string">&quot;100g&quot;</span><span class="operator">,</span> <span class="string">&quot;1kg&quot;</span><span class="operator">,</span> <span class="string">&quot;10ml&quot;</span><span class="operator">,</span> <span class="string">&quot;100ml&quot;</span><span class="operator">,</span> <span class="string">&quot;1l&quot;</span><span class="operator">]</span>
+        anchors<span class="operator">.</span>verticalCenter: parent<span class="operator">.</span>verticalCenter
+    }
+} <span class="comment">// Row</span>
+
+Row {
+    spacing: <span class="number">10</span>
+
+    AppTextField {
+        placeholderText: qsTr(<span class="string">&quot;Weight&quot;</span>)
+        inputMethodHints: <span class="type">Qt</span><span class="operator">.</span>ImhDigitsOnly
+        width: col<span class="operator">.</span>numFieldWidth
+        anchors<span class="operator">.</span>verticalCenter: parent<span class="operator">.</span>verticalCenter
+    }
+
+    ComboBox {
+        id: comboWeightUnit
+        model: <span class="operator">[</span><span class="string">&quot;g&quot;</span><span class="operator">,</span> <span class="string">&quot;kg&quot;</span><span class="operator">,</span> <span class="string">&quot;l&quot;</span><span class="operator">,</span> <span class="string">&quot;ml&quot;</span><span class="operator">]</span>
+        anchors<span class="operator">.</span>verticalCenter: parent<span class="operator">.</span>verticalCenter
+    }
+} <span class="comment">// Row</span>
+
+Row {
+    spacing: <span class="number">10</span>
+
+    AppTextField {
+        placeholderText: qsTr(<span class="string">&quot;Age&quot;</span>)
+        inputMethodHints: <span class="type">Qt</span><span class="operator">.</span>ImhDigitsOnly
+        width: col<span class="operator">.</span>numFieldWidth
+        anchors<span class="operator">.</span>verticalCenter: parent<span class="operator">.</span>verticalCenter
+    }
+
+    ComboBox {
+        id: comboAgeUnit
+        model: <span class="operator">[</span><span class="string">&quot;months&quot;</span><span class="operator">,</span> <span class="string">&quot;years&quot;</span><span class="operator">]</span>
+        anchors<span class="operator">.</span>verticalCenter: parent<span class="operator">.</span>verticalCenter
+    }
+} <span class="comment">// Row</span></pre>
+<h3 id="layout-tags-selection">Layout tags selection</h3>
+<p>For the tags, we use a <code translate="no">Repeater</code> inside a <code translate="no">Flow</code> item, with a <code translate="no">checkable</code> <code translate="no">AppButton</code> as delegate. The <code translate="no">Flow</code> item will distribute the items over multiple lines as needed. For the model, we can now use the method for retrieving the types we wrote in a previous section.</p>
+<pre class="cpp" translate="no">Flow {
+    width: parent<span class="operator">.</span>width
+    spacing: <span class="number">5</span>
+
+    <span class="operator">.</span><span class="operator">.</span><span class="operator">.</span>
+
+    Repeater {
+        model: Data<span class="operator">.</span>getAllTags()
+        delegate: <span class="operator">.</span><span class="operator">.</span><span class="operator">.</span>
+    } <span class="comment">// Repeater</span>
+}</pre>
+<p>The <code translate="no">AppButton</code> is styled to look similar to the tags in a list item: the background color is a grey tone (darker, if a tag is selected), the shadow is removed, the corners are rounded, and the minimum width is set to a small value to match the width of its text.<br />
+ There will also be an icon to make it clearer that the tags (buttons) need to be clicked to select them.</p>
+<pre class="cpp" translate="no">component TagButton: AppButton {
+    iconRight: checked<span class="operator">?</span> IconType<span class="operator">.</span>checksquareo : IconType<span class="operator">.</span>squareo
+    checkable: <span class="keyword">true</span>
+    backgroundColor: checked<span class="operator">?</span> <span class="string">&quot;#737373&quot;</span> : <span class="string">&quot;#c3c3c3&quot;</span>
+    dropShadow: <span class="keyword">false</span>
+    radius: height<span class="operator">/</span><span class="number">2</span> <span class="operator">-</span> <span class="number">2</span>
+    minimumWidth: <span class="number">10</span>
+    horizontalMargin: <span class="number">0</span>
+    verticalMargin: <span class="number">0</span>
+}</pre>
+<p>The last item in the <code translate="no">Repeater</code> is a text field and button to add a new tag. For simplicity, the new tags are added to a second repeater with by default enabled tags (checked buttons) as delegate. This is also why we defined an inline component for the <code translate="no">AppButton</code>: to not have to rewrite the delegate for both repeaters.</p>
+<p>But, a tag should not be added if it is already in a model; either of the database tags or the new tags. Then the corresponding tag should be enabled. For that, define an inline component for the <code translate="no">Repeater</code>s, and write a method that looks for the tag in its model and enables the button (if it is not enabled yet).</p>
+<pre class="cpp" translate="no">component TagRepeater : Repeater {
+    id: tagRepeater
+    function enableMatchingTag(tag) {
+        <span class="comment">// Returns false if no matching tag is found.</span>
+        <span class="keyword">for</span> (var i <span class="operator">=</span> <span class="number">0</span>; i <span class="operator">&lt;</span> tagRepeater<span class="operator">.</span>model<span class="operator">.</span>length; i<span class="operator">+</span><span class="operator">+</span>)
+            <span class="keyword">if</span> (tagRepeater<span class="operator">.</span>model<span class="operator">[</span>i<span class="operator">]</span><span class="operator">.</span>toLowerCase()
+                <span class="operator">=</span><span class="operator">=</span><span class="operator">=</span> tag<span class="operator">.</span>toLowerCase()) {
+                <span class="comment">// Check if not checked yet.</span>
+                <span class="keyword">if</span> (tagRepeater<span class="operator">.</span>itemAt(i)<span class="operator">.</span>checked <span class="operator">!</span><span class="operator">=</span><span class="operator">=</span> <span class="keyword">true</span>)
+                    tagRepeater<span class="operator">.</span>itemAt(i)<span class="operator">.</span>checked <span class="operator">=</span> <span class="keyword">true</span>;
+                <span class="keyword">return</span> <span class="keyword">true</span>;
+            }
+        <span class="keyword">return</span> <span class="keyword">false</span>;
+    }
+}</pre>
+<p>The tag would not be added anywhere to the database yet. Only when the item is added to the database with the new tag enabled, it will be part of the tag list of the next item edit view; so when editing the next new item.</p>
+<pre class="cpp" translate="no">Flow {
+    width: parent<span class="operator">.</span>width
+    spacing: <span class="number">5</span>
+
+    component TagButton : AppButton { <span class="operator">.</span><span class="operator">.</span><span class="operator">.</span> }
+    component TagRepeater : Repeater { <span class="operator">.</span><span class="operator">.</span><span class="operator">.</span> }
+
+    TagRepeater {
+        id: repeaterTags
+        model: Data<span class="operator">.</span>getAllTags()
+        delegate: TagButton {
+            text: modelData
+        }
+    } <span class="comment">// Repeater</span>
+
+    TagRepeater {
+        id: repeaterNewTags
+
+        property list<span class="operator">&lt;</span>string<span class="operator">&gt;</span> newTags;
+
+        model: newTags
+        delegate: TagButton {
+            text: modelData
+            checked: <span class="keyword">true</span>
+        }
+    } <span class="comment">// Repeater</span>
+
+    AppTextField {
+        id: inputNewTag
+        placeholderText: qsTr(<span class="string">&quot;New tag&quot;</span>)
+    }
+
+    AppButton {
+        text: <span class="string">&quot;+&quot;</span>
+        onClicked: {
+            var newTag <span class="operator">=</span> inputNewTag<span class="operator">.</span>text;
+            <span class="keyword">if</span> (newTag <span class="operator">=</span><span class="operator">=</span><span class="operator">=</span> <span class="string">&quot;&quot;</span>)
+                <span class="keyword">return</span>;
+            <span class="keyword">if</span> (repeaterTags<span class="operator">.</span>enableMatchingTag(newTag)
+                <span class="operator">|</span><span class="operator">|</span> repeaterNewTags<span class="operator">.</span>enableMatchingTag(newTag)) {
+                inputNewTag<span class="operator">.</span>clear();
+                <span class="keyword">return</span>;
+            }
+            repeaterNewTags<span class="operator">.</span>newTags<span class="operator">.</span>push(newTag);
+            inputNewTag<span class="operator">.</span>clear();
+        }
+        radius: height <span class="operator">/</span> <span class="number">2</span>
+        minimumWidth: <span class="number">0</span>
+        horizontalMargin: <span class="number">0</span>
+        verticalMargin: <span class="number">0</span>
+    }
+} <span class="comment">// Flow</span></pre>
+<p>The next item in the column should be the separator we added in a previous section.</p>
+<p class="centerAlign"><img src="images/add_item_2.jpg" alt="{Layout for editing an item or adding a new item}" /></p><h3 id="add-color-dialogs">Add color dialogs</h3>
+<p>We still need to show e.g. a dialog when clicking the color buttons. There is the QML Type <code translate="no">ColorDialog</code> we can use. Add it to the bottom of the file, inside <code translate="no">AppPage</code>, after the <code translate="no">Column</code> and give it an id. The type requires the import for <code translate="no">QtQuick.Dialogs</code>.</p>
+<pre class="cpp" translate="no">ColorDialog {
+    id: dialogColor
+}</pre>
+<p>This dialog should be opened when one of the three buttons are clicked. It already has a full layout, including 'Cancel' and 'OK' buttons that close the dialog. We will have to set the initial color of the dialog depending on the clicked button, and get the selected color when the 'OK' button is clicked. But first, because it will be the same behavior for three buttons, just with different colors, we will add a component <code translate="no">ColorButton</code> to the bottom of the file, above <code translate="no">ColorDialog</code>.</p>
+<pre class="cpp" translate="no">component ColorButton : AppButton {
+    property string colorName
+    backgroundColor: colorName
+}</pre>
+<p>Replace the three buttons with this component, and set the color property instead of their background color.<br />
+ The color type of the dialog has the QML type <code translate="no">color</code>, but we will keep using <code translate="no">string</code> because this is the only type we will use it as for now, namely for setting color properties and saving it to the database.</p>
+<p>Now for opening the dialog and getting the result. Define a <code translate="no">Connection</code> for <code translate="no">onAccepted</code>, so we can set the <code translate="no">colorName</code> property.</p>
+<pre class="cpp" translate="no">Connections {
+    id: connectDialogColor
+    target: dialogColor
+    enabled: <span class="keyword">false</span>
+    function onAccepted() {
+        colorName <span class="operator">=</span> dialogColor<span class="operator">.</span>selectedColor;
+        connectDialogColor<span class="operator">.</span>enabled <span class="operator">=</span> <span class="keyword">false</span>;
+    }
+}</pre>
+<p>The connection also needs to be disabled again right away, so it does not get the signal when one of the other buttons is clicked, too.</p>
+<p>In the <code translate="no">onClicked</code> handler, set the color of the dialog, enable the connection and open the dialog:</p>
+<pre class="cpp" translate="no">onClicked: {
+    dialogColor<span class="operator">.</span>selectedColor <span class="operator">=</span> colorName;
+    connectDialogColor<span class="operator">.</span>enabled <span class="operator">=</span> <span class="keyword">true</span>;
+    dialogColor<span class="operator">.</span>open();
+}</pre>
+<p>The overall structure of the inline component should now be as follows:</p>
+<pre class="cpp" translate="no">component ColorButton : AppButton {
+    property string colorName
+    backgroundColor: colorName
+    onClicked: { <span class="operator">.</span><span class="operator">.</span><span class="operator">.</span> }
+
+    Connections { }
+}</pre>
+<p>The three buttons also need to handle the color name change, as the Property Bindings to it are one sided:</p>
+<pre class="cpp" translate="no">ColorButton {
+    <span class="operator">.</span><span class="operator">.</span><span class="operator">.</span>
+    colorName: rowTitle<span class="operator">.</span>originColor
+    onColorNameChanged: rowTitle<span class="operator">.</span>originColor <span class="operator">=</span> colorName
+    <span class="comment">// or rowColors.primaryColor or rowColors.secondaryColor</span>
+    <span class="operator">.</span><span class="operator">.</span><span class="operator">.</span>
+}</pre>
+<p>Now the colors can be changed through a color dialog.</p>
+<h2 id="add-item-to-database">Add item to database</h2>
+<p>The last step for this view is adding the item to the database on clicking the 'Add Item' button.</p>
+<p>This again requires a change in the UI components.</p>
+<h3 id="check-input-fields">Check input fields</h3>
+<p>If a field is empty, it should be highlighted until edited. An item with empty fields should not be created. For that, add another component <code translate="no">CheckedTextField</code> with a method to check and set a red color on the field. It will also have a connection that is enabled until the field is edited: it resets the highlight color to the previous color.<br />
+ If it is already enabled, just return false to avoid resetting properties, especially the cached color that would then be overriden with the highlight color.</p>
+<pre class="cpp" translate="no"> component CheckedTextField : AppTextField {
+    id: inputChecked
+    property color prevPlaceholderColor
+
+    function ok() {
+        <span class="keyword">if</span> (inputChecked<span class="operator">.</span>text <span class="operator">!</span><span class="operator">=</span><span class="operator">=</span> <span class="string">&quot;&quot;</span>)
+            <span class="keyword">return</span> <span class="keyword">true</span>;
+        <span class="keyword">if</span> (resetPlaceholderColor<span class="operator">.</span>enabled)
+            <span class="keyword">return</span> <span class="keyword">false</span>;
+        inputChecked<span class="operator">.</span>prevPlaceholderColor <span class="operator">=</span> inputChecked<span class="operator">.</span>placeholderColor;
+        inputChecked<span class="operator">.</span>placeholderColor <span class="operator">=</span> <span class="string">&quot;red&quot;</span>;
+        resetPlaceholderColor<span class="operator">.</span>enabled <span class="operator">=</span> <span class="keyword">true</span>;
+        <span class="keyword">return</span> <span class="keyword">false</span>;
+    }
+
+    Connections {
+        id: resetPlaceholderColor
+        target: inputChecked
+        enabled: <span class="keyword">false</span>
+        function onFocusChanged() {
+            inputChecked<span class="operator">.</span>placeholderColor <span class="operator">=</span> inputChecked<span class="operator">.</span>prevPlaceholderColor
+            resetPlaceholderColor<span class="operator">.</span>enabled <span class="operator">=</span> <span class="keyword">false</span>;
+        }
+    }
+}</pre>
+<p>Then replace the <code translate="no">AppTextField</code> for title, origin, cost, weight and age with <code translate="no">CheckedTextField</code> and add ids to the fields.</p>
+<p>With the ids, add and call a method <code translate="no">fieldsAreFilled</code> to the 'Add item' button.</p>
+<pre class="cpp" translate="no">function fieldsAreFilled() {
+    var titleOk <span class="operator">=</span> inputTitle<span class="operator">.</span>ok();
+    var originOk <span class="operator">=</span> inputOrigin<span class="operator">.</span>ok();
+    var costOk <span class="operator">=</span> inputCost<span class="operator">.</span>ok();
+    var weightOk <span class="operator">=</span> inputWeight<span class="operator">.</span>ok();
+    var ageOk <span class="operator">=</span> inputAge<span class="operator">.</span>ok();
+    <span class="keyword">return</span> titleOk <span class="operator">&amp;</span><span class="operator">&amp;</span> originOk <span class="operator">&amp;</span><span class="operator">&amp;</span> costOk <span class="operator">&amp;</span><span class="operator">&amp;</span> weightOk <span class="operator">&amp;</span><span class="operator">&amp;</span> ageOk;
+}</pre>
+<p>As the type selection is editable, it can also have an empty field that is not checked for yet. We do something similar as for the text edit fields, but as there is not a straight forward property to set for colors on the combo box, we just show an exclamation mark next to it. For that, move the <code translate="no">ComboBox</code> into a <code translate="no">Row</code>, add an <code translate="no">AppIcon</code> component and center it vertically in the row.</p>
+<pre class="cpp" translate="no">Row {
+    spacing: <span class="number">10</span>
+
+    ComboBox {
+        id: comboTypes
+        model: Data<span class="operator">.</span>getAllTypes();
+        editable: <span class="keyword">true</span>
+
+        function ok() {
+            <span class="keyword">if</span> (comboTypes<span class="operator">.</span>editText <span class="operator">!</span><span class="operator">=</span><span class="operator">=</span> <span class="string">&quot;&quot;</span>)
+                <span class="keyword">return</span> <span class="keyword">true</span>;
+            <span class="keyword">if</span> (txtComboHighlight<span class="operator">.</span>visible)
+                <span class="keyword">return</span> <span class="keyword">false</span>;
+            txtComboHighlight<span class="operator">.</span>visible <span class="operator">=</span> <span class="keyword">true</span>;
+            resetHighlight<span class="operator">.</span>enabled <span class="operator">=</span> <span class="keyword">true</span>;
+        }
+
+        Connections {
+            id: resetHighlight
+            target: comboTypes
+            enabled: <span class="keyword">false</span>
+            function onEditTextChanged() {
+                txtComboHighlight<span class="operator">.</span>visible <span class="operator">=</span> <span class="keyword">false</span>;
+                resetHighlight<span class="operator">.</span>enabled <span class="operator">=</span> <span class="keyword">false</span>;
+            }
+        }
+    }
+
+    AppIcon {
+        id: txtComboHighlight
+        iconType: IconType<span class="operator">.</span>exclamation
+        color: <span class="string">&quot;red&quot;</span>
+        visible: <span class="keyword">false</span>
+        anchors<span class="operator">.</span>verticalCenter: parent<span class="operator">.</span>verticalCenter
+    }
+}</pre>
+<p>With that check, the <code translate="no">fieldsAreFilled</code> method is complete: we would only save an item, if no fields are empty.</p>
+<h3 id="get-selected-tags">Get selected tags</h3>
+<p>While data from text inputs and combo boxes is straight forward to get, the tags will have to be extracted first from the <code translate="no">Repeater</code> for database tags and new tags. We could maintain lists of strings as properties of the repeaters, but that means duplicate data and more code, so more work for maintenance. For this app, no noticeable difference in performance is expected.</p>
+<p>Add a method <code translate="no">selectedTags</code> to <code translate="no">TagRepeater</code>, that iterates over the model indices, and collects tags for which the button is checked.</p>
+<pre class="cpp" translate="no">function selectedTags() {
+    <span class="keyword">const</span> tags <span class="operator">=</span> <span class="operator">[</span><span class="operator">]</span>;
+    <span class="keyword">for</span> (var i <span class="operator">=</span> <span class="number">0</span>; i <span class="operator">&lt;</span> tagRepeater<span class="operator">.</span>model<span class="operator">.</span>length; i<span class="operator">+</span><span class="operator">+</span>)
+        <span class="keyword">if</span> (tagRepeater<span class="operator">.</span>itemAt(i)<span class="operator">.</span>checked)
+            tags<span class="operator">.</span>push(tagRepeater<span class="operator">.</span>model<span class="operator">[</span>i<span class="operator">]</span>);
+    <span class="keyword">return</span> tags;
+}</pre>
+<p>Now we can get the tags using:</p>
+<pre class="cpp" translate="no">var tags <span class="operator">=</span> repeaterTags<span class="operator">.</span>selectedTags();
+tags <span class="operator">=</span> tags<span class="operator">.</span>concat(repeaterNewTags<span class="operator">.</span>selectedTags());</pre>
+<h3 id="insert-item-into-database">Insert item into database</h3>
+<p>The method <code translate="no">fillDatabase</code> already contains code for inserting an item, so move it into a method <code translate="no">insertItem</code> depending on <code translate="no">tx</code> and <code translate="no">item</code> and call it instead.</p>
+<pre class="cpp" translate="no">function insertItem(tx<span class="operator">,</span> item)
+{
+    tx<span class="operator">.</span>executeSql(
+        <span class="char">'INSERT INTO Collection VALUES(?,?,?,?,?,?,?,?,?,?,?,?,?,?)'</span><span class="operator">,</span>
+        <span class="operator">[</span>item<span class="operator">.</span>title<span class="operator">,</span>
+         item<span class="operator">.</span>origin<span class="operator">,</span> item<span class="operator">.</span>originColor<span class="operator">,</span>
+         item<span class="operator">.</span>type<span class="operator">,</span>
+         item<span class="operator">.</span>age<span class="operator">,</span> item<span class="operator">.</span>ageUnit<span class="operator">,</span>
+         item<span class="operator">.</span>weightTotal<span class="operator">,</span> item<span class="operator">.</span>weightLeft<span class="operator">,</span>
+         item<span class="operator">.</span>weightUnit<span class="operator">,</span>
+         item<span class="operator">.</span>cost<span class="operator">,</span> item<span class="operator">.</span>secondaryCost<span class="operator">,</span>
+         item<span class="operator">.</span>primaryColor<span class="operator">,</span> item<span class="operator">.</span>secondaryColor<span class="operator">,</span>
+         tagStr(item<span class="operator">.</span>tags)<span class="operator">]</span>
+    );
+}</pre>
+<p>Overload the method to also take only the one argument <code translate="no">item</code> using a switch statement. The implementation for one argument opens a database and calls a transaction with <code translate="no">insertItem(item, tx)</code>.</p>
+<pre class="cpp" translate="no">function insertItem(item<span class="operator">,</span> tx)
+{
+    <span class="keyword">switch</span> (arguments<span class="operator">.</span>length) {
+    <span class="keyword">case</span> <span class="number">1</span>: {
+        var db <span class="operator">=</span> openDatabase();
+        db<span class="operator">.</span>transaction(function(tx) {
+            insertItem(item<span class="operator">,</span> tx);
+        });
+        <span class="keyword">break</span>;
+    }
+    <span class="keyword">case</span> <span class="number">2</span>: {
+        tx<span class="operator">.</span>executeSql(
+            <span class="char">'INSERT INTO Collection VALUES(?,?,?,?,?,?,?,?,?,?,?,?,?,?)'</span><span class="operator">,</span>
+            <span class="operator">[</span>item<span class="operator">.</span>title<span class="operator">,</span>
+             item<span class="operator">.</span>origin<span class="operator">,</span> item<span class="operator">.</span>originColor<span class="operator">,</span>
+             item<span class="operator">.</span>type<span class="operator">,</span>
+             item<span class="operator">.</span>age<span class="operator">,</span> item<span class="operator">.</span>ageUnit<span class="operator">,</span>
+             item<span class="operator">.</span>weightTotal<span class="operator">,</span> item<span class="operator">.</span>weightLeft<span class="operator">,</span>
+             item<span class="operator">.</span>weightUnit<span class="operator">,</span>
+             item<span class="operator">.</span>cost<span class="operator">,</span> item<span class="operator">.</span>secondaryCost<span class="operator">,</span>
+             item<span class="operator">.</span>primaryColor<span class="operator">,</span> item<span class="operator">.</span>secondaryColor<span class="operator">,</span>
+             tagStr(item<span class="operator">.</span>tags)<span class="operator">]</span>
+        );
+        <span class="keyword">break</span>;
+    }
+    <span class="keyword">default</span>:
+        <span class="keyword">break</span>;
+}</pre>
+<p>Then call that method on clicking the 'Add item' button, if every field is filled:</p>
+<pre class="cpp" translate="no">onClicked: {
+    <span class="keyword">if</span> (fieldsAreFilled()) {
+        var tags <span class="operator">=</span> repeaterTags<span class="operator">.</span>selectedTags();
+        tags <span class="operator">=</span> tags<span class="operator">.</span>concat(repeaterNewTags<span class="operator">.</span>selectedTags());
+        var item <span class="operator">=</span> {
+            title: inputTitle<span class="operator">.</span>text<span class="operator">,</span>
+            origin: inputOrigin<span class="operator">.</span>text<span class="operator">,</span>
+            originColor: rowTitle<span class="operator">.</span>originColor<span class="operator">,</span>
+            type: comboTypes<span class="operator">.</span>editText<span class="operator">,</span>
+            primaryColor: rowColors<span class="operator">.</span>primaryColor<span class="operator">,</span>
+            secondaryColor: rowColors<span class="operator">.</span>secondaryColor<span class="operator">,</span>
+            cost: Number(inputCost<span class="operator">.</span>text)<span class="operator">,</span>
+            secondaryCost: Number(inputCost<span class="operator">.</span>text)<span class="operator">,</span>
+            weightTotal: Number(inputWeight<span class="operator">.</span>text)<span class="operator">,</span>
+            weightLeft: Number(inputWeight<span class="operator">.</span>text)<span class="operator">,</span>
+            weightUnit: comboWeightUnit<span class="operator">.</span>editText<span class="operator">,</span>
+            age: Number(inputAge<span class="operator">.</span>text)<span class="operator">,</span>
+            ageUnit: comboAgeUnit<span class="operator">.</span>editText<span class="operator">,</span>
+            tags: tags};
+
+        Data<span class="operator">.</span>insertItem(item);
+        <span class="comment">// The list view takes the stringified tags, not an</span>
+        <span class="comment">// array for now.</span>
+        item<span class="operator">.</span>tagStr <span class="operator">=</span> Data<span class="operator">.</span>tagStr(tags);
+        listModel<span class="operator">.</span>append(item);
+
+        modalAddItem<span class="operator">.</span>close();
+    }
+}</pre>
+<p>We also add the item to the list model. As the delegate for the list model takes a stringified tag list for now, we also add the field for it.</p>
+<p>This concludes the implementation of inserting an item.</p>
+<h3 id="resetting-input">Resetting input</h3>
+<p>There is one more UI related thing to do: after adding an item and closing the view, <code translate="no">AppModal</code> is not reset. Adding the next item would require emptying the fields first, which is not convenient. Add the handler for <code translate="no">onClosed</code> to <code translate="no">AppModal</code>, and call a reset method we will write next.</p>
+<pre class="cpp" translate="no">AppModal {
+    id: modalAddItem
+    <span class="operator">.</span><span class="operator">.</span><span class="operator">.</span>
+    onClosed: modalContent<span class="operator">.</span>reset();
+    <span class="operator">.</span><span class="operator">.</span><span class="operator">.</span>
+}</pre>
+<p>The reset method empties the input fields, sets combo boxes to index 0, unselects all tags and reloads types and tags from the database (which would then also load newly added types and tags).</p>
+<pre class="cpp" translate="no">AppPage {
+    title: qsTs(<span class="string">&quot;Add New Item&quot;</span>)
+    <span class="operator">.</span><span class="operator">.</span><span class="operator">.</span>
+    function reset() {
+        inputTitle<span class="operator">.</span>text <span class="operator">=</span> <span class="string">&quot;&quot;</span>;
+        inputOrigin<span class="operator">.</span>text <span class="operator">=</span> <span class="string">&quot;&quot;</span>;
+        rowTitle<span class="operator">.</span>originColor <span class="operator">=</span> <span class="string">&quot;#000&quot;</span>;
+        comboTypes<span class="operator">.</span>currentIndex <span class="operator">=</span> <span class="number">0</span>;
+        comboTypes<span class="operator">.</span>model <span class="operator">=</span> Data<span class="operator">.</span>getAllTypes();
+        rowColors<span class="operator">.</span>primaryColor <span class="operator">=</span> <span class="string">&quot;#000&quot;</span>;
+        rowColors<span class="operator">.</span>secondaryColor <span class="operator">=</span> <span class="string">&quot;#000&quot;</span>;
+        inputCost<span class="operator">.</span>text <span class="operator">=</span> <span class="string">&quot;&quot;</span>;
+        comboCostPerWeightUnit<span class="operator">.</span>currentIndex <span class="operator">=</span> <span class="number">0</span>;
+        inputWeight<span class="operator">.</span>text <span class="operator">=</span> <span class="string">&quot;&quot;</span>;
+        comboWeightUnit<span class="operator">.</span>currentIndex <span class="operator">=</span> <span class="number">0</span>;
+        inputAge<span class="operator">.</span>text <span class="operator">=</span> <span class="string">&quot;&quot;</span>;
+        comboAgeUnit<span class="operator">.</span>currentIndex <span class="operator">=</span> <span class="number">0</span>;
+        repeaterTags<span class="operator">.</span>reset();
+        repeaterTags<span class="operator">.</span>model <span class="operator">=</span> Data<span class="operator">.</span>getAllTags();
+        repeaterNewTags<span class="operator">.</span>reset();
+        repeaterNewTags<span class="operator">.</span>newTags <span class="operator">=</span> <span class="operator">[</span><span class="operator">]</span>;
+    }
+} <span class="comment">// AppPage</span></pre>
+<p>If the binding for the color names of the <code translate="no">ColorButton</code> does not work right away, so the button colors are not reset, redo it on changing the color properties:</p>
+<pre class="cpp" translate="no">Row {
+    id: rowTitle
+    <span class="operator">.</span><span class="operator">.</span><span class="operator">.</span>
+    onOriginColorChanged: btnSetOriginColor<span class="operator">.</span>colorName
+                          <span class="operator">=</span> <span class="type">Qt</span><span class="operator">.</span>binding(function () {<span class="keyword">return</span> originColor})
+    <span class="operator">.</span><span class="operator">.</span><span class="operator">.</span>
+}
+
+<span class="operator">.</span><span class="operator">.</span><span class="operator">.</span>
+
+Row {
+    id: rowColors
+    <span class="operator">.</span><span class="operator">.</span><span class="operator">.</span>
+    onPrimaryColorChanged: btnPrimaryColor<span class="operator">.</span>colorName
+        <span class="operator">=</span> <span class="type">Qt</span><span class="operator">.</span>binding(function () {<span class="keyword">return</span> primaryColor})
+    onSecondaryColorChanged: btnSecondaryColor<span class="operator">.</span>colorName
+        <span class="operator">=</span> <span class="type">Qt</span><span class="operator">.</span>binding(function () {<span class="keyword">return</span> secondaryColor})
+    <span class="operator">.</span><span class="operator">.</span><span class="operator">.</span>
+}</pre>
+<p>Now, when adding another item, the fields are all empty again.</p>
+</div>
+<!-- @@@05-insert.html -->
+<p class="naviNextPrevious footerNavi">
+<a class="prevPage" href="04-theme.html">Set Theme Colors</a>
+</p>
+</body>
+</html>

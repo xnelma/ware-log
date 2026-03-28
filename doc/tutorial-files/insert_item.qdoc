@@ -1,0 +1,942 @@
+/*!
+    \page 05-insert.html
+    \previouspage {Set Theme Colors}
+    \title Insert Item
+
+    \brief provides steps for inserting an item into the database
+
+    It is now possible to view the database items, and delete items.
+    Inserting items is not implemented yet.
+    For that we will add a floating button and the navigation to another page,
+    write a layout for the page and implement inserting the item into the
+    database.
+
+    \section1 Add floating button for navigation
+
+    In Felgo there is the \c{FloatingActionButton} component, which will
+    not require manual positioning but add the button to the bottom right
+    corner by default.
+    Add this button to \c{AppPage} in \c{Main.qml}.
+
+    \code
+    FloatingActionButton {
+        iconType: IconType.plussquareo
+        onClicked: console.log("clicked");
+        visible: true
+    }
+    \endcode
+
+    The property \c{visible: true} is necessary, as it is not the default on
+    all platforms.
+
+    \image {insert_button.jpg} { Floating button in the bottom right corner }
+
+    \section1 Navigate to new page
+
+    Add another \c{qml} file in the \c{qml} folder with the title
+    \c{EditItemView}. This will be the view we will navigate to for editing
+    an item; in this case editing a new item to insert.
+
+    The base item should be an \c{AppPage}, and might have a title that would
+    get shown in a toolbar.
+    Put a text item (and imports for \c{QtQuick},
+    \c{QtQuick.Layouts} und \c{Felgo}) in it.
+
+    \code
+    AppPage {
+        title: qsTr("Add New Item")
+
+        AppText {
+            text: "navigated to EditItemView"
+            anchors.centerIn: parent
+        }
+    }
+    \endcode
+
+    Navigating to the view could be done via the navigation stack, or for
+    example by showing it inside a dialog, preferably a
+    \l{https://doc.qt.io/Qt-6/qml-qtquick-controls-dialog.html#modal-dialogs}
+      {modal dialog}, so a dialog that blocks the UI beneath it.
+    In the Felgo SDK there is the \c{AppModal} type. It does not inherit from
+    Dialog but Item, so dialog buttons are not part of its properties
+    and will have to be added to the view.
+
+    Add two \c{AppButton}s in a \c{Row}, with alignment to the right.
+    Remove margins, and add a row spacing, so they will align well with other
+    page content.
+
+    \code
+    AppPage {
+        title: qsTr("Add New Item")
+
+        ...
+
+        Row {
+            spacing: 10
+            anchors.right: parent.right
+
+            AppButton {
+                text: qsTr("Cancel")
+                horizontalMargin: 0
+                verticalMargin: 0
+                onClicked: {
+                    modalAddItem.close()
+                }
+            }
+
+            AppButton {
+                text: qsTr("Add item")
+                horizontalMargin: 0
+                verticalMargin: 0
+                onClicked: {
+                    modalAddItem.close();
+                    console.log("Add item");
+                }
+            }
+        } // Row
+    }
+    \endcode
+
+    In \c{Main.qml}, add \c{AppModal} with id \c{modalAddItem} as child of
+    \c{AppPage}:
+
+    \code
+    AppModal {
+        id: modalAddItem
+        pushBackContent: root.navigationStack
+        fullscreen: false
+        modalHeight: modalContent.contentHeight
+
+        EditItemView { id: modalContent }
+    }
+    \endcode
+
+    It will not cover the whole screen, so the height needs to be set.
+    Add a property \c{contentHeight} to the view, and move the buttons
+    and text (remove the anchor from text!) into a column, with spacing and
+    margins of 10.
+    \c{contentHeight} will then be set with the column height, plus some margin.
+
+    \code
+    AppPage {
+        title: qsTr("Add New Item")
+
+        property int contentHeight: col.height
+                                    + 40 // add bottom margin
+
+        Column {
+            id: col
+            spacing: 10
+            width: parent.width
+            anchors.top: parent.top
+            anchors.left: parent.left
+            anchors.right: parent.right
+            anchors.margins: 10
+
+            AppText { ... }
+
+            Row { AppButton { ... } ... }
+        }
+    }
+    \endcode
+
+    Separate the row of buttons and text visually with a \c{MenuSeparator}.
+    We now also require the import for \c{QtQuick.Controls}.
+    Remove the padding from the separator, too, so it aligns with the buttons.
+
+    \code
+    AppText { ... }
+
+    MenuSeparator {
+        width: parent.width
+        padding: 0
+    }
+
+    Row { AppButton { ... } ... }
+    \endcode
+
+    Then open the dialog when clicking the floating button:
+
+    \code
+    FloatingActionButton {
+        ...
+        onClicked: modalAddItem.open()
+        ...
+    }
+    \endcode
+
+    \image {add_item_1.jpg} {Intermediate dialog for adding an item}
+
+    \section1 Add layout for new page
+
+    The layout for the item input follows the structure of a list item.
+
+    \section2 Get tags and types model from database
+
+    First, prepare a list of types and tags to choose from. This would be
+    types and tags already set for another item in the database; though it
+    will also be possible to add new values.
+
+    Import the database javascript file for this qml component
+    (\c{import "data.js" as Data}).
+
+    Then add two methods to it, \c{getAllTags} and \c{getAllTypes}. They
+    can then be used for the model properties with
+    \c{model: Data.getAllTypes()} and \c{model: Data.getAllTags()}.
+
+    The implementation will select the respective columns and add those values
+    to an array, that are not in it yet.
+    I used straight forward loops and an empty inital array, but there are
+    probably better ways to write this.
+
+    \code
+    function getAllTags()
+    {
+        const allTags = [];
+        var db = openDatabase();
+        db.transaction(function(tx) {
+            var res = tx.executeSql('SELECT tags FROM Collection');
+            for (var i = 0; i < res.rows.length; i++) {
+                var itemTags = tagList(res.rows.item(i).tags);
+                for (var j = 0; j < itemTags.length; j++) {
+                    if (!allTags.includes(itemTags[j]))
+                        allTags.push(itemTags[j]);
+                }
+            }
+        });
+        return allTags;
+    }
+
+    function getAllTypes()
+    {
+        const allTypes = [];
+        var db = openDatabase();
+        db.transaction(function(tx) {
+            var res = tx.executeSql('SELECT type FROM Collection');
+            for (var i = 0; i < res.rows.length; i++) {
+                var itemType = res.rows.item(i).type;
+                if (!allTypes.includes(itemType))
+                    allTypes.push(itemType);
+            }
+        });
+        return allTypes;
+    }
+    \endcode
+
+    \section2 Layout title and origin input
+
+    As title and origin will be on the same line in a list item, we could
+    put them on the same line here, too. This might give an impression
+    for word length. We can use a \c{Row} for that, and center its items
+    vertically, in case they have different heights.
+    The input width should be the same for both, but not depend on each other,
+    so we add a property \c{inputWidth} that computes it by parent width,
+    color button width and the margin.\br
+    The color button would be for setting a 'signature color' for origin.
+    Both the origin text (and its placeholder) and the button should show
+    the current color.
+    The default color will be black.
+    For \c{AppButton} the text margin can get removed by setting a low
+    minimum width.
+
+    All in all, for the first line of the column in the dialog, we add the
+    following \c{Row}:
+
+    \code
+    Row {
+        id: rowTitle
+        spacing: 10
+        width: parent.width
+        property string originColor: "#000"
+
+        property int inputWidth:
+            (parent.width - btnSetOriginColor.width - 10) / 2;
+
+        AppTextField {
+            placeholderText: qsTr("Item title")
+            width: rowTitle.inputWidth
+            anchors.verticalCenter: parent.verticalCenter
+        }
+
+        AppTextField {
+            placeholderText: qsTr("Origin")
+            color: rowTitle.originColor
+            placeholderColor: rowTitle.originColor
+            width: rowTitle.inputWidth
+            anchors.verticalCenter: parent.verticalCenter
+
+        }
+
+        AppButton {
+            id: btnSetOriginColor
+            text: "Color"
+            backgroundColor: rowTitle.originColor
+            minimumWidth: 10
+            anchors.verticalCenter: parent.verticalCenter
+        }
+    } // rowTitle
+    \endcode
+
+    \section2 Layout type selection
+
+    Next in a list item comes the type. Add an editable \c{ComboBox} and use
+    the javascript method for retrieving the types we wrote earlier.
+
+    \code
+    ComboBox {
+        model: Data.getAllTypes()
+        editable: true
+    }
+    \endcode
+
+    \section2 Layout color selection
+
+    Now we add a row for setting the colors for a list item.
+    There will be two colors, so add two buttons.
+    Remove their margins, so they will align well with other UI elements.
+    Add the colors as properties, so they can be changed and accessed later on,
+    when writing the item to the database.
+
+    \code
+    Row {
+        id: rowColors
+        spacing: 10
+
+        property string primaryColor: "#000"
+        property string secondaryColor: "#000"
+
+        AppButton {
+            text: "Color 1"
+            backgroundColor: rowColors.primaryColor
+            horizontalMargin: 0
+            verticalMargin: 0
+        }
+
+        AppButton {
+            text: "Color 2"
+            backgroundColor: rowColors.secondaryColor
+            horizontalMargin: 0
+            verticalMargin: 0
+        }
+    } // rowColors
+    \endcode
+
+    \section2 Layout cost, weight and age input
+
+    The following three rows will set a number input, and a unit for it.
+    The input width should be the same, so first add a property to the
+    \c{Column}, after \c{rowColors}:
+
+    \code
+    property int numFieldWidth: 100
+    \endcode
+
+    Each of the inputs will be inside a \c{Row}, together with a \c{ComboBox}
+    and maybe a label, with all elements centered vertically in the \c{Row}.
+
+    \code
+    Row {
+        spacing: 10
+
+        AppTextField {
+            placeholderText: qsTr("Cost")
+            inputMethodHints: Qt.ImhDigitsOnly
+            width: col.numFieldWidth
+            anchors.verticalCenter: parent.verticalCenter
+        }
+
+        AppText {
+            text: "€ / "
+            anchors.verticalCenter: parent.verticalCenter
+        }
+
+        ComboBox {
+            model: ["10g", "100g", "1kg", "10ml", "100ml", "1l"]
+            anchors.verticalCenter: parent.verticalCenter
+        }
+    } // Row
+
+    Row {
+        spacing: 10
+
+        AppTextField {
+            placeholderText: qsTr("Weight")
+            inputMethodHints: Qt.ImhDigitsOnly
+            width: col.numFieldWidth
+            anchors.verticalCenter: parent.verticalCenter
+        }
+
+        ComboBox {
+            id: comboWeightUnit
+            model: ["g", "kg", "l", "ml"]
+            anchors.verticalCenter: parent.verticalCenter
+        }
+    } // Row
+
+    Row {
+        spacing: 10
+
+        AppTextField {
+            placeholderText: qsTr("Age")
+            inputMethodHints: Qt.ImhDigitsOnly
+            width: col.numFieldWidth
+            anchors.verticalCenter: parent.verticalCenter
+        }
+
+        ComboBox {
+            id: comboAgeUnit
+            model: ["months", "years"]
+            anchors.verticalCenter: parent.verticalCenter
+        }
+    } // Row
+    \endcode
+
+    \section2 Layout tags selection
+
+    For the tags, we use a \c{Repeater} inside a \c{Flow} item, with a
+    \c{checkable} \c{AppButton} as delegate.
+    The \c{Flow} item will distribute the items over multiple lines as needed.
+    For the model, we can now use the method for retrieving the types we
+    wrote in a previous section.
+
+    \code
+    Flow {
+        width: parent.width
+        spacing: 5
+
+        ...
+
+        Repeater {
+            model: Data.getAllTags()
+            delegate: ...
+        } // Repeater
+    }
+    \endcode
+
+    The \c{AppButton} is styled to look similar to the tags in a list item:
+    the background color is a grey tone (darker, if a tag is selected),
+    the shadow is removed, the corners are rounded, and the minimum width
+    is set to a small value to match the width of its text.\br
+    There will also be an icon to make it clearer that the tags (buttons)
+    need to be clicked to select them.
+
+    \code
+    component TagButton: AppButton {
+        iconRight: checked? IconType.checksquareo : IconType.squareo
+        checkable: true
+        backgroundColor: checked? "#737373" : "#c3c3c3"
+        dropShadow: false
+        radius: height/2 - 2
+        minimumWidth: 10
+        horizontalMargin: 0
+        verticalMargin: 0
+    }
+    \endcode
+
+    The last item in the \c{Repeater} is a text field and button to add a new
+    tag.
+    For simplicity, the new tags are added to a second repeater with by default
+    enabled tags (checked buttons) as delegate.
+    This is also why we defined an inline component for the \c{AppButton}: to
+    not have to rewrite the delegate for both repeaters.
+
+    But, a tag should not be added if it is already in a model; either of the
+    database tags or the new tags.
+    Then the corresponding tag should be enabled.
+    For that, define an inline component for the \c{Repeater}s, and write
+    a method that looks for the tag in its model and enables the button
+    (if it is not enabled yet).
+
+    \code
+    component TagRepeater : Repeater {
+        id: tagRepeater
+        function enableMatchingTag(tag) {
+            // Returns false if no matching tag is found.
+            for (var i = 0; i < tagRepeater.model.length; i++)
+                if (tagRepeater.model[i].toLowerCase()
+                    === tag.toLowerCase()) {
+                    // Check if not checked yet.
+                    if (tagRepeater.itemAt(i).checked !== true)
+                        tagRepeater.itemAt(i).checked = true;
+                    return true;
+                }
+            return false;
+        }
+    }
+    \endcode
+
+    The tag would not be added anywhere to the database yet. Only when the
+    item is added to the database with the new tag enabled, it will be
+    part of the tag list of the next item edit view; so when
+    editing the next new item.
+
+    \code
+    Flow {
+        width: parent.width
+        spacing: 5
+
+        component TagButton : AppButton { ... }
+        component TagRepeater : Repeater { ... }
+
+        TagRepeater {
+            id: repeaterTags
+            model: Data.getAllTags()
+            delegate: TagButton {
+                text: modelData
+            }
+        } // Repeater
+
+        TagRepeater {
+            id: repeaterNewTags
+
+            property list<string> newTags;
+
+            model: newTags
+            delegate: TagButton {
+                text: modelData
+                checked: true
+            }
+        } // Repeater
+
+        AppTextField {
+            id: inputNewTag
+            placeholderText: qsTr("New tag")
+        }
+
+        AppButton {
+            text: "+"
+            onClicked: {
+                var newTag = inputNewTag.text;
+                if (newTag === "")
+                    return;
+                if (repeaterTags.enableMatchingTag(newTag)
+                    || repeaterNewTags.enableMatchingTag(newTag)) {
+                    inputNewTag.clear();
+                    return;
+                }
+                repeaterNewTags.newTags.push(newTag);
+                inputNewTag.clear();
+            }
+            radius: height / 2
+            minimumWidth: 0
+            horizontalMargin: 0
+            verticalMargin: 0
+        }
+    } // Flow
+    \endcode
+
+    The next item in the column should be the separator we added in a
+    previous section.
+
+    \image {add_item_2.jpg} {Layout for editing an item or adding a new item}
+
+    \section2 Add color dialogs
+
+    We still need to show e.g. a dialog when clicking the color buttons.
+    There is the QML Type \c{ColorDialog} we can use. Add it to the bottom
+    of the file, inside \c{AppPage}, after the \c{Column} and give it an id.
+    The type requires the import for \c{QtQuick.Dialogs}.
+
+    \code
+    ColorDialog {
+        id: dialogColor
+    }
+    \endcode
+
+    This dialog should be opened when one of the three buttons are clicked.
+    It already has a full layout, including 'Cancel' and 'OK' buttons that
+    close the dialog.
+    We will have to set the initial color of the dialog depending on the
+    clicked button, and get the selected color when the 'OK' button is clicked.
+    But first, because it will be the same behavior for three buttons, just
+    with different colors, we will add a component \c{ColorButton} to the
+    bottom of the file, above \c{ColorDialog}.
+
+    \code
+    component ColorButton : AppButton {
+        property string colorName
+        backgroundColor: colorName
+    }
+    \endcode
+
+    Replace the three buttons with this component, and set the color property
+    instead of their background color.\br
+    The color type of the dialog has the QML type \c{color}, but we will
+    keep using \c{string} because this is the only type we will use it as for
+    now, namely for setting color properties and saving it to the database.
+
+    Now for opening the dialog and getting the result.
+    Define a \c{Connection} for \c{onAccepted}, so we can set the
+    \c{colorName} property.
+
+    \code
+    Connections {
+        id: connectDialogColor
+        target: dialogColor
+        enabled: false
+        function onAccepted() {
+            colorName = dialogColor.selectedColor;
+            connectDialogColor.enabled = false;
+        }
+    }
+    \endcode
+
+    The connection also needs to be disabled again right away, so it does not
+    get the signal when one of the other buttons is clicked, too.
+
+    In the \c{onClicked} handler, set the color of the dialog, enable the
+    connection and open the dialog:
+
+    \code
+    onClicked: {
+        dialogColor.selectedColor = colorName;
+        connectDialogColor.enabled = true;
+        dialogColor.open();
+    }
+    \endcode
+
+    The overall structure of the inline component should now be as follows:
+
+    \code
+    component ColorButton : AppButton {
+        property string colorName
+        backgroundColor: colorName
+        onClicked: { ... }
+
+        Connections { }
+    }
+    \endcode
+
+    The three buttons also need to handle the color name change, as the
+    Property Bindings to it are one sided:
+
+    \code
+    ColorButton {
+        ...
+        colorName: rowTitle.originColor
+        onColorNameChanged: rowTitle.originColor = colorName
+        // or rowColors.primaryColor or rowColors.secondaryColor
+        ...
+    }
+    \endcode
+
+    Now the colors can be changed through a color dialog.
+
+    \section1 Add item to database
+
+    The last step for this view is adding the item to the database on clicking
+    the 'Add Item' button.
+
+    This again requires a change in the UI components.
+
+    \section2 Check input fields
+
+    If a field is empty, it should be highlighted until edited. An item with
+    empty fields should not be created.
+    For that, add another component \c{CheckedTextField} with a method
+    to check and set a red color on the field.
+    It will also have a connection that is enabled until the field is edited:
+    it resets the highlight color to the previous color.\br
+    If it is already enabled, just return false to avoid resetting properties,
+    especially the cached color that would then be overriden with the
+    highlight color.
+
+    \code
+     component CheckedTextField : AppTextField {
+        id: inputChecked
+        property color prevPlaceholderColor
+
+        function ok() {
+            if (inputChecked.text !== "")
+                return true;
+            if (resetPlaceholderColor.enabled)
+                return false;
+            inputChecked.prevPlaceholderColor = inputChecked.placeholderColor;
+            inputChecked.placeholderColor = "red";
+            resetPlaceholderColor.enabled = true;
+            return false;
+        }
+
+        Connections {
+            id: resetPlaceholderColor
+            target: inputChecked
+            enabled: false
+            function onFocusChanged() {
+                inputChecked.placeholderColor = inputChecked.prevPlaceholderColor
+                resetPlaceholderColor.enabled = false;
+            }
+        }
+    }
+    \endcode
+
+    Then replace the \c{AppTextField} for title, origin, cost, weight and age
+    with \c{CheckedTextField} and add ids to the fields.
+
+    With the ids, add and call a method \c{fieldsAreFilled} to the 'Add item'
+    button.
+
+    \code
+    function fieldsAreFilled() {
+        var titleOk = inputTitle.ok();
+        var originOk = inputOrigin.ok();
+        var costOk = inputCost.ok();
+        var weightOk = inputWeight.ok();
+        var ageOk = inputAge.ok();
+        return titleOk && originOk && costOk && weightOk && ageOk;
+    }
+    \endcode
+
+    As the type selection is editable, it can also have an empty field that
+    is not checked for yet.
+    We do something similar as for the text edit fields, but as there is not
+    a straight forward property to set for colors on the combo box,
+    we just show an exclamation mark next to it.
+    For that, move the \c{ComboBox} into a \c{Row}, add an \c{AppIcon}
+    component and center it vertically in the row.
+
+    \code
+    Row {
+        spacing: 10
+
+        ComboBox {
+            id: comboTypes
+            model: Data.getAllTypes();
+            editable: true
+
+            function ok() {
+                if (comboTypes.editText !== "")
+                    return true;
+                if (txtComboHighlight.visible)
+                    return false;
+                txtComboHighlight.visible = true;
+                resetHighlight.enabled = true;
+            }
+
+            Connections {
+                id: resetHighlight
+                target: comboTypes
+                enabled: false
+                function onEditTextChanged() {
+                    txtComboHighlight.visible = false;
+                    resetHighlight.enabled = false;
+                }
+            }
+        }
+
+        AppIcon {
+            id: txtComboHighlight
+            iconType: IconType.exclamation
+            color: "red"
+            visible: false
+            anchors.verticalCenter: parent.verticalCenter
+        }
+    }
+    \endcode
+
+    With that check, the \c{fieldsAreFilled} method is complete: we would
+    only save an item, if no fields are empty.
+
+    \section2 Get selected tags
+
+    While data from text inputs and combo boxes is straight forward to
+    get, the tags will have to be extracted first from the \c{Repeater} for
+    database tags and new tags.
+    We could maintain lists of strings as properties of the repeaters, but
+    that means duplicate data and more code, so more work for maintenance.
+    For this app, no noticeable difference in performance is expected.
+
+    Add a method \c{selectedTags} to \c{TagRepeater}, that iterates over the
+    model indices, and collects tags for which the button is checked.
+
+    \code
+    function selectedTags() {
+        const tags = [];
+        for (var i = 0; i < tagRepeater.model.length; i++)
+            if (tagRepeater.itemAt(i).checked)
+                tags.push(tagRepeater.model[i]);
+        return tags;
+    }
+    \endcode
+
+    Now we can get the tags using:
+
+    \code
+    var tags = repeaterTags.selectedTags();
+    tags = tags.concat(repeaterNewTags.selectedTags());
+    \endcode
+
+    \section2 Insert item into database
+
+    The method \c{fillDatabase} already contains code for inserting an item,
+    so move it into a method \c{insertItem} depending on \c{tx}
+    and \c{item} and call it instead.
+
+    \code
+    function insertItem(tx, item)
+    {
+        tx.executeSql(
+            'INSERT INTO Collection VALUES(?,?,?,?,?,?,?,?,?,?,?,?,?,?)',
+            [item.title,
+             item.origin, item.originColor,
+             item.type,
+             item.age, item.ageUnit,
+             item.weightTotal, item.weightLeft,
+             item.weightUnit,
+             item.cost, item.secondaryCost,
+             item.primaryColor, item.secondaryColor,
+             tagStr(item.tags)]
+        );
+    }
+    \endcode
+
+    Overload the method to also take only the one argument \c{item} using a
+    switch statement. The implementation for one argument opens
+    a database and calls a transaction with \c{insertItem(item, tx)}.
+
+    \code
+    function insertItem(item, tx)
+    {
+        switch (arguments.length) {
+        case 1: {
+            var db = openDatabase();
+            db.transaction(function(tx) {
+                insertItem(item, tx);
+            });
+            break;
+        }
+        case 2: {
+            tx.executeSql(
+                'INSERT INTO Collection VALUES(?,?,?,?,?,?,?,?,?,?,?,?,?,?)',
+                [item.title,
+                 item.origin, item.originColor,
+                 item.type,
+                 item.age, item.ageUnit,
+                 item.weightTotal, item.weightLeft,
+                 item.weightUnit,
+                 item.cost, item.secondaryCost,
+                 item.primaryColor, item.secondaryColor,
+                 tagStr(item.tags)]
+            );
+            break;
+        }
+        default:
+            break;
+    }
+    \endcode
+
+    Then call that method on clicking the 'Add item' button, if every field
+    is filled:
+
+    \code
+    onClicked: {
+        if (fieldsAreFilled()) {
+            var tags = repeaterTags.selectedTags();
+            tags = tags.concat(repeaterNewTags.selectedTags());
+            var item = {
+                title: inputTitle.text,
+                origin: inputOrigin.text,
+                originColor: rowTitle.originColor,
+                type: comboTypes.editText,
+                primaryColor: rowColors.primaryColor,
+                secondaryColor: rowColors.secondaryColor,
+                cost: Number(inputCost.text),
+                secondaryCost: Number(inputCost.text),
+                weightTotal: Number(inputWeight.text),
+                weightLeft: Number(inputWeight.text),
+                weightUnit: comboWeightUnit.editText,
+                age: Number(inputAge.text),
+                ageUnit: comboAgeUnit.editText,
+                tags: tags};
+
+            Data.insertItem(item);
+            // The list view takes the stringified tags, not an
+            // array for now.
+            item.tagStr = Data.tagStr(tags);
+            listModel.append(item);
+
+            modalAddItem.close();
+        }
+    }
+    \endcode
+
+    We also add the item to the list model. As the delegate for the list
+    model takes a stringified tag list for now, we also add the field for it.
+
+    This concludes the implementation of inserting an item.
+
+    \section2 Resetting input
+
+    There is one more UI related thing to do:
+    after adding an item and closing the view, \c{AppModal} is not reset.
+    Adding the next item would require emptying the fields first, which is
+    not convenient.
+    Add the handler for \c{onClosed} to \c{AppModal}, and call a reset method
+    we will write next.
+
+    \code
+    AppModal {
+        id: modalAddItem
+        ...
+        onClosed: modalContent.reset();
+        ...
+    }
+    \endcode
+
+    The reset method empties the input fields, sets combo boxes to index 0,
+    unselects all tags and reloads types and tags from the database
+    (which would then also load newly added types and tags).
+
+    \code
+    AppPage {
+        title: qsTs("Add New Item")
+        ...
+        function reset() {
+            inputTitle.text = "";
+            inputOrigin.text = "";
+            rowTitle.originColor = "#000";
+            comboTypes.currentIndex = 0;
+            comboTypes.model = Data.getAllTypes();
+            rowColors.primaryColor = "#000";
+            rowColors.secondaryColor = "#000";
+            inputCost.text = "";
+            comboCostPerWeightUnit.currentIndex = 0;
+            inputWeight.text = "";
+            comboWeightUnit.currentIndex = 0;
+            inputAge.text = "";
+            comboAgeUnit.currentIndex = 0;
+            repeaterTags.reset();
+            repeaterTags.model = Data.getAllTags();
+            repeaterNewTags.reset();
+            repeaterNewTags.newTags = [];
+        }
+    } // AppPage
+    \endcode
+
+    If the binding for the color names of the \c{ColorButton} does not work
+    right away, so the button colors are not reset, redo it on changing the
+    color properties:
+
+    \code
+    Row {
+        id: rowTitle
+        ...
+        onOriginColorChanged: btnSetOriginColor.colorName
+                              = Qt.binding(function () {return originColor})
+        ...
+    }
+
+    ...
+
+    Row {
+        id: rowColors
+        ...
+        onPrimaryColorChanged: btnPrimaryColor.colorName
+            = Qt.binding(function () {return primaryColor})
+        onSecondaryColorChanged: btnSecondaryColor.colorName
+            = Qt.binding(function () {return secondaryColor})
+        ...
+    }
+    \endcode
+
+    Now, when adding another item, the fields are all empty again.
+*/

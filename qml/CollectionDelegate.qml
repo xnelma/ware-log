@@ -147,12 +147,12 @@ SwipeOptionsContainer {
                         Rectangle {
                             id: rectPropBg
 
-                        color: txtProp.color
-                        opacity: 0.1
-                        radius: height / 2 - 2
+                            color: txtProp.color
+                            opacity: 0.1
+                            radius: height / 2 - 2
 
-                        height: txtProp.height + 4
-                        width: txtProp.width + 10
+                            height: txtProp.height + 4
+                            width: txtProp.width + 10
                         }
 
                     }
