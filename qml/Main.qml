@@ -16,6 +16,10 @@ App {
             id: root
             title: qsTr("Ware Log")
 
+            rightBarItem: IconButtonBarItem {
+                iconType: IconType.bars
+            }
+
             AppListView {
                 spacing: 10
                 anchors.top: parent.top

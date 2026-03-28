@@ -1,0 +1,23 @@
+/*!
+    \page 06-darkmode.html
+    \previouspage {Insert Item}
+    \title Add Dark Mode
+
+    \brief provides steps for adding and switching to a dark theme
+
+    First, add a menu icon to the app bar.
+    \c{AppPage} by Felgo has the property \c{rightBarIcon} and can be used
+    with an \c{IconButtonBarItem}, so let's add that.
+
+    \code
+    AppPage {
+        ...
+        title: qsTr("Ware Log")
+
+        rightBarItem: IconButtonBarItem {
+            iconType: IconType.bars
+        }
+        ...
+    }
+    \endcode
+*/

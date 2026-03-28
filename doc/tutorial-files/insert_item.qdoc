@@ -2,6 +2,7 @@
     \page 05-insert.html
     \previouspage {Set Theme Colors}
     \title Insert Item
+    \nextpage{Add Dark Mode}
 
     \brief provides steps for inserting an item into the database
 

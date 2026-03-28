@@ -1,0 +1,35 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+<!-- darkmode.qdoc -->
+  <meta name="description" content="provides steps for adding and switching to a dark theme">
+  <title>Add Dark Mode | WareLog</title>
+<link rel="stylesheet" type="text/css" href="style/style.css"/>
+</head>
+<body>
+  <link rel="prev" href="05-insert.html" />
+<p class="naviNextPrevious headerNavi">
+<a class="prevPage" href="05-insert.html">Insert Item</a>
+</p>
+<div class="sidebar"><div class="sidebar-content" id="sidebar-content"></div></div>
+<h1 class="title">Add Dark Mode</h1>
+<!-- $$$06-darkmode.html-description -->
+<div class="descr" id="details">
+<p>First, add a menu icon to the app bar. <code translate="no">AppPage</code> by Felgo has the property <code translate="no">rightBarIcon</code> and can be used with an <code translate="no">IconButtonBarItem</code>, so let's add that.</p>
+<pre class="cpp" translate="no">AppPage {
+    <span class="operator">.</span><span class="operator">.</span><span class="operator">.</span>
+    title: qsTr(<span class="string">&quot;Ware Log&quot;</span>)
+
+    rightBarItem: IconButtonBarItem {
+        iconType: IconType<span class="operator">.</span>bars
+    }
+    <span class="operator">.</span><span class="operator">.</span><span class="operator">.</span>
+}</pre>
+</div>
+<!-- @@@06-darkmode.html -->
+<p class="naviNextPrevious footerNavi">
+<a class="prevPage" href="05-insert.html">Insert Item</a>
+</p>
+</body>
+</html>
