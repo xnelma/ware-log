@@ -12,6 +12,8 @@ App {
     property string buttonColor: darkModeEnabled? "#373737" : "#a3a3a3"
     property string backgroundColor: darkModeEnabled? "black" : "white"
     property string textColor: darkModeEnabled? "white" : "black"
+    property string tagButtonColor: darkModeEnabled? "#303030" : "#c3c3c3"
+    property string tagButtonCheckedColor: darkModeEnabled? "#505050" : "#737373"
 
     onInitTheme: {
         Theme.colors.tintColor

@@ -201,7 +201,7 @@ AppPage {
                 // Only when setting it on the theme.
                 iconRight: checked? IconType.checksquareo : IconType.squareo
                 checkable: true
-                backgroundColor: checked? "#737373" : "#c3c3c3"
+                backgroundColor: checked? tagButtonCheckedColor : tagButtonColor
                 dropShadow: false
                 radius: height/2 - 2
                 minimumWidth: 10
