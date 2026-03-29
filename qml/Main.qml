@@ -17,6 +17,10 @@ App {
     property string colorButtonTextColor: darkModeEnabled? "black" : "white"
     property string defaultColor: darkModeEnabled? "white" : "black"
 
+    property string lightColor: darkModeEnabled? "#222222" : "#dddddd"
+    property string lighterColor: darkModeEnabled? "#191919" : "#f6f6f6"
+    property string mediumColor: darkModeEnabled? "#444444" : "#bdbdbd"
+
     onInitTheme: {
         Theme.colors.tintColor
             = Qt.binding(function() { return tintColor; });

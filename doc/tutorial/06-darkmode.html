@@ -18,6 +18,7 @@
 <ul>
 <li class="level1"><a href="#add-menu-button-for-dark-mode">Add menu button for dark mode</a></li>
 <li class="level1"><a href="#set-basic-dark-mode-colors">Set basic dark mode colors</a></li>
+<li class="level1"><a href="#set-combobox-dark-mode-colors">Set combobox dark mode colors</a></li>
 </ul>
 </div>
 <div class="sidebar-content" id="sidebar-content"></div></div>
@@ -144,7 +145,32 @@ component ColorButton : AppButton {
     rowColors<span class="operator">.</span>secondaryColor <span class="operator">=</span> <span class="type">Qt</span><span class="operator">.</span>binding(function() { <span class="keyword">return</span> defaultColor });
     <span class="operator">.</span><span class="operator">.</span><span class="operator">.</span>
 }</pre>
-</div>
+<h2 id="set-combobox-dark-mode-colors">Set combobox dark mode colors</h2>
+<p>The <code translate="no">ComboBox</code> components have no direct color properties, but can be changed via their <a href="https://doc.qt.io/qt-6/qml-qtquick-palette.html">palette</a>.</p>
+<p>Add a component <code translate="no">LightDarkComboBox</code> with <code translate="no">ComboBox</code> as base type and set the colors with bindings to color properties. This is trial and error and results in following properties:</p>
+<pre class="cpp" translate="no">component LightDarkComboBox : ComboBox {
+    palette {
+        text: textColor
+        base: editable<span class="operator">?</span> backgroundColor: lightColor
+        highlight: lightColor
+        button: lightColor
+        mid: mediumColor
+        dark: textColor
+        buttonText: textColor
+        highlightedText: textColor
+        window: backgroundColor
+        midlight: lightColor
+        light: lighterColor
+    }
+}</pre>
+<p>This requires three more colors, <code translate="no">lightColor, lighterColor, mediumColor</code>, which would match the default combobox colors for light mode, and are set to corresponding dark colors for dark mode. While it would be convenient to use argb colors, with opacity values derived from light mode and then also used for dark mode, it does not work for <code translate="no">ComboBox</code>: parts of it would overlap and the borders would not look as clean:</p>
+<p class="centerAlign"><img src="images/dark_mode_combobox_rgba.jpg" alt="{Issue with argb hex codes for palette}" /></p><p>In comparison without alpha channel:</p>
+<p class="centerAlign"><img src="images/dark_mode_combobox_rgb.jpg" alt="{Comparison with rgb hex codes}" /></p><p>I picked following colors:</p>
+<pre class="cpp" translate="no">property string lightColor: darkModeEnabled<span class="operator">?</span> <span class="string">&quot;#222222&quot;</span> : <span class="string">&quot;#dddddd&quot;</span>
+property string lighterColor: darkModeEnabled<span class="operator">?</span> <span class="string">&quot;#191919&quot;</span> : <span class="string">&quot;#f6f6f6&quot;</span>
+property string mediumColor: darkModeEnabled<span class="operator">?</span> <span class="string">&quot;#444444&quot;</span> : <span class="string">&quot;#bdbdbd&quot;</span></pre>
+<p>Now the item edit view is also shown correctly in dark mode.</p>
+<p class="centerAlign"><img src="images/dark_mode_3.jpg" alt="{Dark mode for item edit view}" /></p></div>
 <!-- @@@06-darkmode.html -->
 <p class="naviNextPrevious footerNavi">
 <a class="prevPage" href="05-insert.html">Insert Item</a>

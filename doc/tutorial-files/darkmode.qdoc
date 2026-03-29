@@ -192,4 +192,59 @@
         ...
     }
     \endcode
+
+    \section1 Set combobox dark mode colors
+
+    The \c{ComboBox} components have no direct color properties, but can be
+    changed via their
+    \l {https://doc.qt.io/qt-6/qml-qtquick-palette.html} {palette}.
+
+    Add a component \c{LightDarkComboBox} with \c{ComboBox} as base type
+    and set the colors with bindings to color properties.
+    This is trial and error and results in following properties:
+
+    \code
+    component LightDarkComboBox : ComboBox {
+        palette {
+            text: textColor
+            base: editable? backgroundColor: lightColor
+            highlight: lightColor
+            button: lightColor
+            mid: mediumColor
+            dark: textColor
+            buttonText: textColor
+            highlightedText: textColor
+            window: backgroundColor
+            midlight: lightColor
+            light: lighterColor
+        }
+    }
+    \endcode
+
+    This requires three more colors, \c{lightColor, lighterColor, mediumColor},
+    which would match the default combobox colors
+    for light mode, and are set to corresponding dark colors for dark mode.
+    While it would be convenient to use argb colors, with opacity values
+    derived from light mode and then also used for dark mode, it does not
+    work for \c{ComboBox}:
+    parts of it would overlap
+    and the borders would not look as clean:
+
+    \image {dark_mode_combobox_rgba.jpg} {Issue with argb hex codes for palette}
+
+    In comparison without alpha channel:
+
+    \image {dark_mode_combobox_rgb.jpg} {Comparison with rgb hex codes}
+
+    I picked following colors:
+
+    \code
+    property string lightColor: darkModeEnabled? "#222222" : "#dddddd"
+    property string lighterColor: darkModeEnabled? "#191919" : "#f6f6f6"
+    property string mediumColor: darkModeEnabled? "#444444" : "#bdbdbd"
+    \endcode
+
+    Now the item edit view is also shown correctly in dark mode.
+
+    \image {dark_mode_3.jpg} {Dark mode for item edit view}
 */

@@ -73,7 +73,7 @@ AppPage {
         Row {
             spacing: 10
 
-            ComboBox {
+            LightDarkComboBox {
                 id: comboTypes
                 model: Data.getAllTypes();
                 editable: true
@@ -160,7 +160,7 @@ AppPage {
                 anchors.verticalCenter: parent.verticalCenter
             }
 
-            ComboBox {
+            LightDarkComboBox {
                 id: comboCostPerWeightUnit
                 model: ["10g", "100g", "1kg", "10ml", "100ml", "1l"]
                 anchors.verticalCenter: parent.verticalCenter
@@ -178,7 +178,7 @@ AppPage {
                 anchors.verticalCenter: parent.verticalCenter
             }
 
-            ComboBox {
+            LightDarkComboBox {
                 id: comboWeightUnit
                 model: ["g", "kg", "l", "ml"]
                 anchors.verticalCenter: parent.verticalCenter
@@ -196,7 +196,7 @@ AppPage {
                 anchors.verticalCenter: parent.verticalCenter
             }
 
-            ComboBox {
+            LightDarkComboBox {
                 id: comboAgeUnit
                 model: ["months", "years"]
                 anchors.verticalCenter: parent.verticalCenter
@@ -422,6 +422,22 @@ AppPage {
                 colorName = dialogColor.selectedColor;
                 connectDialogColor.enabled = false;
             }
+        }
+    }
+
+    component LightDarkComboBox : ComboBox {
+        palette {
+            text: textColor
+            base: editable ? backgroundColor : lightColor
+            highlight: lightColor
+            button: lightColor
+            mid: mediumColor
+            dark: textColor
+            buttonText: textColor
+            highlightedText: textColor
+            window: backgroundColor
+            midlight: lightColor
+            light: lighterColor
         }
     }
 
