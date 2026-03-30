@@ -112,16 +112,7 @@ onInitTheme: {
     Theme<span class="operator">.</span>navigationBar<span class="operator">.</span>shadowHeight <span class="operator">=</span> <span class="number">0</span>
 }</pre>
 <p>Toggling light and dark mode should now change colors to dark or light respectively.</p>
-<p class="centerAlign"><img src="images/dark_mode_2.jpg" alt="{Dark mode for list view}" /></p><p>For the item edit view, the tag button colors and default color properties are hardcoded. Create properties for them in <code translate="no">Main.qml</code>, again depending on <code translate="no">darkModeEnabled</code>.</p>
-<pre class="cpp" translate="no">property string tagButtonColor: darkModeEnabled<span class="operator">?</span> <span class="string">&quot;#303030&quot;</span> : <span class="string">&quot;#c3c3c3&quot;</span>
-property string tagButtonCheckedColor: darkModeEnabled<span class="operator">?</span> <span class="string">&quot;#505050&quot;</span> : <span class="string">&quot;#737373&quot;</span></pre>
-<p>and use them in <code translate="no">EditItemView.qml</code>:</p>
-<pre class="cpp" translate="no">component TagButton : AppButton {
-    <span class="operator">.</span><span class="operator">.</span><span class="operator">.</span>
-    backgroundColor: checked<span class="operator">?</span> tagButtonCheckedColor : tagButtonColor
-    <span class="operator">.</span><span class="operator">.</span><span class="operator">.</span>
-}</pre>
-<p>Similarly for the default color: create properties for the default color and the button text color, and use them instead of the hardcoded values.</p>
+<p class="centerAlign"><img src="images/dark_mode_2.jpg" alt="{Dark mode for list view}" /></p><p>For the item edit view, the default color properties are hardcoded. Create properties for the default color and the button text color, and use them instead of the hardcoded values.</p>
 <pre class="cpp" translate="no">property string colorButtonTextColor: darkModeEnabled<span class="operator">?</span> <span class="string">&quot;black&quot;</span> : <span class="string">&quot;white&quot;</span>
 property string defaultColor: darkModeEnabled<span class="operator">?</span> <span class="string">&quot;white&quot;</span> : <span class="string">&quot;black&quot;</span></pre>
 <p>and in <code translate="no">EditItemView.qml</code>:</p>
