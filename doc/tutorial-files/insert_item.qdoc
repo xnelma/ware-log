@@ -104,7 +104,7 @@
     \code
     AppModal {
         id: modalAddItem
-        pushBackContent: root.navigationStack
+        pushBackContent: pageMain.navigationStack
         fullscreen: false
         modalHeight: modalContent.contentHeight
 

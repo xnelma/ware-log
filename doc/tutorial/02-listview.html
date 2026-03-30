@@ -54,12 +54,12 @@
 }</pre>
 <p>&quot;<code translate="no">Data</code>&quot; comes from the import of the javascript file:</p>
 <pre class="cpp" translate="no">import <span class="string">&quot;data.js&quot;</span> as Data</pre>
-<p>For a basic delegate, add an <code translate="no">Item</code> with the parents width (I defined <code translate="no">root</code> as id of <code translate="no">AppPage</code>) and a text components height plus some margin. As text component, use the Felgo component <code translate="no">AppText</code>, aligned to the left with a margin of 10, and centered vertically.</p>
+<p>For a basic delegate, add an <code translate="no">Item</code> with the parents width (I defined <code translate="no">pageMain</code> as id of <code translate="no">AppPage</code>) and a text components height plus some margin. As text component, use the Felgo component <code translate="no">AppText</code>, aligned to the left with a margin of 10, and centered vertically.</p>
 <p>The model data is specified as required property for <code translate="no">Item</code>, and then assigned to the text property of the <code translate="no">AppText</code> component:</p>
 <pre class="cpp" translate="no">delegate: Item {
     required property string title
 
-    width: root<span class="operator">.</span>width;
+    width: pageMain<span class="operator">.</span>width;
     height: txtTitle<span class="operator">.</span>height <span class="operator">+</span> <span class="number">10</span>
 
     AppText {
@@ -228,7 +228,7 @@ Column {
 <h2 id="use-delegate-component">Use delegate component</h2>
 <p>Assign the delegate component to the delegate property:</p>
 <pre class="cpp" translate="no">delegate: CollectionDelegate {
-    width: root<span class="operator">.</span>width
+    width: pageMain<span class="operator">.</span>width
 }</pre>
 <p>Here we will also set its width.</p>
 <p>Now if you build and deploy the app, you should see a detailed list view with the sample data added in the first chapter.</p>

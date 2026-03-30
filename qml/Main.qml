@@ -6,7 +6,7 @@ import QtCore
 import "data.js" as Data
 
 App {
-    id: aRoot
+    id: root
 
     property bool darkModeEnabled: settings.darkModeEnabled
 
@@ -40,7 +40,7 @@ App {
 
     NavigationStack {
         AppPage {
-            id: root
+            id: pageMain
             title: qsTr("Ware Log")
 
             rightBarItem: IconButtonBarItem {
@@ -78,7 +78,7 @@ App {
                 }
 
                 delegate: CollectionDelegate {
-                    width: root.width
+                    width: pageMain.width
                 }
             }
 
@@ -90,13 +90,13 @@ App {
 
             AppModal {
                 id: modalAddItem
-                pushBackContent: root.navigationStack
+                pushBackContent: pageMain.navigationStack
                 fullscreen: false
                 modalHeight: modalContent.contentHeight
                 onClosed: modalContent.reset();
 
                 EditItemView { id: modalContent }
             }
-        } // root
+        } // pageMain
     } // NavigationStack
 }

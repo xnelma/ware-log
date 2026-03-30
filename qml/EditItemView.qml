@@ -213,7 +213,7 @@ AppPage {
                 iconRight: checked? IconType.checksquareo : IconType.squareo
                 checkable: true
                 opacity: 0.8
-                textColor: aRoot.textColor
+                textColor: root.textColor
                 backgroundColor: Qt.rgba(textColor.r, textColor.g, textColor.b,
                                          checked? 0.3 : 0.1);
                 dropShadow: false
