@@ -47,7 +47,7 @@
     \endcode
 
     For a basic delegate, add an \c{Item} with the parents width (I defined
-    \c{root} as id of \c{AppPage}) and a text components
+    \c{pageMain} as id of \c{AppPage}) and a text components
     height plus some margin.
     As text component, use the Felgo component \c{AppText}, aligned to the
     left with a margin of 10, and centered vertically.
@@ -59,7 +59,7 @@
     delegate: Item {
         required property string title
 
-        width: root.width;
+        width: pageMain.width;
         height: txtTitle.height + 10
 
         AppText {
@@ -321,7 +321,7 @@
 
     \code
     delegate: CollectionDelegate {
-        width: root.width
+        width: pageMain.width
     }
     \endcode
 

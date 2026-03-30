@@ -2,6 +2,7 @@
     \page 05-insert.html
     \previouspage {Set Theme Colors}
     \title Insert Item
+    \nextpage{Add Dark Mode}
 
     \brief provides steps for inserting an item into the database
 
@@ -103,7 +104,7 @@
     \code
     AppModal {
         id: modalAddItem
-        pushBackContent: root.navigationStack
+        pushBackContent: pageMain.navigationStack
         fullscreen: false
         modalHeight: modalContent.contentHeight
 
@@ -415,6 +416,7 @@
 
     The \c{AppButton} is styled to look similar to the tags in a list item:
     the background color is a grey tone (darker, if a tag is selected),
+    determined via opacity,
     the shadow is removed, the corners are rounded, and the minimum width
     is set to a small value to match the width of its text.\br
     There will also be an icon to make it clearer that the tags (buttons)
@@ -424,7 +426,10 @@
     component TagButton: AppButton {
         iconRight: checked? IconType.checksquareo : IconType.squareo
         checkable: true
-        backgroundColor: checked? "#737373" : "#c3c3c3"
+        opacity: 0.8
+        textColor: "black"
+        backgroundColor: Qt.rgba(textColor.r, textColor.g, textColor.b,
+                                 checked? 0.3 : 0.1);
         dropShadow: false
         radius: height/2 - 2
         minimumWidth: 10

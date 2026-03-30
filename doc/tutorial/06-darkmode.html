@@ -1,0 +1,172 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+<!-- darkmode.qdoc -->
+  <meta name="description" content="provides steps for adding and switching to a dark theme">
+  <title>Add Dark Mode | WareLog</title>
+<link rel="stylesheet" type="text/css" href="style/style.css"/>
+</head>
+<body>
+  <link rel="prev" href="05-insert.html" />
+<p class="naviNextPrevious headerNavi">
+<a class="prevPage" href="05-insert.html">Insert Item</a>
+</p>
+<div class="sidebar">
+<div class="toc">
+<h3 id="toc">Contents</h3>
+<ul>
+<li class="level1"><a href="#add-menu-button-for-dark-mode">Add menu button for dark mode</a></li>
+<li class="level1"><a href="#set-basic-dark-mode-colors">Set basic dark mode colors</a></li>
+<li class="level1"><a href="#set-combobox-dark-mode-colors">Set combobox dark mode colors</a></li>
+</ul>
+</div>
+<div class="sidebar-content" id="sidebar-content"></div></div>
+<h1 class="title">Add Dark Mode</h1>
+<!-- $$$06-darkmode.html-description -->
+<div class="descr" id="details">
+<p>To enable switching to a dark theme, we will add a menu and menu item, save the state to settings and set dark mode colors.</p>
+<h2 id="add-menu-button-for-dark-mode">Add menu button for dark mode</h2>
+<p>First, add a menu icon to the app bar. <code translate="no">AppPage</code> by Felgo has the property <code translate="no">rightBarIcon</code> and can be used with an <code translate="no">IconButtonBarItem</code>, so let's add that.</p>
+<pre class="cpp" translate="no">AppPage {
+    <span class="operator">.</span><span class="operator">.</span><span class="operator">.</span>
+    title: qsTr(<span class="string">&quot;Ware Log&quot;</span>)
+
+    rightBarItem: IconButtonBarItem {
+        iconType: IconType<span class="operator">.</span>bars
+    }
+    <span class="operator">.</span><span class="operator">.</span><span class="operator">.</span>
+}</pre>
+<p>Then add the <code translate="no">Menu</code> component with a <code translate="no">MenuItem</code> for toggling the dark mode setting. These components require the <code translate="no">QtQuick.Controls</code> import.</p>
+<pre class="cpp" translate="no">rightBarItem: IconButtonBarItem {
+    <span class="operator">.</span><span class="operator">.</span><span class="operator">.</span>
+    onClicked: menu<span class="operator">.</span>open()
+
+    Menu {
+        id: menu
+        y: parent<span class="operator">.</span>height
+
+        MenuItem {
+            text: qsTr(<span class="string">&quot;Turn Dark Mode %1&quot;</span>)
+                <span class="operator">.</span>arg(darkModeEnabled <span class="operator">?</span> qsTr(<span class="string">&quot;off&quot;</span>) : qsTr(<span class="string">&quot;on&quot;</span>))
+            onClicked: darkModeEnabled <span class="operator">=</span> <span class="operator">!</span>darkModeEnabled
+        }
+    }
+}</pre>
+<p>Add the <code translate="no">darkModeEnabled</code> property above <code translate="no">onInitTheme</code>:</p>
+<pre class="cpp" translate="no">App {
+    property <span class="type">bool</span> darkModeEnabled: <span class="keyword">false</span>
+
+    onInitTheme: {
+    <span class="operator">.</span><span class="operator">.</span><span class="operator">.</span>
+}</pre>
+<p class="centerAlign"><img src="images/dark_mode_1.jpg" alt="{Menu item for toggling dark mode}" /></p><p>Now the menu item should switch between 'on' and 'off', but the state is not saved when closing the app.</p>
+<p>So add a <code translate="no">Settings</code> component (requires the <code translate="no">QtCore</code> import) and bind it to the property:</p>
+<pre class="cpp" translate="no">App {
+    property <span class="type">bool</span> darkModeEnabled: settings<span class="operator">.</span>darkModeEnabled
+
+    onInitTheme:  <span class="operator">.</span><span class="operator">.</span><span class="operator">.</span>
+
+    Settings {
+        id: settings
+        property <span class="type">bool</span> darkModeEnabled: <span class="keyword">false</span>
+    }
+
+    NavigationStack {
+        AppPage {
+            id: root
+            title: qsTr(<span class="string">&quot;Ware Log&quot;</span>)
+
+            rightBarItem: IconButtonBarItem {
+                <span class="operator">.</span><span class="operator">.</span><span class="operator">.</span>
+
+                Menu {
+                    <span class="operator">.</span><span class="operator">.</span><span class="operator">.</span>
+
+                    MenuItem {
+                        text: qsTr(<span class="string">&quot;Turn Dark Mode %1&quot;</span>)
+                            <span class="operator">.</span>arg(darkModeEnabled <span class="operator">?</span> qsTr(<span class="string">&quot;off&quot;</span>) : qsTr(<span class="string">&quot;on&quot;</span>))
+                        onClicked: settings<span class="operator">.</span>darkModeEnabled
+                                   <span class="operator">=</span> <span class="operator">!</span>settings<span class="operator">.</span>darkModeEnabled
+                    }
+                }
+            }
+    <span class="operator">.</span><span class="operator">.</span><span class="operator">.</span>
+}</pre>
+<h2 id="set-basic-dark-mode-colors">Set basic dark mode colors</h2>
+<p>We will use property bindings for switching between colors. Add properties above <code translate="no">onInitTheme</code> that have bindings to colors depending on <code translate="no">darkModeEnabled</code> and create bindings in <code translate="no">onInitTheme</code> to them. Now, apart from the tint and button color, we also need to define a background and text color for light and dark mode.</p>
+<pre class="cpp" translate="no">property string tintColor: darkModeEnabled<span class="operator">?</span> <span class="string">&quot;#373737&quot;</span> : <span class="string">&quot;#c7c7c7&quot;</span>
+property string buttonColor: darkModeEnabled<span class="operator">?</span> <span class="string">&quot;#373737&quot;</span> : <span class="string">&quot;#a3a3a3&quot;</span>
+property string backgroundColor: darkModeEnabled<span class="operator">?</span> <span class="string">&quot;black&quot;</span> : <span class="string">&quot;white&quot;</span>
+property string textColor: darkModeEnabled<span class="operator">?</span> <span class="string">&quot;white&quot;</span> : <span class="string">&quot;black&quot;</span>
+
+onInitTheme: {
+    Theme<span class="operator">.</span>colors<span class="operator">.</span>tintColor
+        <span class="operator">=</span> <span class="type">Qt</span><span class="operator">.</span>binding(function() { <span class="keyword">return</span> tintColor; });
+    Theme<span class="operator">.</span>colors<span class="operator">.</span>backgroundColor
+        <span class="operator">=</span> <span class="type">Qt</span><span class="operator">.</span>binding(function() { <span class="keyword">return</span> backgroundColor; });
+    Theme<span class="operator">.</span>colors<span class="operator">.</span>textColor
+        <span class="operator">=</span> <span class="type">Qt</span><span class="operator">.</span>binding(function() { <span class="keyword">return</span> textColor; });
+    Theme<span class="operator">.</span>appButton<span class="operator">.</span>backgroundColor
+        <span class="operator">=</span> <span class="type">Qt</span><span class="operator">.</span>binding(function() { <span class="keyword">return</span> buttonColor; });
+    Theme<span class="operator">.</span>navigationBar<span class="operator">.</span>shadowHeight <span class="operator">=</span> <span class="number">0</span>
+}</pre>
+<p>Toggling light and dark mode should now change colors to dark or light respectively.</p>
+<p class="centerAlign"><img src="images/dark_mode_2.jpg" alt="{Dark mode for list view}" /></p><p>In the item edit view, the tag base color (the text color of <code translate="no">TagButton</code>) and the default color properties are hardcoded.<br />
+ For the TagButton, set the text color to <code translate="no">root.textColor</code>. If not done already, set <code translate="no">root</code> as id of the <code translate="no">App</code> component in <code translate="no">Main.qml</code>. This should be enough to toggle colors between dark and light mode for the tag button list.</p>
+<p>For the default color, create properties for it and for the <code translate="no">ColorButton</code> text color, and use them instead of the hardcoded values.</p>
+<pre class="cpp" translate="no">property string colorButtonTextColor: darkModeEnabled<span class="operator">?</span> <span class="string">&quot;black&quot;</span> : <span class="string">&quot;white&quot;</span>
+property string defaultColor: darkModeEnabled<span class="operator">?</span> <span class="string">&quot;white&quot;</span> : <span class="string">&quot;black&quot;</span></pre>
+<p>and in <code translate="no">EditItemView.qml</code>:</p>
+<pre class="cpp" translate="no">property string originColor: defaultColor
+<span class="operator">.</span><span class="operator">.</span><span class="operator">.</span>
+property string primaryColor: defaultColor
+property string secondaryColor: defaultColor
+<span class="operator">.</span><span class="operator">.</span><span class="operator">.</span>
+
+component ColorButton : AppButton {
+    <span class="operator">.</span><span class="operator">.</span><span class="operator">.</span>
+    textColor: colorButtonTextColor
+    <span class="operator">.</span><span class="operator">.</span><span class="operator">.</span>
+}</pre>
+<p>Also assign bindings for the default color in the reset method:</p>
+<pre class="cpp" translate="no">function reset() {
+    <span class="operator">.</span><span class="operator">.</span><span class="operator">.</span>
+    rowTitle<span class="operator">.</span>originColor <span class="operator">=</span> <span class="type">Qt</span><span class="operator">.</span>binding(function() { <span class="keyword">return</span> defaultColor });
+    <span class="operator">.</span><span class="operator">.</span><span class="operator">.</span>
+    rowColors<span class="operator">.</span>primaryColor <span class="operator">=</span> <span class="type">Qt</span><span class="operator">.</span>binding(function() { <span class="keyword">return</span> defaultColor });
+    rowColors<span class="operator">.</span>secondaryColor <span class="operator">=</span> <span class="type">Qt</span><span class="operator">.</span>binding(function() { <span class="keyword">return</span> defaultColor });
+    <span class="operator">.</span><span class="operator">.</span><span class="operator">.</span>
+}</pre>
+<h2 id="set-combobox-dark-mode-colors">Set combobox dark mode colors</h2>
+<p>The <code translate="no">ComboBox</code> components have no direct color properties, but can be changed via their <a href="https://doc.qt.io/qt-6/qml-qtquick-palette.html">palette</a>.</p>
+<p>Add a component <code translate="no">LightDarkComboBox</code> with <code translate="no">ComboBox</code> as base type and set the colors with bindings to color properties. This is trial and error and results in following properties:</p>
+<pre class="cpp" translate="no">component LightDarkComboBox : ComboBox {
+    palette {
+        text: textColor
+        base: editable<span class="operator">?</span> backgroundColor: lightColor
+        highlight: lightColor
+        button: lightColor
+        mid: mediumColor
+        dark: textColor
+        buttonText: textColor
+        highlightedText: textColor
+        window: backgroundColor
+        midlight: lightColor
+        light: lighterColor
+    }
+}</pre>
+<p>This requires three more colors, <code translate="no">lightColor, lighterColor, mediumColor</code>, which would match the default combobox colors for light mode, and are set to corresponding dark colors for dark mode. While it would be convenient to use argb colors, with opacity values derived from light mode and then also used for dark mode, it does not work for <code translate="no">ComboBox</code>: parts of it would overlap and the borders would not look as clean:</p>
+<p class="centerAlign"><img src="images/dark_mode_combobox_rgba.jpg" alt="{Issue with argb hex codes for palette}" /></p><p>In comparison without alpha channel:</p>
+<p class="centerAlign"><img src="images/dark_mode_combobox_rgb.jpg" alt="{Comparison with rgb hex codes}" /></p><p>I picked following colors:</p>
+<pre class="cpp" translate="no">property string lightColor: darkModeEnabled<span class="operator">?</span> <span class="string">&quot;#222222&quot;</span> : <span class="string">&quot;#dddddd&quot;</span>
+property string lighterColor: darkModeEnabled<span class="operator">?</span> <span class="string">&quot;#191919&quot;</span> : <span class="string">&quot;#f6f6f6&quot;</span>
+property string mediumColor: darkModeEnabled<span class="operator">?</span> <span class="string">&quot;#444444&quot;</span> : <span class="string">&quot;#bdbdbd&quot;</span></pre>
+<p>Now the item edit view is also shown correctly in dark mode.</p>
+<p class="centerAlign"><img src="images/dark_mode_3.jpg" alt="{Dark mode for item edit view}" /></p></div>
+<!-- @@@06-darkmode.html -->
+<p class="naviNextPrevious footerNavi">
+<a class="prevPage" href="05-insert.html">Insert Item</a>
+</p>
+</body>
+</html>

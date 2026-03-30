@@ -1,0 +1,237 @@
+/*!
+    \page 06-darkmode.html
+    \previouspage {Insert Item}
+    \title Add Dark Mode
+
+    \brief provides steps for adding and switching to a dark theme
+
+    To enable switching to a dark theme, we will add a menu and menu item,
+    save the state to settings and set dark mode colors.
+
+    \section1 Add menu button for dark mode
+
+    First, add a menu icon to the app bar.
+    \c{AppPage} by Felgo has the property \c{rightBarIcon} and can be used
+    with an \c{IconButtonBarItem}, so let's add that.
+
+    \code
+    AppPage {
+        ...
+        title: qsTr("Ware Log")
+
+        rightBarItem: IconButtonBarItem {
+            iconType: IconType.bars
+        }
+        ...
+    }
+    \endcode
+
+    Then add the \c{Menu} component with a \c{MenuItem} for toggling the
+    dark mode setting.
+    These components require the \c{QtQuick.Controls} import.
+
+    \code
+    rightBarItem: IconButtonBarItem {
+        ...
+        onClicked: menu.open()
+
+        Menu {
+            id: menu
+            y: parent.height
+
+            MenuItem {
+                text: qsTr("Turn Dark Mode %1")
+                    .arg(darkModeEnabled ? qsTr("off") : qsTr("on"))
+                onClicked: darkModeEnabled = !darkModeEnabled
+            }
+        }
+    }
+    \endcode
+
+    Add the \c{darkModeEnabled} property above \c{onInitTheme}:
+
+    \code
+
+    App {
+        property bool darkModeEnabled: false
+
+        onInitTheme: {
+        ...
+    }
+    \endcode
+
+    \image {dark_mode_1.jpg} {Menu item for toggling dark mode}
+
+    Now the menu item should switch between 'on' and 'off', but the state
+    is not saved when closing the app.
+
+    So add a \c{Settings} component (requires the \c{QtCore} import) and
+    bind it to the property:
+
+    \code
+    App {
+        property bool darkModeEnabled: settings.darkModeEnabled
+
+        onInitTheme:  ...
+
+        Settings {
+            id: settings
+            property bool darkModeEnabled: false
+        }
+
+        NavigationStack {
+            AppPage {
+                id: root
+                title: qsTr("Ware Log")
+
+                rightBarItem: IconButtonBarItem {
+                    ...
+
+                    Menu {
+                        ...
+
+                        MenuItem {
+                            text: qsTr("Turn Dark Mode %1")
+                                .arg(darkModeEnabled ? qsTr("off") : qsTr("on"))
+                            onClicked: settings.darkModeEnabled
+                                       = !settings.darkModeEnabled
+                        }
+                    }
+                }
+        ...
+    }
+    \endcode
+
+    \section1 Set basic dark mode colors
+
+    We will use property bindings for switching between colors.
+    Add properties above \c{onInitTheme} that have bindings to colors
+    depending on \c{darkModeEnabled} and create bindings in \c{onInitTheme}
+    to them.
+    Now, apart from the tint and button color, we also need to define a
+    background and text color for light and dark mode.
+
+    \code
+    property string tintColor: darkModeEnabled? "#373737" : "#c7c7c7"
+    property string buttonColor: darkModeEnabled? "#373737" : "#a3a3a3"
+    property string backgroundColor: darkModeEnabled? "black" : "white"
+    property string textColor: darkModeEnabled? "white" : "black"
+
+    onInitTheme: {
+        Theme.colors.tintColor
+            = Qt.binding(function() { return tintColor; });
+        Theme.colors.backgroundColor
+            = Qt.binding(function() { return backgroundColor; });
+        Theme.colors.textColor
+            = Qt.binding(function() { return textColor; });
+        Theme.appButton.backgroundColor
+            = Qt.binding(function() { return buttonColor; });
+        Theme.navigationBar.shadowHeight = 0
+    }
+    \endcode
+
+    Toggling light and dark mode should now change colors to dark or light
+    respectively.
+
+    \image {dark_mode_2.jpg} {Dark mode for list view}
+
+    In the item edit view, the tag base color (the text color of \c{TagButton})
+    and the default color properties are hardcoded.\br
+    For the TagButton, set the text color to \c{root.textColor}. If not done
+    already, set \c{root} as id of the \c{App} component
+    in \c{Main.qml}. This should be enough to toggle colors between dark and
+    light mode for the tag button list.
+
+    For the default color, create properties for it
+    and for the \c{ColorButton} text color, and use them instead of the
+    hardcoded values.
+
+    \code
+    property string colorButtonTextColor: darkModeEnabled? "black" : "white"
+    property string defaultColor: darkModeEnabled? "white" : "black"
+    \endcode
+
+    and in \c{EditItemView.qml}:
+
+    \code
+    property string originColor: defaultColor
+    ...
+    property string primaryColor: defaultColor
+    property string secondaryColor: defaultColor
+    ...
+
+    component ColorButton : AppButton {
+        ...
+        textColor: colorButtonTextColor
+        ...
+    }
+    \endcode
+
+    Also assign bindings for the default color in the reset method:
+
+    \code
+    function reset() {
+        ...
+        rowTitle.originColor = Qt.binding(function() { return defaultColor });
+        ...
+        rowColors.primaryColor = Qt.binding(function() { return defaultColor });
+        rowColors.secondaryColor = Qt.binding(function() { return defaultColor });
+        ...
+    }
+    \endcode
+
+    \section1 Set combobox dark mode colors
+
+    The \c{ComboBox} components have no direct color properties, but can be
+    changed via their
+    \l {https://doc.qt.io/qt-6/qml-qtquick-palette.html} {palette}.
+
+    Add a component \c{LightDarkComboBox} with \c{ComboBox} as base type
+    and set the colors with bindings to color properties.
+    This is trial and error and results in following properties:
+
+    \code
+    component LightDarkComboBox : ComboBox {
+        palette {
+            text: textColor
+            base: editable? backgroundColor: lightColor
+            highlight: lightColor
+            button: lightColor
+            mid: mediumColor
+            dark: textColor
+            buttonText: textColor
+            highlightedText: textColor
+            window: backgroundColor
+            midlight: lightColor
+            light: lighterColor
+        }
+    }
+    \endcode
+
+    This requires three more colors, \c{lightColor, lighterColor, mediumColor},
+    which would match the default combobox colors
+    for light mode, and are set to corresponding dark colors for dark mode.
+    While it would be convenient to use argb colors, with opacity values
+    derived from light mode and then also used for dark mode, it does not
+    work for \c{ComboBox}:
+    parts of it would overlap
+    and the borders would not look as clean:
+
+    \image {dark_mode_combobox_rgba.jpg} {Issue with argb hex codes for palette}
+
+    In comparison without alpha channel:
+
+    \image {dark_mode_combobox_rgb.jpg} {Comparison with rgb hex codes}
+
+    I picked following colors:
+
+    \code
+    property string lightColor: darkModeEnabled? "#222222" : "#dddddd"
+    property string lighterColor: darkModeEnabled? "#191919" : "#f6f6f6"
+    property string mediumColor: darkModeEnabled? "#444444" : "#bdbdbd"
+    \endcode
+
+    Now the item edit view is also shown correctly in dark mode.
+
+    \image {dark_mode_3.jpg} {Dark mode for item edit view}
+*/
