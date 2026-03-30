@@ -135,10 +135,16 @@
 
     \image {dark_mode_2.jpg} {Dark mode for list view}
 
-    For the item edit view, the default color properties are hardcoded.
-    Create properties for the default color
-    and the button text color, and use them instead of the hardcoded
-    values.
+    In the item edit view, the tag base color (the text color of \c{TagButton})
+    and the default color properties are hardcoded.\br
+    For the TagButton, set the text color to \c{aRoot.textColor}. If not done
+    already, set \c{aRoot} (for 'app root') as id of the \c{App} component
+    in \c{Main.qml}. This should be enough to toggle colors between dark and
+    light mode for the tag button list.
+
+    For the default color, create properties for it
+    and for the \c{ColorButton} text color, and use them instead of the
+    hardcoded values.
 
     \code
     property string colorButtonTextColor: darkModeEnabled? "black" : "white"

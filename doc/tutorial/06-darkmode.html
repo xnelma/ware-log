@@ -112,7 +112,9 @@ onInitTheme: {
     Theme<span class="operator">.</span>navigationBar<span class="operator">.</span>shadowHeight <span class="operator">=</span> <span class="number">0</span>
 }</pre>
 <p>Toggling light and dark mode should now change colors to dark or light respectively.</p>
-<p class="centerAlign"><img src="images/dark_mode_2.jpg" alt="{Dark mode for list view}" /></p><p>For the item edit view, the default color properties are hardcoded. Create properties for the default color and the button text color, and use them instead of the hardcoded values.</p>
+<p class="centerAlign"><img src="images/dark_mode_2.jpg" alt="{Dark mode for list view}" /></p><p>In the item edit view, the tag base color (the text color of <code translate="no">TagButton</code>) and the default color properties are hardcoded.<br />
+ For the TagButton, set the text color to <code translate="no">aRoot.textColor</code>. If not done already, set <code translate="no">aRoot</code> (for 'app root') as id of the <code translate="no">App</code> component in <code translate="no">Main.qml</code>. This should be enough to toggle colors between dark and light mode for the tag button list.</p>
+<p>For the default color, create properties for it and for the <code translate="no">ColorButton</code> text color, and use them instead of the hardcoded values.</p>
 <pre class="cpp" translate="no">property string colorButtonTextColor: darkModeEnabled<span class="operator">?</span> <span class="string">&quot;black&quot;</span> : <span class="string">&quot;white&quot;</span>
 property string defaultColor: darkModeEnabled<span class="operator">?</span> <span class="string">&quot;white&quot;</span> : <span class="string">&quot;black&quot;</span></pre>
 <p>and in <code translate="no">EditItemView.qml</code>:</p>
