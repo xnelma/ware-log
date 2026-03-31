@@ -1,0 +1,136 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+<!-- custom_weight_component.qdoc -->
+  <meta name="description" content="provides steps for laying out a custom component for item weight">
+  <title>Custom Weight Component | WareLog</title>
+<link rel="stylesheet" type="text/css" href="style/style.css"/>
+</head>
+<body>
+  <link rel="prev" href="06-darkmode.html" />
+<p class="naviNextPrevious headerNavi">
+<a class="prevPage" href="06-darkmode.html">Add Dark Mode</a>
+</p>
+<div class="sidebar">
+<div class="toc">
+<h3 id="toc">Contents</h3>
+<ul>
+<li class="level1"><a href="#show-item-weight">Show item weight</a></li>
+</ul>
+</div>
+<div class="sidebar-content" id="sidebar-content"></div></div>
+<h1 class="title">Custom Weight Component</h1>
+<!-- $$$07-weight.html-description -->
+<div class="descr" id="details">
+<p>So far, the list view shows only the primary color for an item, and the weight not at all, especially not the remaining weight. In this chapter we will write a custom component that will also show those properties.</p>
+<h2 id="show-item-weight">Show item weight</h2>
+<p>First, the item weight. Add a qml file for the custom component with e.g. the file name <code translate="no">WeightIndicator.qml</code>. The base item would be the same <code translate="no">Rectangle</code> as before, but height and width are set in the delegate, and the color in the component qml file:</p>
+<pre class="cpp" translate="no">WeightIndicator {
+    id: weightIndicator
+
+    height: parent<span class="operator">.</span>height
+    width: delegate<span class="operator">.</span>width <span class="operator">/</span> <span class="number">7</span>
+}</pre>
+<p>and in <code translate="no">WeightIndicator.qml</code>:</p>
+<pre class="cpp" translate="no">import Felgo
+import <span class="type">QtQuick</span>
+import <span class="type">QtQuick</span><span class="operator">.</span>Layouts
+
+Rectangle {
+    color: primaryColor
+}</pre>
+<p>If you build now, the list items should still look the same.</p>
+<p>Then add properties for the data the component will show: the total and remaining weight, the weight unit and the primary and secondary color.</p>
+<pre class="cpp" translate="no">WeightIndicator {
+    id: weightIndicator
+
+    <span class="operator">.</span><span class="operator">.</span><span class="operator">.</span>
+
+    weightTotal: delegate<span class="operator">.</span>weightTotal
+    weightLeft: delegate<span class="operator">.</span>weightLeft
+    weightUnit: delegate<span class="operator">.</span>weightUnit
+
+    primaryColor: delegate<span class="operator">.</span>primaryColor
+    secondaryColor: delegate<span class="operator">.</span>secondaryColor
+}</pre>
+<p>and in <code translate="no">WeightIndicator.qml</code>:</p>
+<pre class="cpp" translate="no">Rectangle {
+    required property <span class="type">int</span> weightTotal
+    required property <span class="type">int</span> weightLeft
+    required property string weightUnit
+
+    required property string primaryColor
+    required property string secondaryColor
+
+    color: primaryColor
+}</pre>
+<p>The component should show labels for the remaining and total weight, and visualize the amount left, which can be done by greying out a proportion of the rectangle. This can all be done via child elements of the rectangle. Add an <code translate="no">AppText</code> item for the remaining weight and the total weight, and another rectangle, in black and with a low opacity, e.g. 0.4, to the base rectangle.</p>
+<pre class="cpp" translate="no">AppText {
+    id: txtWeightLeft
+    text: weightLeft <span class="operator">+</span> weightUnit
+    anchors<span class="operator">.</span>top: parent<span class="operator">.</span>top
+    anchors<span class="operator">.</span>topMargin: <span class="number">2</span>
+    anchors<span class="operator">.</span>horizontalCenter: parent<span class="operator">.</span>horizontalCenter
+}
+
+AppText {
+    id: txtWeightTotal
+    text: <span class="string">&quot;/&quot;</span> <span class="operator">+</span> weightTotal <span class="operator">+</span> weightUnit
+    anchors<span class="operator">.</span>top: txtWeightLeft<span class="operator">.</span>bottom
+    anchors<span class="operator">.</span>topMargin: <span class="number">2</span>
+    anchors<span class="operator">.</span>horizontalCenter: parent<span class="operator">.</span>horizontalCenter
+}
+
+Rectangle {
+    id: rectWeightLeft
+    color: <span class="string">&quot;black&quot;</span>
+    opacity: <span class="number">0.4</span>
+    height: parent<span class="operator">.</span>height <span class="operator">*</span> ((weightTotal <span class="operator">-</span> weightLeft) <span class="operator">/</span> weightTotal)
+    width: parent<span class="operator">.</span>width
+    anchors<span class="operator">.</span>bottom: parent<span class="operator">.</span>bottom
+}</pre>
+<p>The black rectangle will grow from the bottom, and the labels are aligned to the top.</p>
+<p>The labels will get a text white color to contrast well with the colored background and in case the black rectangle fills the colored rectangle up to the top. The label for the total weight is a bit darker than the more relevant remaining weight.</p>
+<pre class="cpp" translate="no">AppText {
+    id: txtWeightLeft
+    <span class="operator">.</span><span class="operator">.</span><span class="operator">.</span>
+    color: <span class="string">&quot;white&quot;</span>
+    <span class="operator">.</span><span class="operator">.</span><span class="operator">.</span>
+}
+
+AppText {
+    id: txtWeightTotal
+    <span class="operator">.</span><span class="operator">.</span><span class="operator">.</span>
+    color: <span class="string">&quot;white&quot;</span>
+    opacity: <span class="number">0.6</span>
+    <span class="operator">.</span><span class="operator">.</span><span class="operator">.</span>
+}</pre>
+<p>And, in case the numbers have too many digits for the width of the component, set the elide property (for now):</p>
+<pre class="cpp" translate="no">AppText {
+    id: txtWeightLeft
+    <span class="operator">.</span><span class="operator">.</span><span class="operator">.</span>
+    elide: Text<span class="operator">.</span>ElideRight
+    width: parent<span class="operator">.</span>width
+    maximumLineCount: <span class="number">1</span>
+    horizontalAlignment: Text<span class="operator">.</span>AlignHCenter
+    <span class="operator">.</span><span class="operator">.</span><span class="operator">.</span>
+}
+
+AppText {
+    id: txtWeightTotal
+    <span class="operator">.</span><span class="operator">.</span><span class="operator">.</span>
+    elide: Text<span class="operator">.</span>ElideRight
+    width: parent<span class="operator">.</span>width
+    maximumLineCount: <span class="number">1</span>
+    horizontalAlignment: Text<span class="operator">.</span>AlignHCenter
+    <span class="operator">.</span><span class="operator">.</span><span class="operator">.</span>
+}</pre>
+<p>The <code translate="no">anchors.horizontalCenter</code> property is not used anymore due to setting the full width for the <code translate="no">elide</code> property and using <code translate="no">horizontalAlignment</code> instead.</p>
+<p class="centerAlign"><img src="images/weight_indicator_1.jpg" alt="{Weight labels and grey layer added}" /></p></div>
+<!-- @@@07-weight.html -->
+<p class="naviNextPrevious footerNavi">
+<a class="prevPage" href="06-darkmode.html">Add Dark Mode</a>
+</p>
+</body>
+</html>

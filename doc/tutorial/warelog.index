@@ -7,6 +7,9 @@
             <contents name="set-basic-dark-mode-colors" title="Set basic dark mode colors" level="1"/>
             <contents name="set-combobox-dark-mode-colors" title="Set combobox dark mode colors" level="1"/>
         </page>
+        <page name="07-weight.html" href="07-weight.html" status="active" location="custom_weight_component.qdoc" filepath="/home/maja/Desktop/ware-log/doc/tutorial-files/custom_weight_component.qdoc" lineno="1" documented="true" subtype="page" title="Custom Weight Component" fulltitle="Custom Weight Component" subtitle="" brief="Steps for laying out a custom component for item weight">
+            <contents name="show-item-weight" title="Show item weight" level="1"/>
+        </page>
         <page name="03-delete.html" href="03-delete.html" status="active" location="delete_item.qdoc" filepath="/home/maja/Desktop/ware-log/doc/tutorial-files/delete_item.qdoc" lineno="1" documented="true" subtype="page" title="Delete Item" fulltitle="Delete Item" subtitle="" brief="Steps for deleting a list item">
             <contents name="add-the-delete-button" title="Add the delete button" level="1"/>
             <contents name="write-delete-methods" title="Write delete methods" level="1"/>
