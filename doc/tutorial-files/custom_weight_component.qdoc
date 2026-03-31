@@ -165,4 +165,61 @@
     \c{horizontalAlignment} instead.
 
     \image {weight_indicator_1.jpg} {Weight labels and grey layer added}
+
+    \section1 Show secondary color
+
+    The secondary color should help illustrate some characteristics of an item,
+    e.g. the item texture.
+    Another characteristic would be an outer color of an item, so some kind of
+    hull.
+    For now, I will add a texture for the sand example database as hardcoded
+    asset. The texture will simply be noise I generated using a graphics editor.
+    It has an alpha channel instead of the white color in contrast to black.
+
+    Add an image \c{texture.png} with some black-and-transparent texture to
+    the \c{assets} folder.
+    This image will be used as a mask with the \c{MultiEffect} component
+    (requires the \c{QtQuick.Effects} import),
+    applied to a \c{Rectangle}.
+    The rectangle is set to the secondary color, and the effect will have
+    properties set to smooth out the noise a bit.
+
+    Both \c{Rectangle} and \c{MultiEffect} should be added before the
+    label and transparent-black \c{Rectangle}, to be drawn below them (but the
+    order can also be set using the z property).
+
+    \code
+    Rectangle {
+        id: rectSecondaryColor
+        color: secondaryColor
+
+        height: parent.height
+        width: parent.width
+        visible: false
+    }
+
+    MultiEffect {
+        source: rectSecondaryColor
+        anchors.fill: rectSecondaryColor
+
+        maskEnabled: true
+        maskSource: Image {
+            source: "../assets/texture.png"
+            fillMode: Image.PreserveAspectCrop
+        }
+        maskThresholdMax: 0.7
+        maskThresholdMin: 0.3
+        maskSpreadAtMax: 0.7
+        maskSpreadAtMin: 0.7
+    }
+    \endcode
+
+    \image {weight_indicator_2.jpg} {Secondary color shown by texture}
+
+    For now, this is all we will do for this component. Especially setting
+    the texture and using the secondary color can get inherently more complex,
+    for example since the texture depends on the domain of the database.
+    There would have to be settings to choose the texture behavior, or more
+    generally the behavior of the second color, for items in a database.
+    We will revisit textures and the secondary color later on.
 */

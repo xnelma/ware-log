@@ -1,6 +1,7 @@
 import Felgo
 import QtQuick
 import QtQuick.Layouts
+import QtQuick.Effects
 
 Rectangle {
     required property int weightTotal
@@ -11,6 +12,30 @@ Rectangle {
     required property string secondaryColor
 
     color: primaryColor
+
+    Rectangle {
+        id: rectSecondaryColor
+        color: secondaryColor
+
+        height: parent.height
+        width: parent.width
+        visible: false
+    }
+
+    MultiEffect {
+        source: rectSecondaryColor
+        anchors.fill: rectSecondaryColor
+
+        maskEnabled: true
+        maskSource: Image {
+            source: "../assets/texture.png"
+            fillMode: Image.PreserveAspectCrop
+        }
+        maskThresholdMax: 0.7
+        maskThresholdMin: 0.3
+        maskSpreadAtMax: 0.7
+        maskSpreadAtMin: 0.7
+    }
 
     AppText {
         id: txtWeightLeft

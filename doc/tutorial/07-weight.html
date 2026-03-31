@@ -17,6 +17,7 @@
 <h3 id="toc">Contents</h3>
 <ul>
 <li class="level1"><a href="#show-item-weight">Show item weight</a></li>
+<li class="level1"><a href="#show-secondary-color">Show secondary color</a></li>
 </ul>
 </div>
 <div class="sidebar-content" id="sidebar-content"></div></div>
@@ -127,7 +128,35 @@ AppText {
     <span class="operator">.</span><span class="operator">.</span><span class="operator">.</span>
 }</pre>
 <p>The <code translate="no">anchors.horizontalCenter</code> property is not used anymore due to setting the full width for the <code translate="no">elide</code> property and using <code translate="no">horizontalAlignment</code> instead.</p>
-<p class="centerAlign"><img src="images/weight_indicator_1.jpg" alt="{Weight labels and grey layer added}" /></p></div>
+<p class="centerAlign"><img src="images/weight_indicator_1.jpg" alt="{Weight labels and grey layer added}" /></p><h2 id="show-secondary-color">Show secondary color</h2>
+<p>The secondary color should help illustrate some characteristics of an item, e.g. the item texture. Another characteristic would be an outer color of an item, so some kind of hull. For now, I will add a texture for the sand example database as hardcoded asset. The texture will simply be noise I generated using a graphics editor. It has an alpha channel instead of the white color in contrast to black.</p>
+<p>Add an image <code translate="no">texture.png</code> with some black-and-transparent texture to the <code translate="no">assets</code> folder. This image will be used as a mask with the <code translate="no">MultiEffect</code> component (requires the <code translate="no">QtQuick.Effects</code> import), applied to a <code translate="no">Rectangle</code>. The rectangle is set to the secondary color, and the effect will have properties set to smooth out the noise a bit.</p>
+<p>Both <code translate="no">Rectangle</code> and <code translate="no">MultiEffect</code> should be added before the label and transparent-black <code translate="no">Rectangle</code>, to be drawn below them (but the order can also be set using the z property).</p>
+<pre class="cpp" translate="no">Rectangle {
+    id: rectSecondaryColor
+    color: secondaryColor
+
+    height: parent<span class="operator">.</span>height
+    width: parent<span class="operator">.</span>width
+    visible: <span class="keyword">false</span>
+}
+
+MultiEffect {
+    source: rectSecondaryColor
+    anchors<span class="operator">.</span>fill: rectSecondaryColor
+
+    maskEnabled: <span class="keyword">true</span>
+    maskSource: Image {
+        source: <span class="string">&quot;../assets/texture.png&quot;</span>
+        fillMode: Image<span class="operator">.</span>PreserveAspectCrop
+    }
+    maskThresholdMax: <span class="number">0.7</span>
+    maskThresholdMin: <span class="number">0.3</span>
+    maskSpreadAtMax: <span class="number">0.7</span>
+    maskSpreadAtMin: <span class="number">0.7</span>
+}</pre>
+<p class="centerAlign"><img src="images/weight_indicator_2.jpg" alt="{Secondary color shown by texture}" /></p><p>For now, this is all we will do for this component. Especially setting the texture and using the secondary color can get inherently more complex, for example since the texture depends on the domain of the database. There would have to be settings to choose the texture behavior, or more generally the behavior of the second color, for items in a database. We will revisit textures and the secondary color later on.</p>
+</div>
 <!-- @@@07-weight.html -->
 <p class="naviNextPrevious footerNavi">
 <a class="prevPage" href="06-darkmode.html">Add Dark Mode</a>
