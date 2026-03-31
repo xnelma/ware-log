@@ -37,6 +37,15 @@ Rectangle {
         maskSpreadAtMin: 0.7
     }
 
+    Rectangle {
+        id: rectWeightLeft
+        color: "black"
+        opacity: 0.4
+        height: parent.height * ((weightTotal - weightLeft) / weightTotal)
+        width: parent.width
+        anchors.bottom: parent.bottom
+    }
+
     AppText {
         id: txtWeightLeft
         text: weightLeft + weightUnit
@@ -60,14 +69,5 @@ Rectangle {
         horizontalAlignment: Text.AlignHCenter
         anchors.top: txtWeightLeft.bottom
         anchors.topMargin: 2
-    }
-
-    Rectangle {
-        id: rectWeightLeft
-        color: "black"
-        opacity: 0.4
-        height: parent.height * ((weightTotal - weightLeft) / weightTotal)
-        width: parent.width
-        anchors.bottom: parent.bottom
     }
 }

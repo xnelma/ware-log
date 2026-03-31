@@ -84,6 +84,15 @@
     base rectangle.
 
     \code
+    Rectangle {
+        id: rectWeightLeft
+        color: "black"
+        opacity: 0.4
+        height: parent.height * ((weightTotal - weightLeft) / weightTotal)
+        width: parent.width
+        anchors.bottom: parent.bottom
+    }
+
     AppText {
         id: txtWeightLeft
         text: weightLeft + weightUnit
@@ -99,19 +108,12 @@
         anchors.topMargin: 2
         anchors.horizontalCenter: parent.horizontalCenter
     }
-
-    Rectangle {
-        id: rectWeightLeft
-        color: "black"
-        opacity: 0.4
-        height: parent.height * ((weightTotal - weightLeft) / weightTotal)
-        width: parent.width
-        anchors.bottom: parent.bottom
-    }
     \endcode
 
     The black rectangle will grow from the bottom, and the labels are
-    aligned to the top.
+    aligned to the top. The black rectangle should be behind the labels,
+    which can be achieved by defining it before them (as done above),
+    or using the z property.
 
     The labels will get a text white color to contrast well with the colored
     background and in case the black rectangle fills the colored rectangle
