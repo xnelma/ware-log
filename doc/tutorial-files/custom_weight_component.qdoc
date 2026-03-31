@@ -1,0 +1,227 @@
+/*!
+    \page 07-weight.html
+    \previouspage {Add Dark Mode}
+    \title Custom Weight Component
+
+    \brief provides steps for laying out a custom component for item weight
+
+    So far, the list view shows only the primary color for an item, and the
+    weight not at all, especially not the remaining weight.
+    In this chapter we will write a custom component that will also show
+    those properties.
+
+    \section1 Show item weight
+
+    First, the item weight.
+    Add a qml file for the custom component with e.g. the file name
+    \c{WeightIndicator.qml}.
+    The base item would be the same \c{Rectangle} as before, but height
+    and width are set in the delegate, and the color in the component qml
+    file:
+
+    \code
+    WeightIndicator {
+        id: weightIndicator
+
+        height: parent.height
+        width: delegate.width / 7
+    }
+    \endcode
+
+    and in \c{WeightIndicator.qml}:
+
+    \code
+    import Felgo
+    import QtQuick
+    import QtQuick.Layouts
+
+    Rectangle {
+        color: primaryColor
+    }
+    \endcode
+
+    If you build now, the list items should still look the same.
+
+    Then add properties for the data the component will show: the total and
+    remaining weight, the weight unit and the primary and secondary color.
+
+    \code
+    WeightIndicator {
+        id: weightIndicator
+
+        ...
+
+        weightTotal: delegate.weightTotal
+        weightLeft: delegate.weightLeft
+        weightUnit: delegate.weightUnit
+
+        primaryColor: delegate.primaryColor
+        secondaryColor: delegate.secondaryColor
+    }
+    \endcode
+
+    and in \c{WeightIndicator.qml}:
+
+    \code
+    Rectangle {
+        required property int weightTotal
+        required property int weightLeft
+        required property string weightUnit
+
+        required property string primaryColor
+        required property string secondaryColor
+
+        color: primaryColor
+    }
+    \endcode
+
+    The component should show labels for the remaining and total weight, and
+    visualize the amount left, which can be done by greying out a proportion
+    of the rectangle.
+    This can all be done via child elements of the rectangle.
+    Add an \c{AppText} item for the remaining weight and the total weight,
+    and another rectangle, in black and with a low opacity, e.g. 0.4, to the
+    base rectangle.
+
+    \code
+    Rectangle {
+        id: rectWeightLeft
+        color: "black"
+        opacity: 0.4
+        height: parent.height * ((weightTotal - weightLeft) / weightTotal)
+        width: parent.width
+        anchors.bottom: parent.bottom
+    }
+
+    AppText {
+        id: txtWeightLeft
+        text: weightLeft + weightUnit
+        anchors.top: parent.top
+        anchors.topMargin: 2
+        anchors.horizontalCenter: parent.horizontalCenter
+    }
+
+    AppText {
+        id: txtWeightTotal
+        text: "/" + weightTotal + weightUnit
+        anchors.top: txtWeightLeft.bottom
+        anchors.topMargin: 2
+        anchors.horizontalCenter: parent.horizontalCenter
+    }
+    \endcode
+
+    The black rectangle will grow from the bottom, and the labels are
+    aligned to the top. The black rectangle should be behind the labels,
+    which can be achieved by defining it before them (as done above),
+    or using the z property.
+
+    The labels will get a text white color to contrast well with the colored
+    background and in case the black rectangle fills the colored rectangle
+    up to the top. The label for the total weight is a bit darker than the
+    more relevant remaining weight.
+
+    \code
+    AppText {
+        id: txtWeightLeft
+        ...
+        color: "white"
+        ...
+    }
+
+    AppText {
+        id: txtWeightTotal
+        ...
+        color: "white"
+        opacity: 0.6
+        ...
+    }
+    \endcode
+
+    And, in case the numbers have too many digits for the width of the
+    component, set the elide property (for now):
+
+    \code
+    AppText {
+        id: txtWeightLeft
+        ...
+        elide: Text.ElideRight
+        width: parent.width
+        maximumLineCount: 1
+        horizontalAlignment: Text.AlignHCenter
+        ...
+    }
+
+    AppText {
+        id: txtWeightTotal
+        ...
+        elide: Text.ElideRight
+        width: parent.width
+        maximumLineCount: 1
+        horizontalAlignment: Text.AlignHCenter
+        ...
+    }
+    \endcode
+
+    The \c{anchors.horizontalCenter} property is not used anymore due to
+    setting the full width for the \c{elide} property and using
+    \c{horizontalAlignment} instead.
+
+    \image {weight_indicator_1.jpg} {Weight labels and grey layer added}
+
+    \section1 Show secondary color
+
+    The secondary color should help illustrate some characteristics of an item,
+    e.g. the item texture.
+    Another characteristic would be an outer color of an item, so some kind of
+    hull.
+    For now, I will add a texture for the sand example database as hardcoded
+    asset. The texture will simply be noise I generated using a graphics editor.
+    It has an alpha channel instead of the white color in contrast to black.
+
+    Add an image \c{texture.png} with some black-and-transparent texture to
+    the \c{assets} folder.
+    This image will be used as a mask with the \c{MultiEffect} component
+    (requires the \c{QtQuick.Effects} import),
+    applied to a \c{Rectangle}.
+    The rectangle is set to the secondary color, and the effect will have
+    properties set to smooth out the noise a bit.
+
+    Both \c{Rectangle} and \c{MultiEffect} should be added before the
+    label and transparent-black \c{Rectangle}, to be drawn below them (but the
+    order can also be set using the z property).
+
+    \code
+    Rectangle {
+        id: rectSecondaryColor
+        color: secondaryColor
+
+        height: parent.height
+        width: parent.width
+        visible: false
+    }
+
+    MultiEffect {
+        source: rectSecondaryColor
+        anchors.fill: rectSecondaryColor
+
+        maskEnabled: true
+        maskSource: Image {
+            source: "../assets/texture.png"
+            fillMode: Image.PreserveAspectCrop
+        }
+        maskThresholdMax: 0.7
+        maskThresholdMin: 0.3
+        maskSpreadAtMax: 0.7
+        maskSpreadAtMin: 0.7
+    }
+    \endcode
+
+    \image {weight_indicator_2.jpg} {Secondary color shown by texture}
+
+    For now, this is all we will do for this component. Especially setting
+    the texture and using the secondary color can get inherently more complex,
+    for example since the texture depends on the domain of the database.
+    There would have to be settings to choose the texture behavior, or more
+    generally the behavior of the second color, for items in a database.
+    We will revisit textures and the secondary color later on.
+*/

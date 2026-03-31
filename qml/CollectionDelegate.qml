@@ -49,19 +49,24 @@ SwipeOptionsContainer {
 
         height: colContent.height + 2
 
-        Rectangle {
-            id: rectWeight
+        WeightIndicator {
+            id: weightIndicator
 
             height: parent.height
             width: delegate.width / 7
 
-            color: delegate.primaryColor
+            weightTotal: delegate.weightTotal
+            weightLeft: delegate.weightLeft
+            weightUnit: delegate.weightUnit
+
+            primaryColor: delegate.primaryColor
+            secondaryColor: delegate.secondaryColor
         }
 
         Column {
             id: colContent
 
-            anchors.left: rectWeight.right
+            anchors.left: weightIndicator.right
             anchors.leftMargin: 10
 
             Row {
