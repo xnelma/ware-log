@@ -1,0 +1,397 @@
+/*!
+    \page 08-update.html
+    \previouspage {Custom Weight Component}
+    \title Update Weight and Cost
+
+    \brief provides steps for showing inputs to update weight and cost
+
+    The custom weight component uses a second number for the weight; the
+    remaining weight. And in list items there is a secondary cost, which leads
+    to striking through the first number; a reduced cost.
+    It would be convenient to have a quick input for updating those two
+    values for list elements, so we will add this functionality in this chapter.
+
+    \section1 Add buttons to list element
+
+    On swiping left a delete button is shown.
+    Now we add two buttons on swiping right.
+
+    For that put two \c{SwipeButton} items in a \c{Row} and assign it to
+    \c{leftOption} in \c{CollectionDelegate.qml}.
+
+    \code
+    leftOption: Row {
+        SwipeButton {
+            iconType: IconType.money
+            height: delegate.height
+        }
+
+        SwipeButton {
+            iconType: IconType.beer
+            height: delegate.height
+        }
+    }
+    \endcode
+
+    \image {update_weight_and_cost_1.jpg} {Buttons for updating weight and cost}
+
+    The on clicked handler will be added later on.
+
+    \section1 Add number input dialog component
+
+    Both dialogs should take a number input and show a warning if the number
+    is not smaller than the total weight or cost. They should also show a hint
+    with the current secondary weight or cost, and the unit for the number.
+    Therefore we add a component for the dialog we can then use for both
+    the weight and the cost.
+
+    While there is the \c{InputDialog} and \c{NativeDialog} component in the
+    Felgo SDK, they would most importantly not enable showing the number
+    keyboard. We could also not show the warning for invalid numbers.
+
+    Add a qml file \c{NumberInputDialog}.
+    To match the style of the current state of the app, we want to use the
+    \c{Dialog} from Felgo. As it clashes with the name of the same component
+    in \c{QtQuick.Controls}, we import it as \c{QtControls}.
+
+    \code
+    import Felgo
+    import QtQuick
+    import QtQuick.Controls as QtControls
+
+    Dialog {
+        id: numberInputDialog
+    }
+    \endcode
+
+    The buttons we need, 'Cancel' and 'Ok', are added by default.
+    The title would be set as a property of \c{NumberInputDialog}.
+    The content of the dialog shows the label of the input, a placeholder
+    text, the error message and the maximum number to show the error message
+    for.
+    Add those values as required properties:
+
+    \code
+    Dialog {
+        ...
+
+        required property string label
+        required property string placeholderText
+        required property string errorMessage
+        required property int maxNum
+    }
+    \endcode
+
+    The layout will consist of a \c{Column} with a \c{Row} for the text input,
+    the text for the warning and a menu separator.
+    We will want to wrap the height of those components, which is done with
+    the property \c{autoSize: true}.
+
+    While the Felgo SDK has a \c{TextFieldRow} that consists of an input
+    and a label, it does currently not adapt to dark mode. So add a row with a
+    label and an input with hint for \c{Qt.ImhDigitsOnly}.
+    All together, the layout would look as follows:
+
+    \code
+    autoSize: true
+
+    Column {
+        spacing: 10
+        width: parent.width - 40 // subtract horizontal dialog margins
+        anchors.left: parent.left
+        anchors.leftMargin: 20
+        anchors.top: parent.top
+        anchors.topMargin: 10
+
+        Row {
+            spacing: 10
+            width: parent.width
+
+            AppText {
+                text: numberInputDialog.label
+                anchors.verticalCenter: parent.verticalCenter
+            }
+
+            AppTextField {
+                id: inputNumber
+                placeholderText: numberInputDialog.placeholderText
+                inputMethodHints: Qt.ImhDigitsOnly
+                width: 100
+                enabled: numberInputDialog.isOpen
+                // Switching light/dark mode otherwise focuses the input.
+                anchors.verticalCenter: parent.verticalCenter
+            }
+        }
+
+        AppText {
+            id: txtMaxNumberWarning
+            color: "red"
+            text: numberInputDialog.errorMessage
+            width: parent.width
+            visible: false
+        }
+
+        QtControls.MenuSeparator {
+            width: parent.width
+            padding: 0
+            bottomPadding: 10
+        }
+    }
+    \endcode
+
+    On canceling or accepting, the input needs to get reset and the warning
+    hidden. The dialog also needs to be closed using \c{close()}.
+
+    Write a method \c{reset()} and add handlers for \c{onAccepted} and
+    \c{onCanceled}:
+
+    \code
+    onAccepted: {
+        if (inputNumber.text === "") {
+            reset();
+            close();
+            return;
+        }
+
+        reset();
+        close();
+    }
+
+    onCanceled: {
+        reset();
+        close();
+    }
+
+    function reset() {
+        txtMaxNumberWarning.visible = false;
+        inputNumber.text = "";
+    }
+    \endcode
+
+    The warning would get shown, if the number is larger than \c{maxNum}:
+
+    \code
+    onAccepted: {
+        ...
+
+        var num = Number(inputNumber.text);
+        if (num > maxNum) {
+            txtMaxNumberWarning.visible = true;
+            return;
+        }
+
+        ...
+    }
+    \endcode
+
+    \section1 Use number input dialog component
+
+    Now we define the \c{NumberInputDialog} component two times in \c{Main.qml},
+    one for weight and another for cost.
+
+    Here we take the properties needed to build the label, placeholder,
+    error message and to set the maximum number.
+
+    \code
+    AppModal { ... }
+
+    NumberInputDialog {
+        id: dlgUpdateWeight
+
+        property int weightTotal
+        property int weightLeft
+        property string weightUnit
+
+        title: qsTr("Update weight")
+        label: qsTr("Weight left (%1): ").arg(dlgUpdateWeight.weightUnit)
+        placeholderText: dlgUpdateWeight.weightLeft
+        errorMessage: qsTr("The amount left should be smaller than the "
+                           + "available weight (%1%2)")
+                        .arg(dlgUpdateWeight.weightTotal)
+                        .arg(dlgUpdateWeight.weightUnit)
+        maxNum: weightTotal
+    }
+
+    NumberInputDialog {
+        id: dlgUpdateCost
+
+        property int cost
+        property int secondaryCost
+
+        title: qsTr("Update cost")
+        label: qsTr("New cost (€): ")
+        placeholderText: dlgUpdateCost.secondaryCost
+        errorMessage: qsTr("The new price should be smaller than the "
+                           + "full price (%1€)")
+        maxNum: cost
+    }
+    \endcode
+
+    So now we can finally add the on click handlers to the two buttons.
+    They set the properties and open the dialog:
+
+    \code
+    SwipeButton {
+        iconType: IconType.money
+        ...
+        onClicked: {
+            dlgUpdateCost.cost = delegate.cost
+            dlgUpdateCost.secondaryCost = delegate.secondaryCost
+            dlgUpdateCost.open()
+        }
+    }
+
+    SwipeButton {
+        iconType: IconType.beer
+        ...
+        onClicked: {
+            dlgUpdateWeight.weightTotal = delegate.weightTotal
+            dlgUpdateWeight.weightLeft = delegate.weightLeft
+            dlgUpdateWeight.weightUnit = delegate.weightUnit
+            dlgUpdateWeight.open()
+        }
+    }
+    \endcode
+
+    \image {update_weight_and_cost_2.jpg} {Light weight update dialog}
+    \image {update_weight_and_cost_3.jpg} {Dark cost update dialog}
+
+    \section1 Save weight or cost
+
+    First we need two different handler bindings that would get invoked in the
+    common \c{onAccepted} handler binding in the component file.
+    Add a signal \c{numberAccepted(num: int)} as member of the dialog in
+    \c{NumberInputDialog.qml}, and call it in \c{onAccepted}:
+
+    \code
+    signal numberAccepted(num: int)
+
+    onAccepted: {
+        ...
+
+        numberAccepted(num);
+
+        reset();
+        close();
+    }
+    \endcode
+
+    We could add the handler in each \c{NumberInputDialog}, but as we need
+    to edit the list item and therefore need write access to its properties, we
+    define a connection in both swipe buttons.
+    But then the handler would get called for every list item, not just the one
+    currently edited, so we enable the connection
+    only when in use and compare the item title:
+
+    \code
+    SwipeButton {
+        iconType: IconType.money
+        ...
+        onClicked: {
+            dlgCostConnection.itemTitle = delegate.title;
+            dlgCostConnection.enabled = true;
+            ...
+        }
+
+        Connections {
+            id: dlgCostConnection
+            target: dlgUpdateCost
+            enabled: false
+
+            property string itemTitle
+
+            function onNumberAccepted(num) {
+                if (itemTitle === delegate.title) {
+                    dlgCostConnection.enabled = false;
+                }
+            }
+        }
+    }
+
+    SwipeButton {
+        iconType: IconType.beer
+        ...
+        onClicked: {
+            dlgWeightConnection.itemTitle = delegate.title;
+            dlgWeightConnection.enabled = true;
+            ...
+        }
+
+        Connections {
+            id: dlgWeightConnection
+            target: dlgUpdateWeight
+            enabled: false
+
+            property string itemTitle
+
+            function onNumberAccepted(num) {
+                if (itemTitle === delegate.title) {
+                    dlgWeightConnection.enabled = false;
+                }
+            }
+        }
+    }
+    \endcode
+
+    In each connection, set the corresponding property with the argument:
+
+    \code
+    delegate.secondaryCost = num;
+    \endcode
+
+    and
+
+    \code
+    delegate.weightLeft = num;
+    \endcode
+
+    Both updates also need to be done on the database.
+    Add the two methods \c{updateWeight} and \c{updateCost} to \c{data.js},
+    taking the item title and the weight/cost as parameter.
+    They define a transaction to update the corresponding cell:
+
+    \code
+    function updateWeight(title, weight)
+    {
+        var db = openDatabase();
+        db.transaction(function(tx) {
+            tx.executeSql('UPDATE Collection SET weightLeft = ' + weight
+                          + ' WHERE title = \'' + title + '\'');
+        });
+    }
+
+    function updateCost(title, cost)
+    {
+        var db = openDatabase();
+        db.transaction(function(tx) {
+            tx.executeSql('UPDATE Collection SET secondaryCost = ' + cost
+                          + ' WHERE title = \'' + title + '\'');
+        });
+    }
+    \endcode
+
+    Call the methods in the connections right before setting the delegate
+    properties:
+
+    \code
+    function onNumberAccepted(num) {
+        if (itemTitle === delegate.title) {
+            Data.updateCost(delegate.title, num);
+            delegate.secondaryCost = num;
+            dlgCostConnection.enabled = false;
+        }
+    }
+
+    function onNumberAccepted(num) {
+        if (itemTitle === delegate.title) {
+            Data.updateWeight(delegate.title, num);
+            delegate.weightLeft = num;
+            dlgWeightConnection.enabled = false;
+        }
+    }
+    \endcode
+
+    Now cost and weight should get updated on accepting the respective
+    dialog input, both in the database (loaded when restarting the app), and
+    right away in the list.
+*/

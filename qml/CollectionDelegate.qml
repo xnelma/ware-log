@@ -44,6 +44,68 @@ SwipeOptionsContainer {
         }
     }
 
+    // FIXME Swiping both sides or scrolling the list view while swiping
+    // sometimes deactivates swiping for an item completely.
+    // It happens more often if not just one SwipeButton is used, but the Row.
+    leftOption: Row {
+        SwipeButton {
+            iconType: IconType.money
+            height: delegate.height
+            onClicked: {
+                dlgCostConnection.itemTitle = delegate.title;
+                dlgCostConnection.enabled = true;
+                dlgUpdateCost.cost = delegate.cost
+                dlgUpdateCost.secondaryCost = delegate.secondaryCost
+                dlgUpdateCost.open()
+            }
+
+            Connections {
+                id: dlgCostConnection
+                target: dlgUpdateCost
+                enabled: false
+
+                property string itemTitle
+
+                function onNumberAccepted(num) {
+                    if (itemTitle === delegate.title) {
+                        Data.updateCost(delegate.title, num);
+                        delegate.secondaryCost = num;
+                        dlgCostConnection.enabled = false;
+                    }
+                }
+            }
+        }
+
+        SwipeButton {
+            iconType: IconType.beer
+            height: delegate.height
+            onClicked: {
+                dlgWeightConnection.itemTitle = delegate.title;
+                dlgWeightConnection.enabled = true;
+                dlgUpdateWeight.weightTotal = delegate.weightTotal
+                dlgUpdateWeight.weightLeft = delegate.weightLeft
+                dlgUpdateWeight.weightUnit = delegate.weightUnit
+                dlgUpdateWeight.open()
+            }
+
+            Connections {
+                id: dlgWeightConnection
+                target: dlgUpdateWeight
+                enabled: false
+
+                property string itemTitle
+
+                function onNumberAccepted(num) {
+                    if (itemTitle === delegate.title) {
+                        Data.updateWeight(delegate.title, num);
+                        delegate.weightLeft = num;
+                        dlgWeightConnection.enabled = false;
+                    }
+                }
+            }
+        }
+    }
+
     Item {
         id: content
 

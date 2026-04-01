@@ -146,6 +146,24 @@ function deleteItem(title)
     });
 }
 
+function updateWeight(title, weight)
+{
+    var db = openDatabase();
+    db.transaction(function(tx) {
+        tx.executeSql('UPDATE Collection SET weightLeft = ' + weight
+                      + ' WHERE title = \'' + title + '\'');
+    });
+}
+
+function updateCost(title, cost)
+{
+    var db = openDatabase();
+    db.transaction(function(tx) {
+        tx.executeSql('UPDATE Collection SET secondaryCost = ' + cost
+                      + ' WHERE title = \'' + title + '\'');
+    });
+}
+
 function getAllTags()
 {
     const allTags = [];

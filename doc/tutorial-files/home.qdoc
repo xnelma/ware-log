@@ -45,5 +45,6 @@
          \li \l {05-insert.html} {Insert Item}
          \li \l {06-darkmode.html} {Add Dark Mode}
          \li \l {07-weight.html} {Custom Weight Component}
+         \li \l {08-update.html} {Update Weight and Cost}
      \endlist
 */

@@ -1,6 +1,7 @@
 /*!
     \page 07-weight.html
     \previouspage {Add Dark Mode}
+    \nextpage {Update Weight and Cost}
     \title Custom Weight Component
 
     \brief provides steps for laying out a custom component for item weight

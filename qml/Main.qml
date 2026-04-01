@@ -97,6 +97,39 @@ App {
 
                 EditItemView { id: modalContent }
             }
+
+            NumberInputDialog {
+                id: dlgUpdateWeight
+
+                property int weightTotal
+                property int weightLeft
+                property string weightUnit
+
+                title: qsTr("Update weight")
+                label: qsTr("Weight left (%1): ").arg(dlgUpdateWeight.weightUnit)
+                placeholderText: dlgUpdateWeight.weightLeft
+                errorMessage: qsTr("The amount left should be smaller than the "
+                                   + "available weight (%1%2)")
+                                .arg(dlgUpdateWeight.weightTotal)
+                                .arg(dlgUpdateWeight.weightUnit)
+                maxNum: weightTotal
+            }
+
+            NumberInputDialog {
+                id: dlgUpdateCost
+
+                property int cost
+                property int secondaryCost
+
+                title: qsTr("Update cost")
+                label: qsTr("New cost (€): ")
+                placeholderText: dlgUpdateCost.secondaryCost
+                errorMessage: qsTr("The new price should be smaller than the "
+                                   + "full price (%1€)")
+                                .arg(dlgUpdateCost.cost)
+                maxNum: cost
+            }
+
         } // pageMain
     } // NavigationStack
 }
