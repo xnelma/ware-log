@@ -56,6 +56,8 @@ Dialog {
         }
     }
 
+    signal numberAccepted(num: int)
+
     onAccepted: {
         if (inputNumber.text === "") {
             reset();
@@ -68,7 +70,7 @@ Dialog {
             return;
         }
 
-        console.log("save number " + inputNumber.text);
+        numberAccepted(num);
 
         reset();
         close();

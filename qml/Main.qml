@@ -114,6 +114,10 @@ App {
                                 .arg(dlgUpdateWeight.weightTotal)
                                 .arg(dlgUpdateWeight.weightUnit)
                 maxNum: weightTotal
+
+                onNumberAccepted: (num) => {
+                    console.log("save weight for " + itemTitle + ": " + num);
+                }
             }
 
             NumberInputDialog {
@@ -130,6 +134,10 @@ App {
                                    + "full price (%1€)")
                                 .arg(dlgUpdateCost.cost)
                 maxNum: cost
+
+                onNumberAccepted: (num) => {
+                    console.log("save cost for " + itemTitle + ": " + num);
+                }
             }
 
         } // pageMain

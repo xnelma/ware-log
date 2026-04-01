@@ -57,6 +57,7 @@
             <contents name="add-buttons-to-list-element" title="Add buttons to list element" level="1"/>
             <contents name="add-number-input-dialog-component" title="Add number input dialog component" level="1"/>
             <contents name="use-number-input-dialog-component" title="Use number input dialog component" level="1"/>
+            <contents name="save-weight-or-cost" title="Save weight or cost" level="1"/>
         </page>
     </namespace>
 </INDEX>

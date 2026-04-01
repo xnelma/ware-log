@@ -19,6 +19,7 @@
 <li class="level1"><a href="#add-buttons-to-list-element">Add buttons to list element</a></li>
 <li class="level1"><a href="#add-number-input-dialog-component">Add number input dialog component</a></li>
 <li class="level1"><a href="#use-number-input-dialog-component">Use number input dialog component</a></li>
+<li class="level1"><a href="#save-weight-or-cost">Save weight or cost</a></li>
 </ul>
 </div>
 <div class="sidebar-content" id="sidebar-content"></div></div>
@@ -201,7 +202,34 @@ SwipeButton {
         dlgUpdateWeight<span class="operator">.</span>open()
     }
 }</pre>
-<p class="centerAlign"><img src="images/update_weight_and_cost_2.jpg" alt="{Light weight update dialog}" /></p><p class="centerAlign"><img src="images/update_weight_and_cost_3.jpg" alt="{Dark cost update dialog}" /></p></div>
+<p class="centerAlign"><img src="images/update_weight_and_cost_2.jpg" alt="{Light weight update dialog}" /></p><p class="centerAlign"><img src="images/update_weight_and_cost_3.jpg" alt="{Dark cost update dialog}" /></p><h2 id="save-weight-or-cost">Save weight or cost</h2>
+<p>First we need two different handlers that would get invoked in the common <code translate="no">onAccepted</code> handler in the component file. Add a signal <code translate="no">numberAccepted(num: int)</code> as member of the dialog in <code translate="no">NumberInputDialog.qml</code>, and call it in <code translate="no">onAccepted</code>:</p>
+<pre class="cpp" translate="no">signal numberAccepted(num: <span class="type">int</span>)
+
+onAccepted: {
+    <span class="operator">.</span><span class="operator">.</span><span class="operator">.</span>
+
+    numberAccepted(num);
+
+    reset();
+    close();
+}</pre>
+<p>Then for each <code translate="no">NumberInputDialog</code>, add the handler for this signal.</p>
+<pre class="cpp" translate="no">NumberInputDialog {
+    id: dlgUpdateWeight
+    <span class="operator">.</span><span class="operator">.</span><span class="operator">.</span>
+    onNumberAccepted: (num) <span class="operator">=</span><span class="operator">&gt;</span> {
+        console<span class="operator">.</span>log(<span class="string">&quot;save weight for &quot;</span> <span class="operator">+</span> itemTitle <span class="operator">+</span> <span class="string">&quot;: &quot;</span> <span class="operator">+</span> num);
+}
+
+NumberInputDialog {
+    id: dlgUpdateCost
+    <span class="operator">.</span><span class="operator">.</span><span class="operator">.</span>
+    onNumberAccepted: (num) <span class="operator">=</span><span class="operator">&gt;</span> {
+        console<span class="operator">.</span>log(<span class="string">&quot;save cost for &quot;</span> <span class="operator">+</span> itemTitle <span class="operator">+</span> <span class="string">&quot;: &quot;</span> <span class="operator">+</span> num);
+    }
+}</pre>
+</div>
 <!-- @@@08-update.html -->
 <p class="naviNextPrevious footerNavi">
 <a class="prevPage" href="07-weight.html">Custom Weight Component</a>

@@ -260,5 +260,42 @@
     \image {update_weight_and_cost_2.jpg} {Light weight update dialog}
     \image {update_weight_and_cost_3.jpg} {Dark cost update dialog}
 
+    \section1 Save weight or cost
 
+    First we need two different handlers that would get invoked in the
+    common \c{onAccepted} handler in the component file.
+    Add a signal \c{numberAccepted(num: int)} as member of the dialog in
+    \c{NumberInputDialog.qml}, and call it in \c{onAccepted}:
+
+    \code
+    signal numberAccepted(num: int)
+
+    onAccepted: {
+        ...
+
+        numberAccepted(num);
+
+        reset();
+        close();
+    }
+    \endcode
+
+    Then for each \c{NumberInputDialog}, add the handler for this signal.
+
+    \code
+    NumberInputDialog {
+        id: dlgUpdateWeight
+        ...
+        onNumberAccepted: (num) => {
+            console.log("save weight for " + itemTitle + ": " + num);
+    }
+
+    NumberInputDialog {
+        id: dlgUpdateCost
+        ...
+        onNumberAccepted: (num) => {
+            console.log("save cost for " + itemTitle + ": " + num);
+        }
+    }
+    \endcode
 */
