@@ -36,11 +36,26 @@ function openDatabase()
 
         var res = tx.executeSql('SELECT * FROM Collection');
         if (res.rows.length === 0) {
-            Data.fillDatabase(db);
+            fillSampleDatabase(db);
         }
     });
 
     return db;
+}
+
+function fillSampleDatabase(db)
+{
+    var data = parseSampleData();
+
+    db.transaction(function(tx) {
+        var res = tx.executeSql('SELECT * FROM Collection');
+        if (res.rows.length !== 0)
+            return;
+
+        data.forEach(function(item) {
+            insertItem(item, tx);
+        });
+    });
 }
 
 function insertItem(item, tx)
@@ -71,21 +86,6 @@ function insertItem(item, tx)
     default:
         break;
     }
-}
-
-function fillDatabase(db)
-{
-    var data = parseSampleData();
-
-    db.transaction(function(tx) {
-        var res = tx.executeSql('SELECT * FROM Collection');
-        if (res.rows.length !== 0)
-            return;
-
-        data.forEach(function(item) {
-            insertItem(item, tx);
-        });
-    });
 }
 
 function tagStr(tags)

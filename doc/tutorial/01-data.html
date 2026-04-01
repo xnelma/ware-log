@@ -100,14 +100,14 @@ var obj <span class="operator">=</span> JSON<span class="operator">.</span>parse
 <p>Then we return the database object <code translate="no">db</code> to be able to use it for more transaction calls.</p>
 <h2 id="fill-database-with-sample-data">Fill database with sample data</h2>
 <p>In the same transaction as the table is created, we can also check for an empty table and populate it with the sample data.</p>
-<pre class="cpp" translate="no">var rs <span class="operator">=</span> tx<span class="operator">.</span>executeSql(<span class="char">'SELECT * FROM Collection'</span>);
-<span class="keyword">if</span> (rs<span class="operator">.</span>rows<span class="operator">.</span>length <span class="operator">=</span><span class="operator">=</span><span class="operator">=</span> <span class="number">0</span>) {
-    Data<span class="operator">.</span>fillDatabase(db);
+<pre class="cpp" translate="no">var res <span class="operator">=</span> tx<span class="operator">.</span>executeSql(<span class="char">'SELECT * FROM Collection'</span>);
+<span class="keyword">if</span> (res<span class="operator">.</span>rows<span class="operator">.</span>length <span class="operator">=</span><span class="operator">=</span><span class="operator">=</span> <span class="number">0</span>) {
+    fillSampleDatabase(db);
 }</pre>
-<p>Add the method <code translate="no">fillDatabase</code>, taking the database as parameter (<code translate="no">db</code>), again in the same file.</p>
+<p>Add the method <code translate="no">fillSampleDatabase</code>, taking the database as parameter (<code translate="no">db</code>), again in the same file.</p>
 <p>First we will retrieve the sample data via the method we already wrote, <code translate="no">parseSampleData</code>, then we write a transaction in which every item is inserted into the table. It would also be good to do another check, if the method is not called on an already filled database. Otherwise the entries will get duplicated.</p>
 <p>All together, the method can look like this:</p>
-<pre class="cpp" translate="no">function fillDatabase(db)
+<pre class="cpp" translate="no">function fillSampleDatabase(db)
 {
     var data <span class="operator">=</span> parseSampleData();
 

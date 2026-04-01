@@ -143,14 +143,14 @@
     an empty table and populate it with the sample data.
 
     \code
-    var rs = tx.executeSql('SELECT * FROM Collection');
-    if (rs.rows.length === 0) {
-        Data.fillDatabase(db);
+    var res = tx.executeSql('SELECT * FROM Collection');
+    if (res.rows.length === 0) {
+        fillSampleDatabase(db);
     }
     \endcode
 
-    Add the method \c{fillDatabase}, taking the database as parameter (\c{db}),
-    again in the same file.
+    Add the method \c{fillSampleDatabase}, taking the database as parameter
+    (\c{db}), again in the same file.
 
     First we will retrieve the sample data via the method we already wrote,
     \c{parseSampleData}, then we write a transaction in which every item
@@ -162,7 +162,7 @@
     All together, the method can look like this:
 
     \code
-    function fillDatabase(db)
+    function fillSampleDatabase(db)
     {
         var data = parseSampleData();
 
