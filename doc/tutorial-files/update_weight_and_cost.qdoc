@@ -189,8 +189,8 @@
     Now we define the \c{NumberInputDialog} component two times in \c{Main.qml},
     one for weight and another for cost.
 
-    Here we take properties to build the label, placeholder, error message
-    and to know about the maximum number.
+    Here we take the properties needed to build the label, placeholder,
+    error message and to set the maximum number.
 
     \code
     AppModal { ... }
@@ -198,7 +198,6 @@
     NumberInputDialog {
         id: dlgUpdateWeight
 
-        property string itemTitle
         property int weightTotal
         property int weightLeft
         property string weightUnit
@@ -216,7 +215,6 @@
     NumberInputDialog {
         id: dlgUpdateCost
 
-        property string itemTitle
         property int cost
         property int secondaryCost
 
@@ -237,7 +235,6 @@
         iconType: IconType.money
         ...
         onClicked: {
-            dlgUpdateCost.itemTitle = delegate.title
             dlgUpdateCost.cost = delegate.cost
             dlgUpdateCost.secondaryCost = delegate.secondaryCost
             dlgUpdateCost.open()
@@ -248,7 +245,6 @@
         iconType: IconType.beer
         ...
         onClicked: {
-            dlgUpdateWeight.itemTitle = delegate.title
             dlgUpdateWeight.weightTotal = delegate.weightTotal
             dlgUpdateWeight.weightLeft = delegate.weightLeft
             dlgUpdateWeight.weightUnit = delegate.weightUnit
@@ -262,8 +258,8 @@
 
     \section1 Save weight or cost
 
-    First we need two different handlers that would get invoked in the
-    common \c{onAccepted} handler in the component file.
+    First we need two different handler bindings that would get invoked in the
+    common \c{onAccepted} handler binding in the component file.
     Add a signal \c{numberAccepted(num: int)} as member of the dialog in
     \c{NumberInputDialog.qml}, and call it in \c{onAccepted}:
 
@@ -280,22 +276,61 @@
     }
     \endcode
 
-    Then for each \c{NumberInputDialog}, add the handler for this signal.
+    We could add the handler in each \c{NumberInputDialog}, but as we need
+    to edit the list item, so need access to the model data, we define a
+    connection in both swipe buttons.
+    But then the handler would get called for every list item, not just the one
+    currently edited, so we compare the item title, and enable the connection
+    only when in use:
 
     \code
-    NumberInputDialog {
-        id: dlgUpdateWeight
+    SwipeButton {
+        iconType: IconType.money
         ...
-        onNumberAccepted: (num) => {
-            console.log("save weight for " + itemTitle + ": " + num);
+        onClicked: {
+            dlgCostConnection.itemTitle = delegate.title;
+            dlgCostConnection.enabled = true;
+            ...
+        }
+
+        Connections {
+            id: dlgCostConnection
+            target: dlgUpdateCost
+            enabled: false
+
+            property string itemTitle
+
+            function onNumberAccepted(num) {
+                if (itemTitle === delegate.title) {
+                    dlgCostConnection.enabled = false;
+                }
+            }
+        }
     }
 
-    NumberInputDialog {
-        id: dlgUpdateCost
+    SwipeButton {
+        iconType: IconType.beer
         ...
-        onNumberAccepted: (num) => {
-            console.log("save cost for " + itemTitle + ": " + num);
+        onClicked: {
+            dlgWeightConnection.itemTitle = delegate.title;
+            dlgWeightConnection.enabled = true;
+            ...
+        }
+
+        Connections {
+            id: dlgWeightConnection
+            target: dlgUpdateWeight
+            enabled: false
+
+            property string itemTitle
+
+            function onNumberAccepted(num) {
+                if (itemTitle === delegate.title) {
+                    dlgWeightConnection.enabled = false;
+                }
+            }
         }
     }
     \endcode
+
 */

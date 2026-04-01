@@ -144,13 +144,12 @@ function reset() {
 }</pre>
 <h2 id="use-number-input-dialog-component">Use number input dialog component</h2>
 <p>Now we define the <code translate="no">NumberInputDialog</code> component two times in <code translate="no">Main.qml</code>, one for weight and another for cost.</p>
-<p>Here we take properties to build the label, placeholder, error message and to know about the maximum number.</p>
+<p>Here we take the properties needed to build the label, placeholder, error message and to set the maximum number.</p>
 <pre class="cpp" translate="no">AppModal { <span class="operator">.</span><span class="operator">.</span><span class="operator">.</span> }
 
 NumberInputDialog {
     id: dlgUpdateWeight
 
-    property string itemTitle
     property <span class="type">int</span> weightTotal
     property <span class="type">int</span> weightLeft
     property string weightUnit
@@ -168,7 +167,6 @@ NumberInputDialog {
 NumberInputDialog {
     id: dlgUpdateCost
 
-    property string itemTitle
     property <span class="type">int</span> cost
     property <span class="type">int</span> secondaryCost
 
@@ -184,7 +182,6 @@ NumberInputDialog {
     iconType: IconType<span class="operator">.</span>money
     <span class="operator">.</span><span class="operator">.</span><span class="operator">.</span>
     onClicked: {
-        dlgUpdateCost<span class="operator">.</span>itemTitle <span class="operator">=</span> delegate<span class="operator">.</span>title
         dlgUpdateCost<span class="operator">.</span>cost <span class="operator">=</span> delegate<span class="operator">.</span>cost
         dlgUpdateCost<span class="operator">.</span>secondaryCost <span class="operator">=</span> delegate<span class="operator">.</span>secondaryCost
         dlgUpdateCost<span class="operator">.</span>open()
@@ -195,7 +192,6 @@ SwipeButton {
     iconType: IconType<span class="operator">.</span>beer
     <span class="operator">.</span><span class="operator">.</span><span class="operator">.</span>
     onClicked: {
-        dlgUpdateWeight<span class="operator">.</span>itemTitle <span class="operator">=</span> delegate<span class="operator">.</span>title
         dlgUpdateWeight<span class="operator">.</span>weightTotal <span class="operator">=</span> delegate<span class="operator">.</span>weightTotal
         dlgUpdateWeight<span class="operator">.</span>weightLeft <span class="operator">=</span> delegate<span class="operator">.</span>weightLeft
         dlgUpdateWeight<span class="operator">.</span>weightUnit <span class="operator">=</span> delegate<span class="operator">.</span>weightUnit
@@ -203,7 +199,7 @@ SwipeButton {
     }
 }</pre>
 <p class="centerAlign"><img src="images/update_weight_and_cost_2.jpg" alt="{Light weight update dialog}" /></p><p class="centerAlign"><img src="images/update_weight_and_cost_3.jpg" alt="{Dark cost update dialog}" /></p><h2 id="save-weight-or-cost">Save weight or cost</h2>
-<p>First we need two different handlers that would get invoked in the common <code translate="no">onAccepted</code> handler in the component file. Add a signal <code translate="no">numberAccepted(num: int)</code> as member of the dialog in <code translate="no">NumberInputDialog.qml</code>, and call it in <code translate="no">onAccepted</code>:</p>
+<p>First we need two different handler bindings that would get invoked in the common <code translate="no">onAccepted</code> handler binding in the component file. Add a signal <code translate="no">numberAccepted(num: int)</code> as member of the dialog in <code translate="no">NumberInputDialog.qml</code>, and call it in <code translate="no">onAccepted</code>:</p>
 <pre class="cpp" translate="no">signal numberAccepted(num: <span class="type">int</span>)
 
 onAccepted: {
@@ -214,19 +210,52 @@ onAccepted: {
     reset();
     close();
 }</pre>
-<p>Then for each <code translate="no">NumberInputDialog</code>, add the handler for this signal.</p>
-<pre class="cpp" translate="no">NumberInputDialog {
-    id: dlgUpdateWeight
+<p>We could add the handler in each <code translate="no">NumberInputDialog</code>, but as we need to edit the list item, so need access to the model data, we define a connection in both swipe buttons. But then the handler would get called for every list item, not just the one currently edited, so we compare the item title, and enable the connection only when in use:</p>
+<pre class="cpp" translate="no">SwipeButton {
+    iconType: IconType<span class="operator">.</span>money
     <span class="operator">.</span><span class="operator">.</span><span class="operator">.</span>
-    onNumberAccepted: (num) <span class="operator">=</span><span class="operator">&gt;</span> {
-        console<span class="operator">.</span>log(<span class="string">&quot;save weight for &quot;</span> <span class="operator">+</span> itemTitle <span class="operator">+</span> <span class="string">&quot;: &quot;</span> <span class="operator">+</span> num);
+    onClicked: {
+        dlgCostConnection<span class="operator">.</span>itemTitle <span class="operator">=</span> delegate<span class="operator">.</span>title;
+        dlgCostConnection<span class="operator">.</span>enabled <span class="operator">=</span> <span class="keyword">true</span>;
+        <span class="operator">.</span><span class="operator">.</span><span class="operator">.</span>
+    }
+
+    Connections {
+        id: dlgCostConnection
+        target: dlgUpdateCost
+        enabled: <span class="keyword">false</span>
+
+        property string itemTitle
+
+        function onNumberAccepted(num) {
+            <span class="keyword">if</span> (itemTitle <span class="operator">=</span><span class="operator">=</span><span class="operator">=</span> delegate<span class="operator">.</span>title) {
+                dlgCostConnection<span class="operator">.</span>enabled <span class="operator">=</span> <span class="keyword">false</span>;
+            }
+        }
+    }
 }
 
-NumberInputDialog {
-    id: dlgUpdateCost
+SwipeButton {
+    iconType: IconType<span class="operator">.</span>beer
     <span class="operator">.</span><span class="operator">.</span><span class="operator">.</span>
-    onNumberAccepted: (num) <span class="operator">=</span><span class="operator">&gt;</span> {
-        console<span class="operator">.</span>log(<span class="string">&quot;save cost for &quot;</span> <span class="operator">+</span> itemTitle <span class="operator">+</span> <span class="string">&quot;: &quot;</span> <span class="operator">+</span> num);
+    onClicked: {
+        dlgWeightConnection<span class="operator">.</span>itemTitle <span class="operator">=</span> delegate<span class="operator">.</span>title;
+        dlgWeightConnection<span class="operator">.</span>enabled <span class="operator">=</span> <span class="keyword">true</span>;
+        <span class="operator">.</span><span class="operator">.</span><span class="operator">.</span>
+    }
+
+    Connections {
+        id: dlgWeightConnection
+        target: dlgUpdateWeight
+        enabled: <span class="keyword">false</span>
+
+        property string itemTitle
+
+        function onNumberAccepted(num) {
+            <span class="keyword">if</span> (itemTitle <span class="operator">=</span><span class="operator">=</span><span class="operator">=</span> delegate<span class="operator">.</span>title) {
+                dlgWeightConnection<span class="operator">.</span>enabled <span class="operator">=</span> <span class="keyword">false</span>;
+            }
+        }
     }
 }</pre>
 </div>

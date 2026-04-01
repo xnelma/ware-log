@@ -52,10 +52,25 @@ SwipeOptionsContainer {
             iconType: IconType.money
             height: delegate.height
             onClicked: {
-                dlgUpdateCost.itemTitle = delegate.title
+                dlgCostConnection.itemTitle = delegate.title;
+                dlgCostConnection.enabled = true;
                 dlgUpdateCost.cost = delegate.cost
                 dlgUpdateCost.secondaryCost = delegate.secondaryCost
                 dlgUpdateCost.open()
+            }
+
+            Connections {
+                id: dlgCostConnection
+                target: dlgUpdateCost
+                enabled: false
+
+                property string itemTitle
+
+                function onNumberAccepted(num) {
+                    if (itemTitle === delegate.title) {
+                        dlgCostConnection.enabled = false;
+                    }
+                }
             }
         }
 
@@ -63,11 +78,26 @@ SwipeOptionsContainer {
             iconType: IconType.beer
             height: delegate.height
             onClicked: {
-                dlgUpdateWeight.itemTitle = delegate.title
+                dlgWeightConnection.itemTitle = delegate.title;
+                dlgWeightConnection.enabled = true;
                 dlgUpdateWeight.weightTotal = delegate.weightTotal
                 dlgUpdateWeight.weightLeft = delegate.weightLeft
                 dlgUpdateWeight.weightUnit = delegate.weightUnit
                 dlgUpdateWeight.open()
+            }
+
+            Connections {
+                id: dlgWeightConnection
+                target: dlgUpdateWeight
+                enabled: false
+
+                property string itemTitle
+
+                function onNumberAccepted(num) {
+                    if (itemTitle === delegate.title) {
+                        dlgWeightConnection.enabled = false;
+                    }
+                }
             }
         }
     }

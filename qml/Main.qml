@@ -101,7 +101,6 @@ App {
             NumberInputDialog {
                 id: dlgUpdateWeight
 
-                property string itemTitle
                 property int weightTotal
                 property int weightLeft
                 property string weightUnit
@@ -114,16 +113,11 @@ App {
                                 .arg(dlgUpdateWeight.weightTotal)
                                 .arg(dlgUpdateWeight.weightUnit)
                 maxNum: weightTotal
-
-                onNumberAccepted: (num) => {
-                    console.log("save weight for " + itemTitle + ": " + num);
-                }
             }
 
             NumberInputDialog {
                 id: dlgUpdateCost
 
-                property string itemTitle
                 property int cost
                 property int secondaryCost
 
@@ -134,10 +128,6 @@ App {
                                    + "full price (%1€)")
                                 .arg(dlgUpdateCost.cost)
                 maxNum: cost
-
-                onNumberAccepted: (num) => {
-                    console.log("save cost for " + itemTitle + ": " + num);
-                }
             }
 
         } // pageMain
