@@ -44,6 +44,34 @@ SwipeOptionsContainer {
         }
     }
 
+    // FIXME Swiping both sides or scrolling the list view while swiping
+    // sometimes deactivates swiping for an item completely.
+    // It happens more often if not just one SwipeButton is used, but the Row.
+    leftOption: Row {
+        SwipeButton {
+            iconType: IconType.money
+            height: delegate.height
+            onClicked: {
+                dlgUpdateCost.itemTitle = delegate.title
+                dlgUpdateCost.cost = delegate.cost
+                dlgUpdateCost.secondaryCost = delegate.secondaryCost
+                dlgUpdateCost.open()
+            }
+        }
+
+        SwipeButton {
+            iconType: IconType.beer
+            height: delegate.height
+            onClicked: {
+                dlgUpdateWeight.itemTitle = delegate.title
+                dlgUpdateWeight.weightTotal = delegate.weightTotal
+                dlgUpdateWeight.weightLeft = delegate.weightLeft
+                dlgUpdateWeight.weightUnit = delegate.weightUnit
+                dlgUpdateWeight.open()
+            }
+        }
+    }
+
     Item {
         id: content
 

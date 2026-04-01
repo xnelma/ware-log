@@ -1,0 +1,210 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+<!-- update_weight_and_cost.qdoc -->
+  <meta name="description" content="provides steps for showing inputs to update weight and cost">
+  <title>Update Weight and Cost | WareLog</title>
+<link rel="stylesheet" type="text/css" href="style/style.css"/>
+</head>
+<body>
+  <link rel="prev" href="07-weight.html" />
+<p class="naviNextPrevious headerNavi">
+<a class="prevPage" href="07-weight.html">Custom Weight Component</a>
+</p>
+<div class="sidebar">
+<div class="toc">
+<h3 id="toc">Contents</h3>
+<ul>
+<li class="level1"><a href="#add-buttons-to-list-element">Add buttons to list element</a></li>
+<li class="level1"><a href="#add-number-input-dialog-component">Add number input dialog component</a></li>
+<li class="level1"><a href="#use-number-input-dialog-component">Use number input dialog component</a></li>
+</ul>
+</div>
+<div class="sidebar-content" id="sidebar-content"></div></div>
+<h1 class="title">Update Weight and Cost</h1>
+<!-- $$$08-update.html-description -->
+<div class="descr" id="details">
+<p>The custom weight component uses a second number for the weight; the remaining weight. And in list items there is a secondary cost, which leads to striking through the first number; a reduced cost. It would be convenient to have a quick input for updating those two values for list elements, so we will add this functionality in this chapter.</p>
+<h2 id="add-buttons-to-list-element">Add buttons to list element</h2>
+<p>On swiping left a delete button is shown. Now we add two buttons on swiping right.</p>
+<p>For that put two <code translate="no">SwipeButton</code> items in a <code translate="no">Row</code> and assign it to <code translate="no">leftOption</code> in <code translate="no">CollectionDelegate.qml</code>.</p>
+<pre class="cpp" translate="no">leftOption: Row {
+    SwipeButton {
+        iconType: IconType<span class="operator">.</span>money
+        height: delegate<span class="operator">.</span>height
+    }
+
+    SwipeButton {
+        iconType: IconType<span class="operator">.</span>beer
+        height: delegate<span class="operator">.</span>height
+    }
+}</pre>
+<p class="centerAlign"><img src="images/update_weight_and_cost_1.jpg" alt="{Buttons for updating weight and cost}" /></p><p>The on clicked handler will be added later on.</p>
+<h2 id="add-number-input-dialog-component">Add number input dialog component</h2>
+<p>Both dialogs should take a number input and show a warning if the number is not smaller than the total weight or cost. They should also show a hint with the current secondary weight or cost, and the unit for the number. Therefore we add a component for the dialog we can then use for both the weight and the cost.</p>
+<p>While there is the <code translate="no">InputDialog</code> and <code translate="no">NativeDialog</code> component in the Felgo SDK, they would most importantly not enable showing the number keyboard. We could also not show the warning for invalid numbers.</p>
+<p>Add a qml file <code translate="no">NumberInputDialog</code>. To match the style of the current state of the app, we want to use the <code translate="no">Dialog</code> from Felgo. As it clashes with the name of the same component in <code translate="no">QtQuick.Controls</code>, we import it as <code translate="no">QtControls</code>.</p>
+<pre class="cpp" translate="no">import Felgo
+import <span class="type">QtQuick</span>
+import <span class="type">QtQuick</span><span class="operator">.</span>Controls as <span class="type">QtControls</span>
+
+Dialog {
+    id: numberInputDialog
+}</pre>
+<p>The buttons we need, 'Cancel' and 'Ok', are added by default. The title would be set as a property of <code translate="no">NumberInputDialog</code>. The content of the dialog shows the label of the input, a placeholder text, the error message and the maximum number to show the error message for. Add those values as required properties:</p>
+<pre class="cpp" translate="no">Dialog {
+    <span class="operator">.</span><span class="operator">.</span><span class="operator">.</span>
+
+    required property string label
+    required property string placeholderText
+    required property string errorMessage
+    required property <span class="type">int</span> maxNum
+}</pre>
+<p>The layout will consist of a <code translate="no">Column</code> with a <code translate="no">Row</code> for the text input, the text for the warning and a menu separator. We will want to wrap the height of those components, which is done with the property <code translate="no">autoSize: true</code>.</p>
+<p>While the Felgo SDK has a <code translate="no">TextFieldRow</code> that consists of an input and a label, it does not adapt to dark mode. So add a row with a label and an input with hint for <code translate="no">Qt.ImhDigitsOnly</code>. All together, the layout would look as follows:</p>
+<pre class="cpp" translate="no">autoSize: <span class="keyword">true</span>
+
+Column {
+    spacing: <span class="number">10</span>
+    width: parent<span class="operator">.</span>width <span class="operator">-</span> <span class="number">40</span> <span class="comment">// subtract horizontal dialog margins</span>
+    anchors<span class="operator">.</span>left: parent<span class="operator">.</span>left
+    anchors<span class="operator">.</span>leftMargin: <span class="number">20</span>
+    anchors<span class="operator">.</span>top: parent<span class="operator">.</span>top
+    anchors<span class="operator">.</span>topMargin: <span class="number">10</span>
+
+    Row {
+        spacing: <span class="number">10</span>
+        width: parent<span class="operator">.</span>width
+
+        AppText {
+            text: numberInputDialog<span class="operator">.</span>label
+            anchors<span class="operator">.</span>verticalCenter: parent<span class="operator">.</span>verticalCenter
+        }
+
+        AppTextField {
+            id: inputNumber
+            placeholderText: numberInputDialog<span class="operator">.</span>placeholderText
+            inputMethodHints: <span class="type">Qt</span><span class="operator">.</span>ImhDigitsOnly
+            width: <span class="number">100</span>
+            enabled: numberInputDialog<span class="operator">.</span>isOpen
+            <span class="comment">// Switching light/dark mode otherwise focuses the input.</span>
+            anchors<span class="operator">.</span>verticalCenter: parent<span class="operator">.</span>verticalCenter
+        }
+    }
+
+    AppText {
+        id: txtMaxNumberWarning
+        color: <span class="string">&quot;red&quot;</span>
+        text: numberInputDialog<span class="operator">.</span>errorMessage
+        width: parent<span class="operator">.</span>width
+        visible: <span class="keyword">false</span>
+    }
+
+    <span class="type">QtControls</span><span class="operator">.</span>MenuSeparator {
+        width: parent<span class="operator">.</span>width
+        padding: <span class="number">0</span>
+        bottomPadding: <span class="number">10</span>
+    }
+}</pre>
+<p>On canceling or accepting, the input needs to get reset and the warning hidden. The dialog also needs to be closed using <code translate="no">close()</code>.</p>
+<p>Write a method <code translate="no">reset()</code> and add handlers for <code translate="no">onAccepted</code> and <code translate="no">onCanceled</code>:</p>
+<pre class="cpp" translate="no">onAccepted: {
+    <span class="keyword">if</span> (inputNumber<span class="operator">.</span>text <span class="operator">=</span><span class="operator">=</span><span class="operator">=</span> <span class="string">&quot;&quot;</span>) {
+        reset();
+        close();
+        <span class="keyword">return</span>;
+    }
+
+    reset();
+    close();
+}
+
+onCanceled: {
+    reset();
+    close();
+}
+
+function reset() {
+    txtMaxNumberWarning<span class="operator">.</span>visible <span class="operator">=</span> <span class="keyword">false</span>;
+    inputNumber<span class="operator">.</span>text <span class="operator">=</span> <span class="string">&quot;&quot;</span>;
+}</pre>
+<p>The warning would get shown, if the number is larger than <code translate="no">maxNum</code>:</p>
+<pre class="cpp" translate="no">onAccepted: {
+    <span class="operator">.</span><span class="operator">.</span><span class="operator">.</span>
+
+    var num <span class="operator">=</span> Number(inputNumber<span class="operator">.</span>text);
+    <span class="keyword">if</span> (num <span class="operator">&gt;</span> maxNum) {
+        txtMaxNumberWarning<span class="operator">.</span>visible <span class="operator">=</span> <span class="keyword">true</span>;
+        <span class="keyword">return</span>;
+    }
+
+    <span class="operator">.</span><span class="operator">.</span><span class="operator">.</span>
+}</pre>
+<h2 id="use-number-input-dialog-component">Use number input dialog component</h2>
+<p>Now we define the <code translate="no">NumberInputDialog</code> component two times in <code translate="no">Main.qml</code>, one for weight and another for cost.</p>
+<p>Here we take properties to build the label, placeholder, error message and to know about the maximum number.</p>
+<pre class="cpp" translate="no">AppModal { <span class="operator">.</span><span class="operator">.</span><span class="operator">.</span> }
+
+NumberInputDialog {
+    id: dlgUpdateWeight
+
+    property string itemTitle
+    property <span class="type">int</span> weightTotal
+    property <span class="type">int</span> weightLeft
+    property string weightUnit
+
+    title: qsTr(<span class="string">&quot;Update weight&quot;</span>)
+    label: qsTr(<span class="string">&quot;Weight left (%1): &quot;</span>)<span class="operator">.</span>arg(dlgUpdateWeight<span class="operator">.</span>weightUnit)
+    placeholderText: dlgUpdateWeight<span class="operator">.</span>weightLeft
+    errorMessage: qsTr(<span class="string">&quot;The amount left should be smaller than the &quot;</span>
+                       <span class="operator">+</span> <span class="string">&quot;available weight (%1%2)&quot;</span>)
+                    <span class="operator">.</span>arg(dlgUpdateWeight<span class="operator">.</span>weightTotal)
+                    <span class="operator">.</span>arg(dlgUpdateWeight<span class="operator">.</span>weightUnit)
+    maxNum: weightTotal
+}
+
+NumberInputDialog {
+    id: dlgUpdateCost
+
+    property string itemTitle
+    property <span class="type">int</span> cost
+    property <span class="type">int</span> secondaryCost
+
+    title: qsTr(<span class="string">&quot;Update cost&quot;</span>)
+    label: qsTr(<span class="string">&quot;New cost (€): &quot;</span>)
+    placeholderText: dlgUpdateCost<span class="operator">.</span>secondaryCost
+    errorMessage: qsTr(<span class="string">&quot;The new price should be smaller than the &quot;</span>
+                       <span class="operator">+</span> <span class="string">&quot;full price (%1€)&quot;</span>)
+    maxNum: cost
+}</pre>
+<p>So now we can finally add the on click handlers to the two buttons. They set the properties and open the dialog:</p>
+<pre class="cpp" translate="no">SwipeButton {
+    iconType: IconType<span class="operator">.</span>money
+    <span class="operator">.</span><span class="operator">.</span><span class="operator">.</span>
+    onClicked: {
+        dlgUpdateCost<span class="operator">.</span>itemTitle <span class="operator">=</span> delegate<span class="operator">.</span>title
+        dlgUpdateCost<span class="operator">.</span>cost <span class="operator">=</span> delegate<span class="operator">.</span>cost
+        dlgUpdateCost<span class="operator">.</span>secondaryCost <span class="operator">=</span> delegate<span class="operator">.</span>secondaryCost
+        dlgUpdateCost<span class="operator">.</span>open()
+    }
+}
+
+SwipeButton {
+    iconType: IconType<span class="operator">.</span>beer
+    <span class="operator">.</span><span class="operator">.</span><span class="operator">.</span>
+    onClicked: {
+        dlgUpdateWeight<span class="operator">.</span>itemTitle <span class="operator">=</span> delegate<span class="operator">.</span>title
+        dlgUpdateWeight<span class="operator">.</span>weightTotal <span class="operator">=</span> delegate<span class="operator">.</span>weightTotal
+        dlgUpdateWeight<span class="operator">.</span>weightLeft <span class="operator">=</span> delegate<span class="operator">.</span>weightLeft
+        dlgUpdateWeight<span class="operator">.</span>weightUnit <span class="operator">=</span> delegate<span class="operator">.</span>weightUnit
+        dlgUpdateWeight<span class="operator">.</span>open()
+    }
+}</pre>
+<p class="centerAlign"><img src="images/update_weight_and_cost_2.jpg" alt="{Light weight update dialog}" /></p><p class="centerAlign"><img src="images/update_weight_and_cost_3.jpg" alt="{Dark cost update dialog}" /></p></div>
+<!-- @@@08-update.html -->
+<p class="naviNextPrevious footerNavi">
+<a class="prevPage" href="07-weight.html">Custom Weight Component</a>
+</p>
+</body>
+</html>
