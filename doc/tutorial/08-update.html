@@ -63,7 +63,7 @@ Dialog {
     required property <span class="type">int</span> maxNum
 }</pre>
 <p>The layout will consist of a <code translate="no">Column</code> with a <code translate="no">Row</code> for the text input, the text for the warning and a menu separator. We will want to wrap the height of those components, which is done with the property <code translate="no">autoSize: true</code>.</p>
-<p>While the Felgo SDK has a <code translate="no">TextFieldRow</code> that consists of an input and a label, it does not adapt to dark mode. So add a row with a label and an input with hint for <code translate="no">Qt.ImhDigitsOnly</code>. All together, the layout would look as follows:</p>
+<p>While the Felgo SDK has a <code translate="no">TextFieldRow</code> that consists of an input and a label, it does currently not adapt to dark mode. So add a row with a label and an input with hint for <code translate="no">Qt.ImhDigitsOnly</code>. All together, the layout would look as follows:</p>
 <pre class="cpp" translate="no">autoSize: <span class="keyword">true</span>
 
 Column {
@@ -210,7 +210,7 @@ onAccepted: {
     reset();
     close();
 }</pre>
-<p>We could add the handler in each <code translate="no">NumberInputDialog</code>, but as we need to edit the list item, so need access to the model data, we define a connection in both swipe buttons. But then the handler would get called for every list item, not just the one currently edited, so we compare the item title, and enable the connection only when in use:</p>
+<p>We could add the handler in each <code translate="no">NumberInputDialog</code>, but as we need to edit the list item and therefore need write access to its properties, we define a connection in both swipe buttons. But then the handler would get called for every list item, not just the one currently edited, so we enable the connection only when in use and compare the item title:</p>
 <pre class="cpp" translate="no">SwipeButton {
     iconType: IconType<span class="operator">.</span>money
     <span class="operator">.</span><span class="operator">.</span><span class="operator">.</span>
@@ -258,6 +258,45 @@ SwipeButton {
         }
     }
 }</pre>
+<p>In each connection, set the corresponding property with the argument:</p>
+<pre class="cpp" translate="no">delegate<span class="operator">.</span>secondaryCost <span class="operator">=</span> num;</pre>
+<p>and</p>
+<pre class="cpp" translate="no">delegate<span class="operator">.</span>weightLeft <span class="operator">=</span> num;</pre>
+<p>Both updates also need to be done on the database. Add the two methods <code translate="no">updateWeight</code> and <code translate="no">updateCost</code> to <code translate="no">data.js</code>, taking the item title and the weight/cost as parameter. They define a transaction to update the corresponding cell:</p>
+<pre class="cpp" translate="no">function updateWeight(title<span class="operator">,</span> weight)
+{
+    var db <span class="operator">=</span> openDatabase();
+    db<span class="operator">.</span>transaction(function(tx) {
+        tx<span class="operator">.</span>executeSql(<span class="char">'UPDATE Collection SET weightLeft = '</span> <span class="operator">+</span> weight
+                      <span class="operator">+</span> <span class="char">' WHERE title = \''</span> <span class="operator">+</span> title <span class="operator">+</span> <span class="char">'\''</span>);
+    });
+}
+
+function updateCost(title<span class="operator">,</span> cost)
+{
+    var db <span class="operator">=</span> openDatabase();
+    db<span class="operator">.</span>transaction(function(tx) {
+        tx<span class="operator">.</span>executeSql(<span class="char">'UPDATE Collection SET secondaryCost = '</span> <span class="operator">+</span> cost
+                      <span class="operator">+</span> <span class="char">' WHERE title = \''</span> <span class="operator">+</span> title <span class="operator">+</span> <span class="char">'\''</span>);
+    });
+}</pre>
+<p>Call the methods in the connections right before setting the delegate properties:</p>
+<pre class="cpp" translate="no">function onNumberAccepted(num) {
+    <span class="keyword">if</span> (itemTitle <span class="operator">=</span><span class="operator">=</span><span class="operator">=</span> delegate<span class="operator">.</span>title) {
+        Data<span class="operator">.</span>updateCost(delegate<span class="operator">.</span>title<span class="operator">,</span> num);
+        delegate<span class="operator">.</span>secondaryCost <span class="operator">=</span> num;
+        dlgCostConnection<span class="operator">.</span>enabled <span class="operator">=</span> <span class="keyword">false</span>;
+    }
+}
+
+function onNumberAccepted(num) {
+    <span class="keyword">if</span> (itemTitle <span class="operator">=</span><span class="operator">=</span><span class="operator">=</span> delegate<span class="operator">.</span>title) {
+        Data<span class="operator">.</span>updateWeight(delegate<span class="operator">.</span>title<span class="operator">,</span> num);
+        delegate<span class="operator">.</span>weightLeft <span class="operator">=</span> num;
+        dlgWeightConnection<span class="operator">.</span>enabled <span class="operator">=</span> <span class="keyword">false</span>;
+    }
+}</pre>
+<p>Now cost and weight should get updated on accepting the respective dialog input, both in the database (loaded when restarting the app), and right away in the list.</p>
 </div>
 <!-- @@@08-update.html -->
 <p class="naviNextPrevious footerNavi">

@@ -88,7 +88,7 @@
     the property \c{autoSize: true}.
 
     While the Felgo SDK has a \c{TextFieldRow} that consists of an input
-    and a label, it does not adapt to dark mode. So add a row with a
+    and a label, it does currently not adapt to dark mode. So add a row with a
     label and an input with hint for \c{Qt.ImhDigitsOnly}.
     All together, the layout would look as follows:
 
@@ -277,11 +277,11 @@
     \endcode
 
     We could add the handler in each \c{NumberInputDialog}, but as we need
-    to edit the list item, so need access to the model data, we define a
-    connection in both swipe buttons.
+    to edit the list item and therefore need write access to its properties, we
+    define a connection in both swipe buttons.
     But then the handler would get called for every list item, not just the one
-    currently edited, so we compare the item title, and enable the connection
-    only when in use:
+    currently edited, so we enable the connection
+    only when in use and compare the item title:
 
     \code
     SwipeButton {
@@ -333,4 +333,65 @@
     }
     \endcode
 
+    In each connection, set the corresponding property with the argument:
+
+    \code
+    delegate.secondaryCost = num;
+    \endcode
+
+    and
+
+    \code
+    delegate.weightLeft = num;
+    \endcode
+
+    Both updates also need to be done on the database.
+    Add the two methods \c{updateWeight} and \c{updateCost} to \c{data.js},
+    taking the item title and the weight/cost as parameter.
+    They define a transaction to update the corresponding cell:
+
+    \code
+    function updateWeight(title, weight)
+    {
+        var db = openDatabase();
+        db.transaction(function(tx) {
+            tx.executeSql('UPDATE Collection SET weightLeft = ' + weight
+                          + ' WHERE title = \'' + title + '\'');
+        });
+    }
+
+    function updateCost(title, cost)
+    {
+        var db = openDatabase();
+        db.transaction(function(tx) {
+            tx.executeSql('UPDATE Collection SET secondaryCost = ' + cost
+                          + ' WHERE title = \'' + title + '\'');
+        });
+    }
+    \endcode
+
+    Call the methods in the connections right before setting the delegate
+    properties:
+
+    \code
+    function onNumberAccepted(num) {
+        if (itemTitle === delegate.title) {
+            Data.updateCost(delegate.title, num);
+            delegate.secondaryCost = num;
+            dlgCostConnection.enabled = false;
+        }
+    }
+
+    function onNumberAccepted(num) {
+        if (itemTitle === delegate.title) {
+            Data.updateWeight(delegate.title, num);
+            delegate.weightLeft = num;
+            dlgWeightConnection.enabled = false;
+        }
+    }
+    \endcode
+
+    Now cost and weight should get updated on accepting the respective
+    dialog input, both in the database (loaded when restarting the app), and
+    right away in the list.
 */

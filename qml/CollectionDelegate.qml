@@ -68,6 +68,8 @@ SwipeOptionsContainer {
 
                 function onNumberAccepted(num) {
                     if (itemTitle === delegate.title) {
+                        Data.updateCost(delegate.title, num);
+                        delegate.secondaryCost = num;
                         dlgCostConnection.enabled = false;
                     }
                 }
@@ -95,6 +97,8 @@ SwipeOptionsContainer {
 
                 function onNumberAccepted(num) {
                     if (itemTitle === delegate.title) {
+                        Data.updateWeight(delegate.title, num);
+                        delegate.weightLeft = num;
                         dlgWeightConnection.enabled = false;
                     }
                 }
