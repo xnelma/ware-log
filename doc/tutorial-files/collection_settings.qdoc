@@ -1,0 +1,62 @@
+/*!
+    \page 09-setup.html
+    \previouspage {Update Weight and Cost}
+    \title Set Up Collection
+
+    \brief provides steps for configuring domain properties of a collection
+
+    ...
+
+    \section1 Navigate to settings page
+
+    Add another menu item with the title "Collection Settings", and another
+    qml component file \c{CollectionSettingsView.qml} with an import for
+    the \c{Felgo} module and an empty \c{AppPage} with the title
+    "Collection Settings".
+
+    \image {collection_settings_menu_item.jpg} {Menu item for collection settings}
+
+    \code
+    import Felgo
+
+    AppPage {
+        title: qsTr("Collection Settings")
+    }
+    \endcode
+
+    Then add this page inside a \c{Component} in \c{Main.qml}, give it
+    an id.
+
+    \code
+    Component {
+        id: compCollectionSettings
+
+        CollectionSettingsView {
+        }
+    }
+    \endcode
+
+    Then, on clicking the menu item, push the component onto the stack.
+    The navigation stack should already have been added by the project
+    creation wizard.
+
+    \code
+    NavigationStack {
+        AppPage {
+            ...
+
+            rightBarItem: IconButtonBarItem {
+                ...
+
+                Menu {
+                    ...
+
+                    MenuItem {
+                        text: qsTr("Collection Settings")
+                        onClicked: pageMain.navigationStack
+                            .push(compCollectionSettings)
+                    }
+    ...
+    \endcode
+
+*/

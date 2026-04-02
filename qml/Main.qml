@@ -57,6 +57,12 @@ App {
                         onClicked: settings.darkModeEnabled
                                    = !settings.darkModeEnabled
                     }
+
+                    MenuItem {
+                        text: qsTr("Collection Settings")
+                        onClicked: pageMain.navigationStack
+                            .push(compCollectionSettings)
+                    }
                 }
             }
 
@@ -128,6 +134,13 @@ App {
                                    + "full price (%1€)")
                                 .arg(dlgUpdateCost.cost)
                 maxNum: cost
+            }
+
+            Component {
+                id: compCollectionSettings
+
+                CollectionSettingsView {
+                }
             }
 
         } // pageMain

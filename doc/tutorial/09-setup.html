@@ -1,0 +1,64 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+<!-- collection_settings.qdoc -->
+  <meta name="description" content="provides steps for configuring domain properties of a collection">
+  <title>Set Up Collection | WareLog</title>
+<link rel="stylesheet" type="text/css" href="style/style.css"/>
+</head>
+<body>
+  <link rel="prev" href="08-update.html" />
+<p class="naviNextPrevious headerNavi">
+<a class="prevPage" href="08-update.html">Update Weight and Cost</a>
+</p>
+<div class="sidebar">
+<div class="toc">
+<h3 id="toc">Contents</h3>
+<ul>
+<li class="level1"><a href="#navigate-to-settings-page">Navigate to settings page</a></li>
+</ul>
+</div>
+<div class="sidebar-content" id="sidebar-content"></div></div>
+<h1 class="title">Set Up Collection</h1>
+<!-- $$$09-setup.html-description -->
+<div class="descr" id="details">
+<p>...</p>
+<h2 id="navigate-to-settings-page">Navigate to settings page</h2>
+<p>Add another menu item with the title &quot;Collection Settings&quot;, and another qml component file <code translate="no">CollectionSettingsView.qml</code> with an import for the <code translate="no">Felgo</code> module and an empty <code translate="no">AppPage</code> with the title &quot;Collection Settings&quot;.</p>
+<p class="centerAlign"><img src="images/collection_settings_menu_item.jpg" alt="{Menu item for collection settings}" /></p><pre class="cpp" translate="no">import Felgo
+
+AppPage {
+    title: qsTr(<span class="string">&quot;Collection Settings&quot;</span>)
+}</pre>
+<p>Then add this page inside a <code translate="no">Component</code> in <code translate="no">Main.qml</code>, give it an id.</p>
+<pre class="cpp" translate="no">Component {
+    id: compCollectionSettings
+
+    CollectionSettingsView {
+    }
+}</pre>
+<p>Then, on clicking the menu item, push the component onto the stack. The navigation stack should already have been added by the project creation wizard.</p>
+<pre class="cpp" translate="no">NavigationStack {
+    AppPage {
+        <span class="operator">.</span><span class="operator">.</span><span class="operator">.</span>
+
+        rightBarItem: IconButtonBarItem {
+            <span class="operator">.</span><span class="operator">.</span><span class="operator">.</span>
+
+            Menu {
+                <span class="operator">.</span><span class="operator">.</span><span class="operator">.</span>
+
+                MenuItem {
+                    text: qsTr(<span class="string">&quot;Collection Settings&quot;</span>)
+                    onClicked: pageMain<span class="operator">.</span>navigationStack
+                        <span class="operator">.</span>push(compCollectionSettings)
+                }
+<span class="operator">.</span><span class="operator">.</span><span class="operator">.</span></pre>
+</div>
+<!-- @@@09-setup.html -->
+<p class="naviNextPrevious footerNavi">
+<a class="prevPage" href="08-update.html">Update Weight and Cost</a>
+</p>
+</body>
+</html>
