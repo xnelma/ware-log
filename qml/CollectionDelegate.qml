@@ -19,8 +19,9 @@ SwipeOptionsContainer {
     required property string weightUnit
     required property int cost
     required property int secondaryCost
-    required property string primaryColor
-    required property string secondaryColor
+    required property string mainColor
+    required property string textureColor
+    required property string borderColor
     required property string tagStr
     property list<string> tags
 
@@ -121,8 +122,9 @@ SwipeOptionsContainer {
             weightLeft: delegate.weightLeft
             weightUnit: delegate.weightUnit
 
-            primaryColor: delegate.primaryColor
-            secondaryColor: delegate.secondaryColor
+            mainColor: delegate.mainColor
+            textureColor: delegate.textureColor
+            borderColor: delegate.borderColor
         }
 
         Column {

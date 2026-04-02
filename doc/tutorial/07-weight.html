@@ -19,14 +19,14 @@
 <h3 id="toc">Contents</h3>
 <ul>
 <li class="level1"><a href="#show-item-weight">Show item weight</a></li>
-<li class="level1"><a href="#show-secondary-color">Show secondary color</a></li>
+<li class="level1"><a href="#show-texture-color">Show texture color</a></li>
 </ul>
 </div>
 <div class="sidebar-content" id="sidebar-content"></div></div>
 <h1 class="title">Custom Weight Component</h1>
 <!-- $$$07-weight.html-description -->
 <div class="descr" id="details">
-<p>So far, the list view shows only the primary color for an item, and the weight not at all, especially not the remaining weight. In this chapter we will write a custom component that will also show those properties.</p>
+<p>So far, the list view shows only the main color for an item, and the weight not at all, especially not the remaining weight. In this chapter we will write a custom component that will also show those properties.</p>
 <h2 id="show-item-weight">Show item weight</h2>
 <p>First, the item weight. Add a qml file for the custom component with e.g. the file name <code translate="no">WeightIndicator.qml</code>. The base item would be the same <code translate="no">Rectangle</code> as before, but height and width are set in the delegate, and the color in the component qml file:</p>
 <pre class="cpp" translate="no">WeightIndicator {
@@ -41,10 +41,10 @@ import <span class="type">QtQuick</span>
 import <span class="type">QtQuick</span><span class="operator">.</span>Layouts
 
 Rectangle {
-    color: primaryColor
+    color: mainColor
 }</pre>
 <p>If you build now, the list items should still look the same.</p>
-<p>Then add properties for the data the component will show: the total and remaining weight, the weight unit and the primary and secondary color.</p>
+<p>Then add properties for the data the component will show: the total and remaining weight, the weight unit and the main, texture and border color.</p>
 <pre class="cpp" translate="no">WeightIndicator {
     id: weightIndicator
 
@@ -54,8 +54,9 @@ Rectangle {
     weightLeft: delegate<span class="operator">.</span>weightLeft
     weightUnit: delegate<span class="operator">.</span>weightUnit
 
-    primaryColor: delegate<span class="operator">.</span>primaryColor
-    secondaryColor: delegate<span class="operator">.</span>secondaryColor
+    mainColor: delegate<span class="operator">.</span>mainColor
+    textureColor: delegate<span class="operator">.</span>textureColor
+    borderColor: delegate<span class="operator">.</span>borderColor
 }</pre>
 <p>and in <code translate="no">WeightIndicator.qml</code>:</p>
 <pre class="cpp" translate="no">Rectangle {
@@ -63,10 +64,11 @@ Rectangle {
     required property <span class="type">int</span> weightLeft
     required property string weightUnit
 
-    required property string primaryColor
-    required property string secondaryColor
+    required property string mainColor
+    required property string textureColor
+    required property string borderColor
 
-    color: primaryColor
+    color: mainColor
 }</pre>
 <p>The component should show labels for the remaining and total weight, and visualize the amount left, which can be done by greying out a proportion of the rectangle. This can all be done via child elements of the rectangle. Add an <code translate="no">AppText</code> item for the remaining weight and the total weight, and another rectangle, in black and with a low opacity, e.g. 0.4, to the base rectangle.</p>
 <pre class="cpp" translate="no">Rectangle {
@@ -130,13 +132,13 @@ AppText {
     <span class="operator">.</span><span class="operator">.</span><span class="operator">.</span>
 }</pre>
 <p>The <code translate="no">anchors.horizontalCenter</code> property is not used anymore due to setting the full width for the <code translate="no">elide</code> property and using <code translate="no">horizontalAlignment</code> instead.</p>
-<p class="centerAlign"><img src="images/weight_indicator_1.jpg" alt="{Weight labels and grey layer added}" /></p><h2 id="show-secondary-color">Show secondary color</h2>
-<p>The secondary color should help illustrate some characteristics of an item, e.g. the item texture. Another characteristic would be an outer color of an item, so some kind of hull. For now, I will add a texture for the sand example database as hardcoded asset. The texture will simply be noise I generated using a graphics editor. It has an alpha channel instead of the white color in contrast to black.</p>
-<p>Add an image <code translate="no">texture.png</code> with some black-and-transparent texture to the <code translate="no">assets</code> folder. This image will be used as a mask with the <code translate="no">MultiEffect</code> component (requires the <code translate="no">QtQuick.Effects</code> import), applied to a <code translate="no">Rectangle</code>. The rectangle is set to the secondary color, and the effect will have properties set to smooth out the noise a bit.</p>
+<p class="centerAlign"><img src="images/weight_indicator_1.jpg" alt="{Weight labels and grey layer added}" /></p><h2 id="show-texture-color">Show texture color</h2>
+<p>The texture and border color should help illustrate some characteristics of an item, so color a texture if applicable, and a hull of some sorts. For now, I will add a texture for the sand example database as hardcoded asset. The texture will simply be noise I generated using a graphics editor. It has an alpha channel instead of the white color in contrast to black.</p>
+<p>Add an image <code translate="no">texture.png</code> with some black-and-transparent texture, preferrably noise, to the <code translate="no">assets</code> folder. This image will be used as a mask with the <code translate="no">MultiEffect</code> component (requires the <code translate="no">QtQuick.Effects</code> import), applied to a <code translate="no">Rectangle</code>. The rectangle is set to the texture color, and the effect will have properties set to smooth out the noise a bit.</p>
 <p>Both <code translate="no">Rectangle</code> and <code translate="no">MultiEffect</code> should be added before the label and transparent-black <code translate="no">Rectangle</code>, to be drawn below them (but the order can also be set using the z property).</p>
 <pre class="cpp" translate="no">Rectangle {
-    id: rectSecondaryColor
-    color: secondaryColor
+    id: rectTextureColor
+    color: textureColor
 
     height: parent<span class="operator">.</span>height
     width: parent<span class="operator">.</span>width
@@ -144,8 +146,8 @@ AppText {
 }
 
 MultiEffect {
-    source: rectSecondaryColor
-    anchors<span class="operator">.</span>fill: rectSecondaryColor
+    source: rectTextureColor
+    anchors<span class="operator">.</span>fill: rectTextureColor
 
     maskEnabled: <span class="keyword">true</span>
     maskSource: Image {
@@ -157,7 +159,7 @@ MultiEffect {
     maskSpreadAtMax: <span class="number">0.7</span>
     maskSpreadAtMin: <span class="number">0.7</span>
 }</pre>
-<p class="centerAlign"><img src="images/weight_indicator_2.jpg" alt="{Secondary color shown by texture}" /></p><p>For now, this is all we will do for this component. Especially setting the texture and using the secondary color can get inherently more complex, for example since the texture depends on the domain of the database. There would have to be settings to choose the texture behavior, or more generally the behavior of the second color, for items in a database. We will revisit textures and the secondary color later on.</p>
+<p class="centerAlign"><img src="images/weight_indicator_2.jpg" alt="{Texture color shown by texture}" /></p><p>For now, this is all we will do for this component. Especially setting the texture and using the texture color can get inherently more complex, for example since the texture depends on the domain of the database. There would have to be settings to choose the texture behavior, or more generally the behavior of the second color, for items in a database. We will revisit textures and the texture color later on.</p>
 </div>
 <!-- @@@07-weight.html -->
 <p class="naviNextPrevious footerNavi">

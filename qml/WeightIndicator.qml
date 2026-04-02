@@ -8,14 +8,15 @@ Rectangle {
     required property int weightLeft
     required property string weightUnit
 
-    required property string primaryColor
-    required property string secondaryColor
+    required property string mainColor
+    required property string textureColor
+    required property string borderColor
 
-    color: primaryColor
+    color: mainColor
 
     Rectangle {
-        id: rectSecondaryColor
-        color: secondaryColor
+        id: rectTextureColor
+        color: textureColor
 
         height: parent.height
         width: parent.width
@@ -23,8 +24,8 @@ Rectangle {
     }
 
     MultiEffect {
-        source: rectSecondaryColor
-        anchors.fill: rectSecondaryColor
+        source: rectTextureColor
+        anchors.fill: rectTextureColor
 
         maskEnabled: true
         maskSource: Image {

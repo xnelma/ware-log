@@ -88,8 +88,9 @@ required property <span class="type">int</span> weightLeft
 required property string weightUnit
 required property <span class="type">int</span> cost
 required property <span class="type">int</span> secondaryCost
-required property string primaryColor
-required property string secondaryColor
+required property string mainColor
+required property string textureColor
+required property string borderColor
 required property string tagStr
 property list<span class="operator">&lt;</span>string<span class="operator">&gt;</span> tags</pre>
 <p>The list of tags will be created from <code translate="no">tagStr</code> when it is available:</p>
@@ -107,7 +108,7 @@ property list<span class="operator">&lt;</span>string<span class="operator">&gt;
     height: parent<span class="operator">.</span>height
     width: delegate<span class="operator">.</span>width <span class="operator">/</span> <span class="number">7</span>
 
-    color: delegate<span class="operator">.</span>primaryColor
+    color: delegate<span class="operator">.</span>mainColor
 }
 
 Column {

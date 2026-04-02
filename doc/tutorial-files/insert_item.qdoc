@@ -293,7 +293,7 @@
     \section2 Layout color selection
 
     Now we add a row for setting the colors for a list item.
-    There will be two colors, so add two buttons.
+    There will be three colors, so add three buttons.
     Remove their margins, so they will align well with other UI elements.
     Add the colors as properties, so they can be changed and accessed later on,
     when writing the item to the database.
@@ -303,19 +303,27 @@
         id: rowColors
         spacing: 10
 
-        property string primaryColor: "#000"
-        property string secondaryColor: "#000"
+        property string mainColor: "#000"
+        property string textureColor: "#000"
+        property string borderColor: "#000"
 
         AppButton {
-            text: "Color 1"
-            backgroundColor: rowColors.primaryColor
+            text: "Main Color"
+            backgroundColor: rowColors.mainColor
             horizontalMargin: 0
             verticalMargin: 0
         }
 
         AppButton {
-            text: "Color 2"
-            backgroundColor: rowColors.secondaryColor
+            text: "Texture Color"
+            backgroundColor: rowColors.textureColor
+            horizontalMargin: 0
+            verticalMargin: 0
+        }
+
+        AppButton {
+            text: "Border Color"
+            backgroundColor: rowColors.borderColor
             horizontalMargin: 0
             verticalMargin: 0
         }
@@ -620,7 +628,7 @@
         ...
         colorName: rowTitle.originColor
         onColorNameChanged: rowTitle.originColor = colorName
-        // or rowColors.primaryColor or rowColors.secondaryColor
+        // or rowColors.mainColor, rowColors.textureColor or .borderColor
         ...
     }
     \endcode
@@ -780,7 +788,7 @@
     function insertItem(tx, item)
     {
         tx.executeSql(
-            'INSERT INTO Collection VALUES(?,?,?,?,?,?,?,?,?,?,?,?,?,?)',
+            'INSERT INTO Collection VALUES(?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)',
             [item.title,
              item.origin, item.originColor,
              item.type,
@@ -788,7 +796,7 @@
              item.weightTotal, item.weightLeft,
              item.weightUnit,
              item.cost, item.secondaryCost,
-             item.primaryColor, item.secondaryColor,
+             item.mainColor, item.textureColor, item.borderColor,
              tagStr(item.tags)]
         );
     }
@@ -811,7 +819,7 @@
         }
         case 2: {
             tx.executeSql(
-                'INSERT INTO Collection VALUES(?,?,?,?,?,?,?,?,?,?,?,?,?,?)',
+                'INSERT INTO Collection VALUES(?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)',
                 [item.title,
                  item.origin, item.originColor,
                  item.type,
@@ -819,7 +827,7 @@
                  item.weightTotal, item.weightLeft,
                  item.weightUnit,
                  item.cost, item.secondaryCost,
-                 item.primaryColor, item.secondaryColor,
+                 item.mainColor, item.textureColor, item.borderColor,
                  tagStr(item.tags)]
             );
             break;
@@ -842,8 +850,9 @@
                 origin: inputOrigin.text,
                 originColor: rowTitle.originColor,
                 type: comboTypes.editText,
-                primaryColor: rowColors.primaryColor,
-                secondaryColor: rowColors.secondaryColor,
+                mainColor: rowColors.mainColor,
+                textureColor: rowColors.textureColor,
+                borderColor: rowColors.borderColor,
                 cost: Number(inputCost.text),
                 secondaryCost: Number(inputCost.text),
                 weightTotal: Number(inputWeight.text),
@@ -901,8 +910,9 @@
             rowTitle.originColor = "#000";
             comboTypes.currentIndex = 0;
             comboTypes.model = Data.getAllTypes();
-            rowColors.primaryColor = "#000";
-            rowColors.secondaryColor = "#000";
+            rowColors.mainColor = "#000";
+            rowColors.textureColor = "#000";
+            rowColors.borderColor = "#000";
             inputCost.text = "";
             comboCostPerWeightUnit.currentIndex = 0;
             inputWeight.text = "";
@@ -935,10 +945,12 @@
     Row {
         id: rowColors
         ...
-        onPrimaryColorChanged: btnPrimaryColor.colorName
-            = Qt.binding(function () {return primaryColor})
-        onSecondaryColorChanged: btnSecondaryColor.colorName
-            = Qt.binding(function () {return secondaryColor})
+        onMainColorChanged: btnMainColor.colorName
+            = Qt.binding(function () {return mainColor})
+        onTextureColorChanged: btnTextureColor.colorName
+            = Qt.binding(function () {return textureColor})
+        onBorderColorChanged: btnBorderColor.colorName
+            = Qt.binding(function () {return borderColor})
         ...
     }
     \endcode

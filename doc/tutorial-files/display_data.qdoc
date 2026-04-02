@@ -99,8 +99,9 @@
     required property string weightUnit
     required property int cost
     required property int secondaryCost
-    required property string primaryColor
-    required property string secondaryColor
+    required property string mainColor
+    required property string textureColor
+    required property string borderColor
     required property string tagStr
     property list<string> tags
     \endcode
@@ -148,7 +149,7 @@
         height: parent.height
         width: delegate.width / 7
 
-        color: delegate.primaryColor
+        color: delegate.mainColor
     }
 
     Column {

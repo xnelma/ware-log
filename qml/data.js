@@ -31,7 +31,7 @@ function openDatabase()
                       'weightTotal NUMERIC, weightLeft NUMERIC, ' +
                       'weightUnit TEXT, ' +
                       'cost NUMERIC, secondaryCost NUMERIC, ' +
-                      'primaryColor TEXT, secondaryColor TEXT, ' +
+                      'mainColor TEXT, textureColor TEXT, borderColor TEXT, ' +
                       'tags TEXT)');
 
         var res = tx.executeSql('SELECT * FROM Collection');
@@ -55,7 +55,7 @@ function insertItem(item, tx)
     }
     case 2: {
         tx.executeSql(
-            'INSERT INTO Collection VALUES(?,?,?,?,?,?,?,?,?,?,?,?,?,?)',
+            'INSERT INTO Collection VALUES(?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)',
             [item.title,
              item.origin, item.originColor,
              item.type,
@@ -63,7 +63,7 @@ function insertItem(item, tx)
              item.weightTotal, item.weightLeft,
              item.weightUnit,
              item.cost, item.secondaryCost,
-             item.primaryColor, item.secondaryColor,
+             item.mainColor, item.textureColor, item.borderColor,
              tagStr(item.tags)]
         );
         break;
@@ -117,8 +117,9 @@ function get(model)
                   weightLeft: item.weightLeft,
                   weightUnit: item.weightUnit,
                   cost: item.cost, secondaryCost: item.secondaryCost,
-                  primaryColor: item.primaryColor,
-                  secondaryColor: item.secondaryColor,
+                  mainColor: item.mainColor,
+                  textureColor: item.textureColor,
+                  borderColor: item.borderColor,
                   tagStr: item.tags
                   // TODO Why can't I directly add a list of string as
                   // property of the list element? If I use the property
