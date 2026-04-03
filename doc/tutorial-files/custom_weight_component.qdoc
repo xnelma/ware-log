@@ -45,6 +45,11 @@
 
     Then add properties for the data the component will show: the total and
     remaining weight, the weight unit and the main, texture and border color.
+    Also add properties for texture and border settings, including an enum
+    for the texture type (so far none or noise). Specify default values except
+    for the main color. Later in this chapter latter properties will be used
+    to expose some of the texture properties, so the texture can be
+    manipulated when the component is instantiated.
 
     \code
     WeightIndicator {
@@ -59,6 +64,10 @@
         mainColor: delegate.mainColor
         textureColor: delegate.textureColor
         borderColor: delegate.borderColor
+
+        textureType: WeightIndicator.Texture.Noise
+        textureHeight: height * 3 // approx. 380, the height of texture.png
+        textureWidth: width * 4 // approx. 200, the width of texture.png
     }
     \endcode
 
@@ -66,13 +75,24 @@
 
     \code
     Rectangle {
+        id: wiRoot
+
         required property int weightTotal
         required property int weightLeft
         required property string weightUnit
 
         required property string mainColor
-        required property string textureColor
-        required property string borderColor
+        property string textureColor: mainColor
+        property string borderColor: mainColor
+
+        enum Texture { None, Noise }
+
+        property int borderWidth: 0
+        property int textureType: WeightIndicator.None
+        property int textureHeight: height
+        property int textureWidth: width
+        property bool editable: false
+        property bool smooth: false
 
         color: mainColor
     }
@@ -184,8 +204,18 @@
     This image will be used as a mask with the \c{MultiEffect} component
     (requires the \c{QtQuick.Effects} import),
     applied to a \c{Rectangle}.
-    The rectangle is set to the texture color, and the effect will have
-    properties set to smooth out the noise a bit.
+    The rectangle is set to the texture color, and the effect will have the
+    mask properties set to smooth out the noise a bit.
+    The image is not defined inside the effect, such that the
+    \l {https://doc.qt.io/qt-6/qml-qtquick-item.html#item-layers}
+       {layer can be enabled}.
+    While this should help reduce aliasing, it also gives options to
+    manipulate the texture: by changing the texture size and whether it should
+    be smooth, we can get some smooth wood-like texture and a noisy, very
+    fine sand-like texture with just the texture.png asset.
+    It would be even better to use the Qt shader effect, but let's just use
+    the picture for now and leverage some scaling and artifact byproducts
+    for simplicity.
 
     Both \c{Rectangle} and \c{MultiEffect} should be added before the
     label and transparent-black \c{Rectangle}, to be drawn below them (but the
@@ -195,34 +225,44 @@
     Rectangle {
         id: rectTextureColor
         color: textureColor
-
+        visible: false
         height: parent.height
         width: parent.width
-        visible: false
     }
 
     MultiEffect {
         source: rectTextureColor
         anchors.fill: rectTextureColor
 
-        maskEnabled: true
-        maskSource: Image {
-            source: "../assets/texture.png"
-            fillMode: Image.PreserveAspectCrop
-        }
+        property bool enabled: textureType == WeightIndicator.Noise
+            && textureColor !== mainColor
+        visible: enabled
+        maskEnabled: enabled
+        maskSource: mask
         maskThresholdMax: 0.7
         maskThresholdMin: 0.3
         maskSpreadAtMax: 0.7
         maskSpreadAtMin: 0.7
     }
+
+    Image {
+        id: mask
+        source: "../assets/texture.png"
+        visible: false
+        height: parent.height
+        width: parent.width
+        fillMode: Image.Image.PreserveAspectCrop
+        layer.enabled: true
+        layer.live: wiRoot.editable
+        layer.smooth: wiRoot.smooth
+        layer.textureSize: Qt.size(textureWidth, textureHeight)
+    }
     \endcode
 
     \image {weight_indicator_2.jpg} {Texture color shown by texture}
 
-    For now, this is all we will do for this component. Especially setting
-    the texture and using the texture color can get inherently more complex,
-    for example since the texture depends on the domain of the database.
-    There would have to be settings to choose the texture behavior, or more
-    generally the behavior of the second color, for items in a database.
-    We will revisit textures and the texture color later on.
+    It has to be noted that using the texture this way is inherently fragile,
+    as it depends heavily on the added texture, scaling of the UI elements,
+    and the artifacts resulting from the Qt implementation among other points.
+    But it gives a first way of creating different textures with less code.
 */

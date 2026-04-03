@@ -125,6 +125,10 @@ SwipeOptionsContainer {
             mainColor: delegate.mainColor
             textureColor: delegate.textureColor
             borderColor: delegate.borderColor
+
+            textureType: WeightIndicator.Texture.Noise
+            textureHeight: height * 3 // approx. 380, the height of texture.png
+            textureWidth: width * 4 // approx. 220, the width of texture.png
         }
 
         Column {
