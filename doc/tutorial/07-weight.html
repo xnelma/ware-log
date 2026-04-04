@@ -20,6 +20,7 @@
 <ul>
 <li class="level1"><a href="#show-item-weight">Show item weight</a></li>
 <li class="level1"><a href="#show-texture-color">Show texture color</a></li>
+<li class="level1"><a href="#show-border-color">Show border color</a></li>
 </ul>
 </div>
 <div class="sidebar-content" id="sidebar-content"></div></div>
@@ -44,7 +45,7 @@ Rectangle {
     color: mainColor
 }</pre>
 <p>If you build now, the list items should still look the same.</p>
-<p>Then add properties for the data the component will show: the total and remaining weight, the weight unit and the main, texture and border color.</p>
+<p>Then add properties for the data the component will show: the total and remaining weight, the weight unit and the main, texture and border color. Also add properties for texture and border settings, including an enum for the texture type (so far none or noise). Specify default values except for the main color. Later in this chapter latter properties will be used to expose some of the texture properties, so the texture can be manipulated when the component is instantiated.</p>
 <pre class="cpp" translate="no">WeightIndicator {
     id: weightIndicator
 
@@ -57,16 +58,31 @@ Rectangle {
     mainColor: delegate<span class="operator">.</span>mainColor
     textureColor: delegate<span class="operator">.</span>textureColor
     borderColor: delegate<span class="operator">.</span>borderColor
+
+    textureType: WeightIndicator<span class="operator">.</span>Texture<span class="operator">.</span>Noise
+    textureHeight: height <span class="operator">*</span> <span class="number">3</span> <span class="comment">// approx. 380, the height of texture.png</span>
+    textureWidth: width <span class="operator">*</span> <span class="number">4</span> <span class="comment">// approx. 200, the width of texture.png</span>
 }</pre>
 <p>and in <code translate="no">WeightIndicator.qml</code>:</p>
 <pre class="cpp" translate="no">Rectangle {
+    id: wiRoot
+
     required property <span class="type">int</span> weightTotal
     required property <span class="type">int</span> weightLeft
     required property string weightUnit
 
     required property string mainColor
-    required property string textureColor
-    required property string borderColor
+    property string textureColor: mainColor
+    property string borderColor: mainColor
+
+    <span class="keyword">enum</span> Texture { None<span class="operator">,</span> Noise }
+
+    property <span class="type">int</span> borderWidth: <span class="number">0</span>
+    property <span class="type">int</span> textureType: WeightIndicator<span class="operator">.</span>None
+    property <span class="type">int</span> textureHeight: height
+    property <span class="type">int</span> textureWidth: width
+    property <span class="type">bool</span> editable: <span class="keyword">false</span>
+    property <span class="type">bool</span> smooth: <span class="keyword">false</span>
 
     color: mainColor
 }</pre>
@@ -134,32 +150,64 @@ AppText {
 <p>The <code translate="no">anchors.horizontalCenter</code> property is not used anymore due to setting the full width for the <code translate="no">elide</code> property and using <code translate="no">horizontalAlignment</code> instead.</p>
 <p class="centerAlign"><img src="images/weight_indicator_1.jpg" alt="{Weight labels and grey layer added}" /></p><h2 id="show-texture-color">Show texture color</h2>
 <p>The texture and border color should help illustrate some characteristics of an item, so color a texture if applicable, and a hull of some sorts. For now, I will add a texture for the sand example database as hardcoded asset. The texture will simply be noise I generated using a graphics editor. It has an alpha channel instead of the white color in contrast to black.</p>
-<p>Add an image <code translate="no">texture.png</code> with some black-and-transparent texture, preferrably noise, to the <code translate="no">assets</code> folder. This image will be used as a mask with the <code translate="no">MultiEffect</code> component (requires the <code translate="no">QtQuick.Effects</code> import), applied to a <code translate="no">Rectangle</code>. The rectangle is set to the texture color, and the effect will have properties set to smooth out the noise a bit.</p>
+<p>Add an image <code translate="no">texture.png</code> with some black-and-transparent texture, preferrably noise, to the <code translate="no">assets</code> folder. This image will be used as a mask with the <code translate="no">MultiEffect</code> component (requires the <code translate="no">QtQuick.Effects</code> import), applied to a <code translate="no">Rectangle</code>. The rectangle is set to the texture color, and the effect will have the mask properties set to smooth out the noise a bit. The image is not defined inside the effect, such that the <a href="https://doc.qt.io/qt-6/qml-qtquick-item.html#item-layers">layer can be enabled</a>. While this should help reduce aliasing, it also gives options to manipulate the texture: by changing the texture size and whether it should be smooth, we can get some smooth wood-like texture and a noisy, very fine sand-like texture with just the texture.png asset. It would be even better to use the Qt shader effect, but let's just use the picture for now and leverage some scaling and artifact byproducts for simplicity.</p>
 <p>Both <code translate="no">Rectangle</code> and <code translate="no">MultiEffect</code> should be added before the label and transparent-black <code translate="no">Rectangle</code>, to be drawn below them (but the order can also be set using the z property).</p>
 <pre class="cpp" translate="no">Rectangle {
     id: rectTextureColor
     color: textureColor
-
+    visible: <span class="keyword">false</span>
     height: parent<span class="operator">.</span>height
     width: parent<span class="operator">.</span>width
-    visible: <span class="keyword">false</span>
 }
 
 MultiEffect {
     source: rectTextureColor
     anchors<span class="operator">.</span>fill: rectTextureColor
 
-    maskEnabled: <span class="keyword">true</span>
-    maskSource: Image {
-        source: <span class="string">&quot;../assets/texture.png&quot;</span>
-        fillMode: Image<span class="operator">.</span>PreserveAspectCrop
-    }
+    property <span class="type">bool</span> enabled: textureType <span class="operator">=</span><span class="operator">=</span> WeightIndicator<span class="operator">.</span>Noise
+        <span class="operator">&amp;</span><span class="operator">&amp;</span> textureColor <span class="operator">!</span><span class="operator">=</span><span class="operator">=</span> mainColor
+    visible: enabled
+    maskEnabled: enabled
+    maskSource: mask
     maskThresholdMax: <span class="number">0.7</span>
     maskThresholdMin: <span class="number">0.3</span>
     maskSpreadAtMax: <span class="number">0.7</span>
     maskSpreadAtMin: <span class="number">0.7</span>
+}
+
+Image {
+    id: mask
+    source: <span class="string">&quot;../assets/texture.png&quot;</span>
+    visible: <span class="keyword">false</span>
+    height: parent<span class="operator">.</span>height
+    width: parent<span class="operator">.</span>width
+    fillMode: Image<span class="operator">.</span>Image<span class="operator">.</span>PreserveAspectCrop
+    layer<span class="operator">.</span>enabled: <span class="keyword">true</span>
+    layer<span class="operator">.</span>live: wiRoot<span class="operator">.</span>editable
+    layer<span class="operator">.</span>smooth: wiRoot<span class="operator">.</span>smooth
+    layer<span class="operator">.</span>textureSize: <span class="type">Qt</span><span class="operator">.</span>size(textureWidth<span class="operator">,</span> textureHeight)
 }</pre>
-<p class="centerAlign"><img src="images/weight_indicator_2.jpg" alt="{Texture color shown by texture}" /></p><p>For now, this is all we will do for this component. Especially setting the texture and using the texture color can get inherently more complex, for example since the texture depends on the domain of the database. There would have to be settings to choose the texture behavior, or more generally the behavior of the second color, for items in a database. We will revisit textures and the texture color later on.</p>
+<p class="centerAlign"><img src="images/weight_indicator_2.jpg" alt="{Texture color shown by texture}" /></p><p>It has to be noted that using the texture this way is inherently fragile, as it depends heavily on the added texture, scaling of the UI elements, and the artifacts resulting from the Qt implementation among other points. But it gives a first way of creating different textures with less code.</p>
+<h2 id="show-border-color">Show border color</h2>
+<p>Set the border color and width of the rectangle with the corresponding properties. The texture should not show on the border, so subtract the border width from its height and width.</p>
+<pre class="cpp" translate="no">Rectangle {
+    id: wiRoot
+    <span class="operator">.</span><span class="operator">.</span><span class="operator">.</span>
+
+    color: mainColor
+    border<span class="operator">.</span>color: borderColor
+    border<span class="operator">.</span>width: borderWidth
+
+    Rectangle {
+        id: rectTextureColor
+        <span class="operator">.</span><span class="operator">.</span><span class="operator">.</span>
+        height: parent<span class="operator">.</span>height <span class="operator">-</span> <span class="number">2</span><span class="operator">*</span>borderWidth
+        width: parent<span class="operator">.</span>width <span class="operator">-</span> <span class="number">2</span><span class="operator">*</span>borderWidth
+        anchors<span class="operator">.</span>centerIn: parent
+    }
+    <span class="operator">.</span><span class="operator">.</span><span class="operator">.</span>
+}</pre>
+<p>You can now try out different parameters for the border color and width, and of course the texture color and size. While I am not using the border for the sample database right now, we will add a settings view later on, that will allow setting the properties for different domains.</p>
 </div>
 <!-- @@@07-weight.html -->
 <p class="naviNextPrevious footerNavi">

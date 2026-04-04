@@ -24,13 +24,17 @@ Rectangle {
     property bool smooth: false
 
     color: mainColor
+    border.color: borderColor
+    border.width: borderWidth
 
     Rectangle {
         id: rectTextureColor
         color: textureColor
         visible: false
-        height: parent.height
-        width: parent.width
+        // Do not show texture on border:
+        height: parent.height - 2*borderWidth
+        width: parent.width - 2*borderWidth
+        anchors.centerIn: parent
     }
 
     MultiEffect {

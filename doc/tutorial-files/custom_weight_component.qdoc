@@ -265,4 +265,37 @@
     as it depends heavily on the added texture, scaling of the UI elements,
     and the artifacts resulting from the Qt implementation among other points.
     But it gives a first way of creating different textures with less code.
+
+    \section1 Show border color
+
+    Set the border color and width of the rectangle with the corresponding
+    properties.
+    The texture should not show on the border, so subtract the border width
+    from its height and width.
+
+    \code
+    Rectangle {
+        id: wiRoot
+        ...
+
+        color: mainColor
+        border.color: borderColor
+        border.width: borderWidth
+
+        Rectangle {
+            id: rectTextureColor
+            ...
+            height: parent.height - 2*borderWidth
+            width: parent.width - 2*borderWidth
+            anchors.centerIn: parent
+        }
+        ...
+    }
+    \endcode
+
+    You can now try out different parameters for the border color and width,
+    and of course the texture color and size.
+    While I am not using the border for the sample database right now,
+    we will add a settings view later on,
+    that will allow setting the properties for different domains.
 */
