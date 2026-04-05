@@ -208,24 +208,24 @@ Column {
         Item {
             required property string modelData
 
-            height: rectPropBg<span class="operator">.</span>height
-            width: rectPropBg<span class="operator">.</span>width <span class="operator">+</span> <span class="number">3</span>
+            height: rectTagBackground<span class="operator">.</span>height
+            width: rectTagBackground<span class="operator">.</span>width <span class="operator">+</span> <span class="number">3</span>
 
             AppText {
-                id: txtProp
+                id: txtTag
                 text: parent<span class="operator">.</span>modelData
                 opacity: <span class="number">0.8</span>
                 color: delegate<span class="operator">.</span>textColor
-                anchors<span class="operator">.</span>centerIn: rectPropBg
+                anchors<span class="operator">.</span>centerIn: rectTagBackground
             }
 
             Rectangle {
-                id: rectPropBg
-                color: txtProp<span class="operator">.</span>color
+                id: rectTagBackground
+                color: txtTag<span class="operator">.</span>color
                 opacity: <span class="number">0.1</span>
                 radius: height <span class="operator">/</span> <span class="number">2</span> <span class="operator">-</span> <span class="number">2</span>
-                height: txtProp<span class="operator">.</span>height <span class="operator">+</span> <span class="number">4</span>
-                width: txtProp<span class="operator">.</span>width <span class="operator">+</span> <span class="number">10</span>
+                height: txtTag<span class="operator">.</span>height <span class="operator">+</span> <span class="number">4</span>
+                width: txtTag<span class="operator">.</span>width <span class="operator">+</span> <span class="number">10</span>
             }
         }
     }

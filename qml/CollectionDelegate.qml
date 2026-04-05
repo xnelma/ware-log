@@ -136,24 +136,24 @@ Item {
                 Item {
                     required property string modelData
 
-                    height: rectPropBg.height
-                    width: rectPropBg.width + 3
+                    height: rectTagBackground.height
+                    width: rectTagBackground.width + 3
 
                     AppText {
-                        id: txtProp
+                        id: txtTag
                         text: parent.modelData
                         opacity: 0.8
                         color: delegate.textColor
-                        anchors.centerIn: rectPropBg
+                        anchors.centerIn: rectTagBackground
                     }
 
                     Rectangle {
-                        id: rectPropBg
-                        color: txtProp.color
+                        id: rectTagBackground
+                        color: txtTag.color
                         opacity: 0.1
                         radius: height / 2 - 2
-                        height: txtProp.height + 4
-                        width: txtProp.width + 10
+                        height: txtTag.height + 4
+                        width: txtTag.width + 10
                     }
 
                 }
