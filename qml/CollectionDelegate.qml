@@ -8,6 +8,7 @@ Item {
 
     width: parent.width
     height: colContent.height + 2
+    property color textColor: Theme.colors.textColor
 
     required property string title
     required property string origin
@@ -69,6 +70,7 @@ Item {
                 id: txtTitle
 
                 text: delegate.title
+                color: delegate.textColor
                 font.bold: true
             }
 
@@ -93,9 +95,8 @@ Item {
 
             AppText {
                 id: txtType
-
                 text: delegate.type
-
+                color: delegate.textColor
                 anchors.centerIn: parent
             }
         }
@@ -104,24 +105,28 @@ Item {
             spacing: 2
 
             AppText {
-                    text: delegate.cost + "€"
-                    font.strikeout: delegate.cost !== delegate.secondaryCost
+                text: delegate.cost + "€"
+                font.strikeout: delegate.cost !== delegate.secondaryCost
+                color: delegate.textColor
             }
 
             AppText {
                 text: delegate.secondaryCost + "€"
                 visible: delegate.cost !== delegate.secondaryCost
+                color: delegate.textColor
             }
 
             AppText {
                 text: "/10g"
                 opacity: 0.7
+                color: delegate.textColor
             }
         }
 
         AppText {
             text: delegate.ageDescription.arg(delegate.age)
                                          .arg(delegate.ageUnit)
+            color: delegate.textColor
         }
 
         Row {
@@ -136,20 +141,17 @@ Item {
 
                     AppText {
                         id: txtProp
-
                         text: parent.modelData
-
                         opacity: 0.8
+                        color: delegate.textColor
                         anchors.centerIn: rectPropBg
                     }
 
                     Rectangle {
                         id: rectPropBg
-
                         color: txtProp.color
                         opacity: 0.1
                         radius: height / 2 - 2
-
                         height: txtProp.height + 4
                         width: txtProp.width + 10
                     }

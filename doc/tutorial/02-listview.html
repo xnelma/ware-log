@@ -128,6 +128,8 @@ Column {
 
     <span class="operator">.</span><span class="operator">.</span><span class="operator">.</span>
 }</pre>
+<p>As a small add-on, it would also be nice to be able to set the text color of the item. There is no background set so it would already be possible to change it from outside the component, but the text color would be fix. So add another property that would per default be set to the theme color.</p>
+<pre class="cpp" translate="no">property color textColor: Theme<span class="operator">.</span>colors<span class="operator">.</span>textColor</pre>
 <h3 id="layout-of-properties-title-and-origin">Layout of properties title and origin</h3>
 <p>The first line of the content column will be title and origin. The origin is colored.</p>
 <pre class="cpp" translate="no">Row {
@@ -136,6 +138,7 @@ Column {
         id: txtTitle
 
         text: delegate<span class="operator">.</span>title
+        color: delegate<span class="operator">.</span>textColor
         font<span class="operator">.</span>bold: <span class="keyword">true</span>
     }
 
@@ -161,9 +164,8 @@ Column {
 
     AppText {
         id: txtType
-
         text: delegate<span class="operator">.</span>type
-
+        color: delegate<span class="operator">.</span>textColor
         anchors<span class="operator">.</span>centerIn: parent
     }
 }</pre>
@@ -173,18 +175,21 @@ Column {
     spacing: <span class="number">2</span>
 
     AppText {
-            text: delegate<span class="operator">.</span>cost <span class="operator">+</span> <span class="string">&quot;€&quot;</span>
-            font<span class="operator">.</span>strikeout: delegate<span class="operator">.</span>cost <span class="operator">!</span><span class="operator">=</span><span class="operator">=</span> delegate<span class="operator">.</span>secondaryCost
+        text: delegate<span class="operator">.</span>cost <span class="operator">+</span> <span class="string">&quot;€&quot;</span>
+        font<span class="operator">.</span>strikeout: delegate<span class="operator">.</span>cost <span class="operator">!</span><span class="operator">=</span><span class="operator">=</span> delegate<span class="operator">.</span>secondaryCost
+        color: delegate<span class="operator">.</span>textColor
     }
 
     AppText {
         text: delegate<span class="operator">.</span>secondaryCost <span class="operator">+</span> <span class="string">&quot;€&quot;</span>
         visible: delegate<span class="operator">.</span>cost <span class="operator">!</span><span class="operator">=</span><span class="operator">=</span> delegate<span class="operator">.</span>secondaryCost
+        color: delegate<span class="operator">.</span>textColor
     }
 
     AppText {
         text: <span class="string">&quot;/10g&quot;</span>
         opacity: <span class="number">0.7</span>
+        color: delegate<span class="operator">.</span>textColor
     }
 }</pre>
 <h3 id="layout-of-the-age-property">Layout of the age property</h3>
@@ -192,6 +197,7 @@ Column {
 <pre class="cpp" translate="no">AppText {
     text: delegate<span class="operator">.</span>ageDescription<span class="operator">.</span>arg(delegate<span class="operator">.</span>age)
                                  <span class="operator">.</span>arg(delegate<span class="operator">.</span>ageUnit)
+    color: delegate<span class="operator">.</span>textColor
 }</pre>
 <h3 id="layout-for-the-tag-list">Layout for the tag list</h3>
 <p>Now for the tag list. We will format it as a <code translate="no">Repeater</code> in a <code translate="no">Row</code>. The model will be the string list for the tags we parsed earlier. It is available as property <code translate="no">modelData</code> of type <code translate="no">string</code>. Each tag should have a light grey background with round corners, but not half circles, so decrement the radius with <code translate="no">2</code>. The light grey is achieved by using the text color of the text item, and setting an opacity of <code translate="no">0.1</code>. The text is also not black, but a bit lighter, using an opacity of <code translate="no">0.8</code>.</p>
@@ -207,20 +213,17 @@ Column {
 
             AppText {
                 id: txtProp
-
                 text: parent<span class="operator">.</span>modelData
-
                 opacity: <span class="number">0.8</span>
+                color: delegate<span class="operator">.</span>textColor
                 anchors<span class="operator">.</span>centerIn: rectPropBg
             }
 
             Rectangle {
                 id: rectPropBg
-
                 color: txtProp<span class="operator">.</span>color
                 opacity: <span class="number">0.1</span>
                 radius: height <span class="operator">/</span> <span class="number">2</span> <span class="operator">-</span> <span class="number">2</span>
-
                 height: txtProp<span class="operator">.</span>height <span class="operator">+</span> <span class="number">4</span>
                 width: txtProp<span class="operator">.</span>width <span class="operator">+</span> <span class="number">10</span>
             }
