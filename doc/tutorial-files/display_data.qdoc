@@ -106,11 +106,16 @@
     property list<string> tags
     \endcode
 
-    The list of tags will be created from \c{tagStr} when it is available:
+    The list of tags will be created from \c{tagStr} if
+    the tags are not passed as list.
+    While \c{tagStr} is also not mandatory, it still needs to be marked as
+    \c{required} to be associated with model data in case the delegate is used
+    inside a list view.
 
     \code
     Component.onCompleted: {
-        tags = Data.tagList(tagStr);
+        if (tags.length == 0)
+            tags = Data.tagList(tagStr);
     }
     \endcode
 

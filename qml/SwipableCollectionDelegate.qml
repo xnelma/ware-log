@@ -32,7 +32,8 @@ SwipeOptionsContainer {
         // A list<string> would be empty, and a var would get
         // the datatype of QQmlListProperty, but with empty
         // strings. Why?
-        tags = Data.tagList(tagStr);
+        if (tags.length == 0) // But also allow passing a tag list.
+            tags = Data.tagList(tagStr);
     }
 
     rightOption: SwipeButton {

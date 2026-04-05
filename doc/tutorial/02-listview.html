@@ -93,9 +93,10 @@ required property string textureColor
 required property string borderColor
 required property string tagStr
 property list<span class="operator">&lt;</span>string<span class="operator">&gt;</span> tags</pre>
-<p>The list of tags will be created from <code translate="no">tagStr</code> when it is available:</p>
+<p>The list of tags will be created from <code translate="no">tagStr</code> if the tags are not passed as list. While <code translate="no">tagStr</code> is also not mandatory, it still needs to be marked as <code translate="no">required</code> to be associated with model data in case the delegate is used inside a list view.</p>
 <pre class="cpp" translate="no">Component<span class="operator">.</span>onCompleted: {
-    tags <span class="operator">=</span> Data<span class="operator">.</span>tagList(tagStr);
+    <span class="keyword">if</span> (tags<span class="operator">.</span>length <span class="operator">=</span><span class="operator">=</span> <span class="number">0</span>)
+        tags <span class="operator">=</span> Data<span class="operator">.</span>tagList(tagStr);
 }</pre>
 <p>There should also be a property <code translate="no">ageDescription</code> to give some domain specific context to the meaning of the entry type. I picked it to be:</p>
 <pre class="cpp" translate="no">property string ageDescription: qsTr(<span class="string">&quot;collected %1 %2 ago&quot;</span>)</pre>

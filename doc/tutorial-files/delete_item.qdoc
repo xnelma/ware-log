@@ -35,9 +35,7 @@
 
         property string ageDescription: qsTr("collected %1 %2 ago")
 
-        Component.onCompleted: {
-            tags = Data.tagList(tagStr);
-        }
+        Component.onCompleted: { ... }
 
         CollectionDelegate {
             id: content
