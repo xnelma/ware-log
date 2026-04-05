@@ -3,10 +3,11 @@ import QtQuick
 import QtQuick.Layouts
 import "data.js" as Data
 
-SwipeOptionsContainer {
+Item {
     id: delegate
 
-    height: content.height
+    width: parent.width
+    height: colContent.height + 2
 
     required property string title
     required property string origin
@@ -36,202 +37,125 @@ SwipeOptionsContainer {
         tags = Data.tagList(tagStr);
     }
 
-    rightOption: SwipeButton {
-        iconType: IconType.remove
+    WeightIndicator {
+        id: weightIndicator
+
         height: parent.height
-        onClicked: {
-            Data.deleteItem(title);
-            listModel.deleteItem(title);
-        }
+        width: delegate.width / 7
+
+        weightTotal: delegate.weightTotal
+        weightLeft: delegate.weightLeft
+        weightUnit: delegate.weightUnit
+
+        mainColor: delegate.mainColor
+        textureColor: delegate.textureColor
+        borderColor: delegate.borderColor
+
+        textureType: WeightIndicator.Texture.Noise
+        textureHeight: height * 3 // approx. 380, the height of texture.png
+        textureWidth: width * 4 // approx. 220, the width of texture.png
     }
 
-    // FIXME Swiping both sides or scrolling the list view while swiping
-    // sometimes deactivates swiping for an item completely.
-    // It happens more often if not just one SwipeButton is used, but the Row.
-    leftOption: Row {
-        SwipeButton {
-            iconType: IconType.money
-            height: delegate.height
-            onClicked: {
-                dlgCostConnection.itemTitle = delegate.title;
-                dlgCostConnection.enabled = true;
-                dlgUpdateCost.cost = delegate.cost
-                dlgUpdateCost.secondaryCost = delegate.secondaryCost
-                dlgUpdateCost.open()
-            }
+    Column {
+        id: colContent
 
-            Connections {
-                id: dlgCostConnection
-                target: dlgUpdateCost
-                enabled: false
+        anchors.left: weightIndicator.right
+        anchors.leftMargin: 10
 
-                property string itemTitle
+        Row {
+            spacing: 10
+            AppText {
+                id: txtTitle
 
-                function onNumberAccepted(num) {
-                    if (itemTitle === delegate.title) {
-                        Data.updateCost(delegate.title, num);
-                        delegate.secondaryCost = num;
-                        dlgCostConnection.enabled = false;
-                    }
-                }
-            }
-        }
-
-        SwipeButton {
-            iconType: IconType.beer
-            height: delegate.height
-            onClicked: {
-                dlgWeightConnection.itemTitle = delegate.title;
-                dlgWeightConnection.enabled = true;
-                dlgUpdateWeight.weightTotal = delegate.weightTotal
-                dlgUpdateWeight.weightLeft = delegate.weightLeft
-                dlgUpdateWeight.weightUnit = delegate.weightUnit
-                dlgUpdateWeight.open()
-            }
-
-            Connections {
-                id: dlgWeightConnection
-                target: dlgUpdateWeight
-                enabled: false
-
-                property string itemTitle
-
-                function onNumberAccepted(num) {
-                    if (itemTitle === delegate.title) {
-                        Data.updateWeight(delegate.title, num);
-                        delegate.weightLeft = num;
-                        dlgWeightConnection.enabled = false;
-                    }
-                }
-            }
-        }
-    }
-
-    Item {
-        id: content
-
-        height: colContent.height + 2
-
-        WeightIndicator {
-            id: weightIndicator
-
-            height: parent.height
-            width: delegate.width / 7
-
-            weightTotal: delegate.weightTotal
-            weightLeft: delegate.weightLeft
-            weightUnit: delegate.weightUnit
-
-            mainColor: delegate.mainColor
-            textureColor: delegate.textureColor
-            borderColor: delegate.borderColor
-
-            textureType: WeightIndicator.Texture.Noise
-            textureHeight: height * 3 // approx. 380, the height of texture.png
-            textureWidth: width * 4 // approx. 220, the width of texture.png
-        }
-
-        Column {
-            id: colContent
-
-            anchors.left: weightIndicator.right
-            anchors.leftMargin: 10
-
-            Row {
-                spacing: 10
-                AppText {
-                    id: txtTitle
-
-                    text: delegate.title
-                    font.bold: true
-                }
-
-                AppText {
-                    id: txtOrigin
-
-                    text: delegate.origin
-                    color: delegate.originColor
-                }
-            }
-
-            Item {
-                height: txtType.height + 2
-                width: txtType.width + 4
-
-                Rectangle {
-                    height: parent.height
-                    width: parent.width
-                    color: txtType.color
-                    opacity: 0.2
-                }
-
-                AppText {
-                    id: txtType
-
-                    text: delegate.type
-
-                    anchors.centerIn: parent
-                }
-            }
-
-            Row {
-                spacing: 2
-
-                AppText {
-                        text: delegate.cost + "€"
-                        font.strikeout: delegate.cost !== delegate.secondaryCost
-                }
-
-                AppText {
-                    text: delegate.secondaryCost + "€"
-                    visible: delegate.cost !== delegate.secondaryCost
-                }
-
-                AppText {
-                    text: "/10g"
-                    opacity: 0.7
-                }
+                text: delegate.title
+                font.bold: true
             }
 
             AppText {
-                text: delegate.ageDescription.arg(delegate.age)
-                                             .arg(delegate.ageUnit)
+                id: txtOrigin
+
+                text: delegate.origin
+                color: delegate.originColor
+            }
+        }
+
+        Item {
+            height: txtType.height + 2
+            width: txtType.width + 4
+
+            Rectangle {
+                height: parent.height
+                width: parent.width
+                color: txtType.color
+                opacity: 0.2
             }
 
-            Row {
-                Repeater {
-                    model: delegate.tags
+            AppText {
+                id: txtType
 
-                    Item {
-                        required property string modelData
+                text: delegate.type
 
-                        height: rectPropBg.height
-                        width: rectPropBg.width + 3
+                anchors.centerIn: parent
+            }
+        }
 
-                        AppText {
-                            id: txtProp
+        Row {
+            spacing: 2
 
-                            text: parent.modelData
+            AppText {
+                    text: delegate.cost + "€"
+                    font.strikeout: delegate.cost !== delegate.secondaryCost
+            }
 
-                            opacity: 0.8
-                            anchors.centerIn: rectPropBg
-                        }
+            AppText {
+                text: delegate.secondaryCost + "€"
+                visible: delegate.cost !== delegate.secondaryCost
+            }
 
-                        Rectangle {
-                            id: rectPropBg
+            AppText {
+                text: "/10g"
+                opacity: 0.7
+            }
+        }
 
-                            color: txtProp.color
-                            opacity: 0.1
-                            radius: height / 2 - 2
+        AppText {
+            text: delegate.ageDescription.arg(delegate.age)
+                                         .arg(delegate.ageUnit)
+        }
 
-                            height: txtProp.height + 4
-                            width: txtProp.width + 10
-                        }
+        Row {
+            Repeater {
+                model: delegate.tags
 
+                Item {
+                    required property string modelData
+
+                    height: rectPropBg.height
+                    width: rectPropBg.width + 3
+
+                    AppText {
+                        id: txtProp
+
+                        text: parent.modelData
+
+                        opacity: 0.8
+                        anchors.centerIn: rectPropBg
                     }
+
+                    Rectangle {
+                        id: rectPropBg
+
+                        color: txtProp.color
+                        opacity: 0.1
+                        radius: height / 2 - 2
+
+                        height: txtProp.height + 4
+                        width: txtProp.width + 10
+                    }
+
                 }
             }
+        } // Row
 
-        }
-    }
-}
+    } // colContent
+} // delegate

@@ -83,7 +83,7 @@ App {
                     }
                 }
 
-                delegate: CollectionDelegate {
+                delegate: SwipableCollectionDelegate {
                     width: pageMain.width
                 }
             }

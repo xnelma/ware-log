@@ -13,13 +13,18 @@
     The Felgo SDK provides a component \c{SwipeOptionsContainer}, that makes
     e.g. a list item swipable, and shows a button left or right on swipe.
 
-    Wrap the base component \c{Item} in \c{CollectionDelegate.qml} in
-    \c{SwipeOptionsContainer} by moving id and properties to it, and having
-    the \c{Item} as child component of it.
+    We will wrap the base component \c{Item} in \c{CollectionDelegate.qml} in
+    a \c{SwipeOptionsContainer}, but to be able to also use the layout for
+    a list item without the swipe buttons, it should be a separate component
+    that includes \c{CollectionDelegate}.
+    Create a file \c{SwipableCollectionDelegate.qml} with the same properties
+    for the list model as \c{CollectionDelegate}, that has the swipe container
+    as root item, and the delegate as child item, with its properties bound
+    to the delegate item.
 
     \code
     SwipeOptionsContainer {
-        id: delegate
+        id: swipeOptionsContainer
 
         height: content.height
 
@@ -34,18 +39,31 @@
             tags = Data.tagList(tagStr);
         }
 
-        Item {
+        CollectionDelegate {
             id: content
 
-            height: colContent.height + 2
-
-            Rectangle {
-                ...
-            }
+            title: swipeOptionsContainer.title
+            origin: swipeOptionsContainer.origin
+            originColor: swipeOptionsContainer.originColor
+            type: swipeOptionsContainer.type
+            age: swipeOptionsContainer.age
+            ageUnit: swipeOptionsContainer.ageUnit
+            weightTotal: swipeOptionsContainer.weightTotal
+            weightLeft: swipeOptionsContainer.weightLeft
+            weightUnit: swipeOptionsContainer.weightUnit
+            cost: swipeOptionsContainer.cost
+            secondaryCost: swipeOptionsContainer.secondaryCost
+            mainColor: swipeOptionsContainer.mainColor
+            textureColor: swipeOptionsContainer.textureColor
+            borderColor: swipeOptionsContainer.borderColor
+            tagStr: swipeOptionsContainer.tagStr
+            tags: swipeOptionsContainer.tags
         }
-        ...
     }
     \endcode
+
+    Use the \c{SwipableCollectionDelegate} instead of the \c{CollectionDelegate}
+    in the list view in \c{Main.qml}.
 
     Then assign a \c{SwipeButton} to the \c{rightOption} property, with
     a \c{remove} icon.
