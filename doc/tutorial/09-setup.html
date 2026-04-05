@@ -17,6 +17,7 @@
 <h3 id="toc">Contents</h3>
 <ul>
 <li class="level1"><a href="#navigate-to-settings-page">Navigate to settings page</a></li>
+<li class="level1"><a href="#add-collection-delegate-preview">Add collection delegate preview</a></li>
 </ul>
 </div>
 <div class="sidebar-content" id="sidebar-content"></div></div>
@@ -55,7 +56,131 @@ AppPage {
                         <span class="operator">.</span>push(compCollectionSettings)
                 }
 <span class="operator">.</span><span class="operator">.</span><span class="operator">.</span></pre>
-</div>
+<p>...</p>
+<h2 id="add-collection-delegate-preview">Add collection delegate preview</h2>
+<p>While we could preview the texture directly on a <code translate="no">WeightIndicator</code>, the texture currently depends on the height of the rectangle. To get the same scale of the texture as it will appear in the list view, we could preview it directly in a list delegate.</p>
+<p>Create another qml file <code translate="no">CollectionDelegatePreview.qml</code>. Needed imports are <code translate="no">QtQuick</code> und <code translate="no">Felgo</code>.</p>
+<p>The root component will be a <code translate="no">Rectangle</code>, and it will have a larger height than the delegate itself to add some margin: it would be handy to be able to switch between dark and light mode to try out the contrast of selected colors, so add some extra space to color around the delegate item.</p>
+<pre class="cpp" translate="no">Rectangle {
+    id: cdpRoot
+
+    height: delegate<span class="operator">.</span>height <span class="operator">+</span> <span class="number">20</span> <span class="operator">+</span> <span class="number">4</span> <span class="comment">// + margin + border width</span>
+    width: parent<span class="operator">.</span>width
+    border<span class="operator">.</span>color: switchDarkStyle<span class="operator">.</span>checked <span class="operator">?</span> <span class="string">&quot;#2f2f2f&quot;</span> : <span class="string">&quot;#cfcfcf&quot;</span>
+    border<span class="operator">.</span>width: <span class="number">2</span>
+}
+
+CollectionDelegate {
+    id: delegate
+
+    width: parent<span class="operator">.</span>width <span class="operator">-</span> cdpRoot<span class="operator">.</span>border<span class="operator">.</span>width <span class="operator">*</span> <span class="number">2</span>
+    anchors<span class="operator">.</span>centerIn: parent
+}</pre>
+<p>The rectangle can then be colored depending on the state of the switch, but that also requires coloring the text of the delegate and other text defined inside the rectangle, so add a property for the text color, too:</p>
+<pre class="cpp" translate="no">Rectangle {
+    id: cdpRoot
+
+    color: switchDarkStyle<span class="operator">.</span>checked<span class="operator">?</span> <span class="string">&quot;black&quot;</span> : <span class="string">&quot;white&quot;</span>
+    property color textColor: switchDarkStyle<span class="operator">.</span>checked<span class="operator">?</span> <span class="string">&quot;white&quot;</span> : <span class="string">&quot;black&quot;</span>
+    <span class="operator">.</span><span class="operator">.</span><span class="operator">.</span>
+}</pre>
+<p>Add properties to expose the delegate properties, but initialize them with sample values:</p>
+<pre class="cpp" translate="no">Rectangle {
+    id: cdpRoot
+
+    property string title: <span class="string">&quot;Title&quot;</span>
+    property string origin: <span class="string">&quot;Origin&quot;</span>
+    property string originColor: textColor
+    property string type: <span class="string">&quot;Type&quot;</span>
+    property <span class="type">int</span> age: <span class="number">2</span>
+    property string ageUnit: <span class="string">&quot;months&quot;</span>
+    property <span class="type">int</span> weightTotal: <span class="number">10</span>
+    property <span class="type">int</span> weightLeft: <span class="number">9</span>
+    property string weightUnit: <span class="string">&quot;g&quot;</span>
+    property <span class="type">int</span> cost: <span class="number">3</span>
+    property <span class="type">int</span> secondaryCost: <span class="number">3</span>
+    property string mainColor: defaultColor
+    property string textureColor: defaultColor
+    property string borderColor: defaultColor
+    property list<span class="operator">&lt;</span>string<span class="operator">&gt;</span> tags: <span class="operator">[</span><span class="string">&quot;Tag 1&quot;</span><span class="operator">,</span> <span class="string">&quot;Tag 2&quot;</span><span class="operator">,</span> <span class="string">&quot;Tag 3&quot;</span><span class="operator">]</span>
+}</pre>
+<p>And add property bindings to the delegate:</p>
+<pre class="cpp" translate="no">CollectionDelegate {
+    id: delegate
+    textColor: cdpRoot<span class="operator">.</span>textColor
+    title: cdpRoot<span class="operator">.</span>title
+    origin: cdpRoot<span class="operator">.</span>origin
+    originColor: cdpRoot<span class="operator">.</span>originColor
+    type: cdpRoot<span class="operator">.</span>type
+    age: cdpRoot<span class="operator">.</span>age
+    ageUnit: cdpRoot<span class="operator">.</span>ageUnit
+    weightTotal: cdpRoot<span class="operator">.</span>weightTotal
+    weightLeft: cdpRoot<span class="operator">.</span>weightLeft
+    weightUnit: cdpRoot<span class="operator">.</span>weightUnit
+    cost: cdpRoot<span class="operator">.</span>cost
+    secondaryCost: cdpRoot<span class="operator">.</span>secondaryCost
+    mainColor: cdpRoot<span class="operator">.</span>mainColor
+    textureColor: cdpRoot<span class="operator">.</span>textureColor
+    borderColor: cdpRoot<span class="operator">.</span>borderColor
+    tagStr: <span class="string">&quot;&quot;</span>
+    tags: cdpRoot<span class="operator">.</span>tags
+
+    <span class="operator">.</span><span class="operator">.</span><span class="operator">.</span>
+}</pre>
+<p>We have not yet defined the switch for the dark/light color. And we will add a label to mark the component as preview. As they should be displayed in front of the delegate, add them after <code translate="no">CollectionDelegate</code>:</p>
+<pre class="cpp" translate="no">CollectionDelegate { <span class="operator">.</span><span class="operator">.</span><span class="operator">.</span> }
+
+AppText {
+    id: txtPreview
+    text: qsTr(<span class="string">&quot;Preview&quot;</span>)
+    color: cdpRoot<span class="operator">.</span>textColor
+    opacity: <span class="number">0.3</span>
+    anchors<span class="operator">.</span>right: parent<span class="operator">.</span>right
+    anchors<span class="operator">.</span>rightMargin: <span class="number">10</span>
+    anchors<span class="operator">.</span>top: parent<span class="operator">.</span>top
+    anchors<span class="operator">.</span>topMargin: <span class="number">10</span>
+}
+
+AppText {
+    text: qsTr(<span class="string">&quot;Dark style:&quot;</span>)
+    color: cdpRoot<span class="operator">.</span>textColor
+    anchors<span class="operator">.</span>right: switchDarkStyle<span class="operator">.</span>left
+    anchors<span class="operator">.</span>rightMargin: <span class="number">10</span>
+    anchors<span class="operator">.</span>verticalCenter: switchDarkStyle<span class="operator">.</span>verticalCenter
+}
+
+AppSwitch {
+    id: switchDarkStyle
+    anchors<span class="operator">.</span>right: parent<span class="operator">.</span>right
+    anchors<span class="operator">.</span>rightMargin: <span class="number">10</span>
+    anchors<span class="operator">.</span>top: txtPreview<span class="operator">.</span>bottom
+    anchors<span class="operator">.</span>topMargin: <span class="number">10</span>
+    checked: darkModeEnabled <span class="comment">// init with app-wide dark mode property</span>
+}</pre>
+<p>We will use the preview in <code translate="no">CollectionSettingsView.qml</code> as follows:</p>
+<pre class="cpp" translate="no">CollectionDelegatePreview {
+    <span class="operator">.</span><span class="operator">.</span><span class="operator">.</span> <span class="comment">// (set main, border and texture color)</span>
+    <span class="comment">// remove parent margin and hide borders at sides:</span>
+    width: parent<span class="operator">.</span>width <span class="operator">+</span> <span class="number">20</span> <span class="operator">+</span> border<span class="operator">.</span>width <span class="operator">*</span> <span class="number">2</span>
+    x: <span class="operator">-</span> <span class="number">10</span> <span class="operator">-</span> border<span class="operator">.</span>width
+}</pre>
+<p>And we can even add it to <code translate="no">EditItemView</code> and additionally bind the origin color to it. This way, when the colors for a list item are selected, they can be tested out in light and dark mode.</p>
+<pre class="cpp" translate="no">Column { <span class="comment">// in EditItemView.qml</span>
+    id: col
+    <span class="operator">.</span><span class="operator">.</span><span class="operator">.</span>
+
+    CollectionDelegatePreview {
+        originColor: rowTitle<span class="operator">.</span>originColor
+        mainColor: rowColors<span class="operator">.</span>mainColor
+        textureColor: rowColors<span class="operator">.</span>textureColor
+        borderColor: rowColors<span class="operator">.</span>borderColor
+        <span class="comment">// remove parent margin and hide borders at sides:</span>
+        width: parent<span class="operator">.</span>width <span class="operator">+</span> <span class="number">20</span> <span class="operator">+</span> border<span class="operator">.</span>width <span class="operator">*</span> <span class="number">2</span>
+        x: <span class="operator">-</span> <span class="number">10</span> <span class="operator">-</span> border<span class="operator">.</span>width
+    }
+    <span class="operator">.</span><span class="operator">.</span><span class="operator">.</span>
+}</pre>
+<p class="centerAlign"><img src="images/delegate_preview_add_item.jpg" alt="{Delegate preview in EditItemView}" /></p></div>
 <!-- @@@09-setup.html -->
 <p class="naviNextPrevious footerNavi">
 <a class="prevPage" href="08-update.html">Update Weight and Cost</a>

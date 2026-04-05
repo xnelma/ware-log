@@ -59,4 +59,178 @@
     ...
     \endcode
 
+    ...
+
+    \section1 Add collection delegate preview
+
+    While we could preview the texture directly on a \c{WeightIndicator}, the
+    texture currently depends on the height of the rectangle.
+    To get the same scale of the texture as it will appear in the list view,
+    we could preview it directly in a list delegate.
+
+    Create another qml file \c{CollectionDelegatePreview.qml}.
+    Needed imports are \c{QtQuick} und \c{Felgo}.
+
+    The root component will be a \c{Rectangle}, and it will have a larger
+    height than the delegate itself to add some margin:
+    it would be handy to be able to switch between dark and light mode to try
+    out the contrast of selected colors, so add some extra space to
+    color around the delegate item.
+
+    \code
+    Rectangle {
+        id: cdpRoot
+
+        height: delegate.height + 20 + 4 // + margin + border width
+        width: parent.width
+        border.color: switchDarkStyle.checked ? "#2f2f2f" : "#cfcfcf"
+        border.width: 2
+    }
+
+    CollectionDelegate {
+        id: delegate
+
+        width: parent.width - cdpRoot.border.width * 2
+        anchors.centerIn: parent
+    }
+    \endcode
+
+    The rectangle can then be colored depending on the state of the switch,
+    but that also requires coloring the text of the delegate and other
+    text defined inside the rectangle, so add a property for the text color,
+    too:
+
+    \code
+    Rectangle {
+        id: cdpRoot
+
+        color: switchDarkStyle.checked? "black" : "white"
+        property color textColor: switchDarkStyle.checked? "white" : "black"
+        ...
+    }
+    \endcode
+
+    Add properties to expose the delegate properties, but initialize them with
+    sample values:
+
+    \code
+    Rectangle {
+        id: cdpRoot
+
+        property string title: "Title"
+        property string origin: "Origin"
+        property string originColor: textColor
+        property string type: "Type"
+        property int age: 2
+        property string ageUnit: "months"
+        property int weightTotal: 10
+        property int weightLeft: 9
+        property string weightUnit: "g"
+        property int cost: 3
+        property int secondaryCost: 3
+        property string mainColor: defaultColor
+        property string textureColor: defaultColor
+        property string borderColor: defaultColor
+        property list<string> tags: ["Tag 1", "Tag 2", "Tag 3"]
+    }
+    \endcode
+
+    And add property bindings to the delegate:
+
+    \code
+    CollectionDelegate {
+        id: delegate
+        textColor: cdpRoot.textColor
+        title: cdpRoot.title
+        origin: cdpRoot.origin
+        originColor: cdpRoot.originColor
+        type: cdpRoot.type
+        age: cdpRoot.age
+        ageUnit: cdpRoot.ageUnit
+        weightTotal: cdpRoot.weightTotal
+        weightLeft: cdpRoot.weightLeft
+        weightUnit: cdpRoot.weightUnit
+        cost: cdpRoot.cost
+        secondaryCost: cdpRoot.secondaryCost
+        mainColor: cdpRoot.mainColor
+        textureColor: cdpRoot.textureColor
+        borderColor: cdpRoot.borderColor
+        tagStr: ""
+        tags: cdpRoot.tags
+
+        ...
+    }
+    \endcode
+
+    We have not yet defined the switch for the dark/light color. And we will
+    add a label to mark the component as preview.
+    As they should be displayed in front of the delegate, add them after
+    \c{CollectionDelegate}:
+
+    \code
+    CollectionDelegate { ... }
+
+    AppText {
+        id: txtPreview
+        text: qsTr("Preview")
+        color: cdpRoot.textColor
+        opacity: 0.3
+        anchors.right: parent.right
+        anchors.rightMargin: 10
+        anchors.top: parent.top
+        anchors.topMargin: 10
+    }
+
+    AppText {
+        text: qsTr("Dark style:")
+        color: cdpRoot.textColor
+        anchors.right: switchDarkStyle.left
+        anchors.rightMargin: 10
+        anchors.verticalCenter: switchDarkStyle.verticalCenter
+    }
+
+    AppSwitch {
+        id: switchDarkStyle
+        anchors.right: parent.right
+        anchors.rightMargin: 10
+        anchors.top: txtPreview.bottom
+        anchors.topMargin: 10
+        checked: darkModeEnabled // init with app-wide dark mode property
+    }
+    \endcode
+
+    We will use the preview in \c{CollectionSettingsView.qml} as follows:
+
+    \code
+    CollectionDelegatePreview {
+        ... // (set main, border and texture color)
+        // remove parent margin and hide borders at sides:
+        width: parent.width + 20 + border.width * 2
+        x: - 10 - border.width
+    }
+    \endcode
+
+    And we can even add it to \c{EditItemView} and additionally bind the
+    origin color to it. This way, when the colors for a list item are selected,
+    they can be tested out in light and dark mode.
+
+    \code
+    Column { // in EditItemView.qml
+        id: col
+        ...
+
+        CollectionDelegatePreview {
+            originColor: rowTitle.originColor
+            mainColor: rowColors.mainColor
+            textureColor: rowColors.textureColor
+            borderColor: rowColors.borderColor
+            // remove parent margin and hide borders at sides:
+            width: parent.width + 20 + border.width * 2
+            x: - 10 - border.width
+        }
+        ...
+    }
+    \endcode
+
+    \image {delegate_preview_add_item.jpg} {Delegate preview in EditItemView}
 */

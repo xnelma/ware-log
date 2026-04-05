@@ -20,6 +20,16 @@ AppPage {
         anchors.right: parent.right
         anchors.margins: 10
 
+        CollectionDelegatePreview {
+            originColor: rowTitle.originColor
+            mainColor: rowColors.mainColor
+            textureColor: rowColors.textureColor
+            borderColor: rowColors.borderColor
+            // remove parent margin and hide borders at sides:
+            width: parent.width + 20 + border.width * 2
+            x: - 10 - border.width
+        }
+
         Row {
             id: rowTitle
             spacing: 10
@@ -144,6 +154,7 @@ AppPage {
                 verticalMargin: 0
             }
 
+            // TODO disable border or texture button if not set for collection.
             ColorButton {
                 id: btnBorderColor
                 text: "Border Color"
