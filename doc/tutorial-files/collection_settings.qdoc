@@ -132,6 +132,14 @@
         property string textureColor: defaultColor
         property string borderColor: defaultColor
         property list<string> tags: ["Tag 1", "Tag 2", "Tag 3"]
+
+        property string ageDescription: qsTr("collected %1 %2 ago")
+        property int borderWidth: 0
+        property int textureType: WeightIndicator.None
+        property int textureHeight: height
+        property int textureWidth: width
+        property bool editable: false
+        property bool smooth: false
     }
     \endcode
 
@@ -157,6 +165,13 @@
         borderColor: cdpRoot.borderColor
         tagStr: ""
         tags: cdpRoot.tags
+
+        borderWidth: cdpRoot.borderWidth
+        textureType: cdpRoot.textureType
+        textureHeight: cdpRoot.textureHeight
+        textureWidth: cdpRoot.textureWidth
+        editable: cdpRoot.editable
+        smooth: cdpRoot.smooth
 
         ...
     }
@@ -204,6 +219,12 @@
     \code
     CollectionDelegatePreview {
         ... // (set main, border and texture color)
+        borderWidth: sliderBorderWidth.value
+        textureType: comboTexture.currentIndex
+        textureWidth: sliderWidth.value
+        textureHeight: sliderHeight.value
+        editable: true
+        smooth: switchSmooth.checked
         // remove parent margin and hide borders at sides:
         width: parent.width + 20 + border.width * 2
         x: - 10 - border.width
@@ -224,6 +245,11 @@
             mainColor: rowColors.mainColor
             textureColor: rowColors.textureColor
             borderColor: rowColors.borderColor
+            borderWidth: 0
+            textureType: WeightIndicator.Texture.Noise
+            textureHeight: 354
+            textureWidth: 220
+            smooth: false
             // remove parent margin and hide borders at sides:
             width: parent.width + 20 + border.width * 2
             x: - 10 - border.width

@@ -50,31 +50,86 @@
     for the main color. Later in this chapter latter properties will be used
     to expose some of the texture properties, so the texture can be
     manipulated when the component is instantiated.
+    To be able to manipulate the properties, we also need to propagate them
+    by adding properties to \c{CollectionDelegate}, too.
 
     \code
-    WeightIndicator {
-        id: weightIndicator
+    Item { // in CollectionDelegate.qml
+        id: delegate
 
         ...
 
-        weightTotal: delegate.weightTotal
-        weightLeft: delegate.weightLeft
-        weightUnit: delegate.weightUnit
+        property string ageDescription: qsTr("collected %1 %2 ago")
+        property int borderWidth: 0
+        property int textureType: WeightIndicator.None
+        property int textureHeight: height
+        property int textureWidth: width
+        property bool editable: false
+        property bool smooth: false
 
-        mainColor: delegate.mainColor
-        textureColor: delegate.textureColor
-        borderColor: delegate.borderColor
+        ...
 
-        textureType: WeightIndicator.Texture.Noise
-        textureHeight: height * 3 // approx. 380, the height of texture.png
-        textureWidth: width * 4 // approx. 200, the width of texture.png
+        WeightIndicator {
+            id: weightIndicator
+
+            ...
+
+            weightTotal: delegate.weightTotal
+            weightLeft: delegate.weightLeft
+            weightUnit: delegate.weightUnit
+
+            mainColor: delegate.mainColor
+            textureColor: delegate.textureColor
+            borderColor: delegate.borderColor
+
+            borderWidth: delegate.borderWidth
+            textureType: delegate.textureType
+            textureHeight: delegate.textureHeight
+            textureWidth: delegate.textureWidth
+            editable: delegate.editable
+            smooth: delegate.smooth
+        }
+        ...
     }
-    \endcode
 
-    and in \c{WeightIndicator.qml}:
+    SwipeOptionsContainer { // in SwipableCollectionDelegate.qml
+        id: swipeOptionsContainer
 
-    \code
-    Rectangle {
+        ...
+
+        property string ageDescription: qsTr("collected %1 %2 ago")
+        property int borderWidth: 0
+        property int textureType: WeightIndicator.None
+        property int textureHeight: height
+        property int textureWidth: width
+        property bool editable: false
+        property bool smooth: false
+
+        ...
+
+        CollectionDelegate {
+            ...
+
+            borderWidth: swipeOptionsContainer.borderWidth
+            textureType: swipeOptionsContainer.textureType
+            textureHeight: swipeOptionsContainer.textureHeight
+            textureWidth: swipeOptionsContainer.textureWidth
+            editable: swipeOptionsContainer.editable
+            smooth: swipeOptionsContainer.smooth
+        }
+    }
+
+    delegate: SwipableCollectionDelegate { // in Main.qml
+        width: pageMain.width
+
+        borderWidth: 0
+        textureType: WeightIndicator.Texture.Noise
+        textureHeight: 354 // a bit less than 380, the height of texture.png
+        textureWidth: 220 // approx. 220, the width of texture.png
+        smooth: false
+    }
+
+    Rectangle { // in WeightIndicator.qml
         id: wiRoot
 
         required property int weightTotal

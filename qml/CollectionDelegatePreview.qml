@@ -20,6 +20,14 @@ Rectangle {
     property string borderColor: defaultColor
     property list<string> tags: ["Tag 1", "Tag 2", "Tag 3"]
 
+    property string ageDescription: qsTr("collected %1 %2 ago")
+    property int borderWidth: 0
+    property int textureType: WeightIndicator.None
+    property int textureHeight: height
+    property int textureWidth: width
+    property bool editable: false
+    property bool smooth: false
+
     color: switchDarkStyle.checked? "black" : "white"
     property color textColor: switchDarkStyle.checked? "white" : "black"
     width: parent.width
@@ -46,6 +54,13 @@ Rectangle {
         borderColor: cdpRoot.borderColor
         tagStr: ""
         tags: cdpRoot.tags
+
+        borderWidth: cdpRoot.borderWidth
+        textureType: cdpRoot.textureType
+        textureHeight: cdpRoot.textureHeight
+        textureWidth: cdpRoot.textureWidth
+        editable: cdpRoot.editable
+        smooth: cdpRoot.smooth
 
         width: parent.width - cdpRoot.border.width * 2
         anchors.centerIn: parent

@@ -25,6 +25,12 @@ SwipeOptionsContainer {
     property list<string> tags
 
     property string ageDescription: qsTr("collected %1 %2 ago")
+    property int borderWidth: 0
+    property int textureType: WeightIndicator.None
+    property int textureHeight: height
+    property int textureWidth: width
+    property bool editable: false
+    property bool smooth: false
 
     Component.onCompleted: {
         // TODO Somehow the datatype of the string list is lost
@@ -126,5 +132,12 @@ SwipeOptionsContainer {
         borderColor: swipeOptionsContainer.borderColor
         tagStr: swipeOptionsContainer.tagStr
         tags: swipeOptionsContainer.tags
+
+        borderWidth: swipeOptionsContainer.borderWidth
+        textureType: swipeOptionsContainer.textureType
+        textureHeight: swipeOptionsContainer.textureHeight
+        textureWidth: swipeOptionsContainer.textureWidth
+        editable: swipeOptionsContainer.editable
+        smooth: swipeOptionsContainer.smooth
     }
 }

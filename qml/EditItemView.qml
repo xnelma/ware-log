@@ -25,6 +25,11 @@ AppPage {
             mainColor: rowColors.mainColor
             textureColor: rowColors.textureColor
             borderColor: rowColors.borderColor
+            borderWidth: 0 // TODO get from database
+            textureType: WeightIndicator.Texture.Noise // TODO get from database
+            textureHeight: 354 // TODO get from database
+            textureWidth: 220 // TODO get from database
+            smooth: false // TODO get from database
             // remove parent margin and hide borders at sides:
             width: parent.width + 20 + border.width * 2
             x: - 10 - border.width

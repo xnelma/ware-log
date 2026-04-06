@@ -103,6 +103,14 @@ CollectionDelegate {
     property string textureColor: defaultColor
     property string borderColor: defaultColor
     property list<span class="operator">&lt;</span>string<span class="operator">&gt;</span> tags: <span class="operator">[</span><span class="string">&quot;Tag 1&quot;</span><span class="operator">,</span> <span class="string">&quot;Tag 2&quot;</span><span class="operator">,</span> <span class="string">&quot;Tag 3&quot;</span><span class="operator">]</span>
+
+    property string ageDescription: qsTr(<span class="string">&quot;collected %1 %2 ago&quot;</span>)
+    property <span class="type">int</span> borderWidth: <span class="number">0</span>
+    property <span class="type">int</span> textureType: WeightIndicator<span class="operator">.</span>None
+    property <span class="type">int</span> textureHeight: height
+    property <span class="type">int</span> textureWidth: width
+    property <span class="type">bool</span> editable: <span class="keyword">false</span>
+    property <span class="type">bool</span> smooth: <span class="keyword">false</span>
 }</pre>
 <p>And add property bindings to the delegate:</p>
 <pre class="cpp" translate="no">CollectionDelegate {
@@ -124,6 +132,13 @@ CollectionDelegate {
     borderColor: cdpRoot<span class="operator">.</span>borderColor
     tagStr: <span class="string">&quot;&quot;</span>
     tags: cdpRoot<span class="operator">.</span>tags
+
+    borderWidth: cdpRoot<span class="operator">.</span>borderWidth
+    textureType: cdpRoot<span class="operator">.</span>textureType
+    textureHeight: cdpRoot<span class="operator">.</span>textureHeight
+    textureWidth: cdpRoot<span class="operator">.</span>textureWidth
+    editable: cdpRoot<span class="operator">.</span>editable
+    smooth: cdpRoot<span class="operator">.</span>smooth
 
     <span class="operator">.</span><span class="operator">.</span><span class="operator">.</span>
 }</pre>
@@ -160,6 +175,12 @@ AppSwitch {
 <p>We will use the preview in <code translate="no">CollectionSettingsView.qml</code> as follows:</p>
 <pre class="cpp" translate="no">CollectionDelegatePreview {
     <span class="operator">.</span><span class="operator">.</span><span class="operator">.</span> <span class="comment">// (set main, border and texture color)</span>
+    borderWidth: sliderBorderWidth<span class="operator">.</span>value
+    textureType: comboTexture<span class="operator">.</span>currentIndex
+    textureWidth: sliderWidth<span class="operator">.</span>value
+    textureHeight: sliderHeight<span class="operator">.</span>value
+    editable: <span class="keyword">true</span>
+    smooth: switchSmooth<span class="operator">.</span>checked
     <span class="comment">// remove parent margin and hide borders at sides:</span>
     width: parent<span class="operator">.</span>width <span class="operator">+</span> <span class="number">20</span> <span class="operator">+</span> border<span class="operator">.</span>width <span class="operator">*</span> <span class="number">2</span>
     x: <span class="operator">-</span> <span class="number">10</span> <span class="operator">-</span> border<span class="operator">.</span>width
@@ -174,6 +195,11 @@ AppSwitch {
         mainColor: rowColors<span class="operator">.</span>mainColor
         textureColor: rowColors<span class="operator">.</span>textureColor
         borderColor: rowColors<span class="operator">.</span>borderColor
+        borderWidth: <span class="number">0</span>
+        textureType: WeightIndicator<span class="operator">.</span>Texture<span class="operator">.</span>Noise
+        textureHeight: <span class="number">354</span>
+        textureWidth: <span class="number">220</span>
+        smooth: <span class="keyword">false</span>
         <span class="comment">// remove parent margin and hide borders at sides:</span>
         width: parent<span class="operator">.</span>width <span class="operator">+</span> <span class="number">20</span> <span class="operator">+</span> border<span class="operator">.</span>width <span class="operator">*</span> <span class="number">2</span>
         x: <span class="operator">-</span> <span class="number">10</span> <span class="operator">-</span> border<span class="operator">.</span>width

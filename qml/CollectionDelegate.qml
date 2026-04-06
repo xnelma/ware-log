@@ -28,6 +28,12 @@ Item {
     property list<string> tags
 
     property string ageDescription: qsTr("collected %1 %2 ago")
+    property int borderWidth: 0
+    property int textureType: WeightIndicator.None
+    property int textureHeight: height
+    property int textureWidth: width
+    property bool editable: false
+    property bool smooth: false
 
     Component.onCompleted: {
         // TODO Somehow the datatype of the string list is lost
@@ -53,9 +59,12 @@ Item {
         textureColor: delegate.textureColor
         borderColor: delegate.borderColor
 
-        textureType: WeightIndicator.Texture.Noise
-        textureHeight: height * 3 // approx. 380, the height of texture.png
-        textureWidth: width * 4 // approx. 220, the width of texture.png
+        borderWidth: delegate.borderWidth
+        textureType: delegate.textureType
+        textureHeight: delegate.textureHeight
+        textureWidth: delegate.textureWidth
+        editable: delegate.editable
+        smooth: delegate.smooth
     }
 
     Column {

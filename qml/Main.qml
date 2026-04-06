@@ -85,6 +85,13 @@ App {
 
                 delegate: SwipableCollectionDelegate {
                     width: pageMain.width
+
+                    // TODO get from database:
+                    borderWidth: 0
+                    textureType: WeightIndicator.Texture.Noise
+                    textureHeight: 354 // a bit less than 380, the height of texture.png
+                    textureWidth: 220 // approx. 220, the width of texture.png
+                    smooth: false
                 }
             }
 

@@ -45,26 +45,83 @@ Rectangle {
     color: mainColor
 }</pre>
 <p>If you build now, the list items should still look the same.</p>
-<p>Then add properties for the data the component will show: the total and remaining weight, the weight unit and the main, texture and border color. Also add properties for texture and border settings, including an enum for the texture type (so far none or noise). Specify default values except for the main color. Later in this chapter latter properties will be used to expose some of the texture properties, so the texture can be manipulated when the component is instantiated.</p>
-<pre class="cpp" translate="no">WeightIndicator {
-    id: weightIndicator
+<p>Then add properties for the data the component will show: the total and remaining weight, the weight unit and the main, texture and border color. Also add properties for texture and border settings, including an enum for the texture type (so far none or noise). Specify default values except for the main color. Later in this chapter latter properties will be used to expose some of the texture properties, so the texture can be manipulated when the component is instantiated. To be able to manipulate the properties, we also need to propagate them by adding properties to <code translate="no">CollectionDelegate</code>, too.</p>
+<pre class="cpp" translate="no">Item { <span class="comment">// in CollectionDelegate.qml</span>
+    id: delegate
 
     <span class="operator">.</span><span class="operator">.</span><span class="operator">.</span>
 
-    weightTotal: delegate<span class="operator">.</span>weightTotal
-    weightLeft: delegate<span class="operator">.</span>weightLeft
-    weightUnit: delegate<span class="operator">.</span>weightUnit
+    property string ageDescription: qsTr(<span class="string">&quot;collected %1 %2 ago&quot;</span>)
+    property <span class="type">int</span> borderWidth: <span class="number">0</span>
+    property <span class="type">int</span> textureType: WeightIndicator<span class="operator">.</span>None
+    property <span class="type">int</span> textureHeight: height
+    property <span class="type">int</span> textureWidth: width
+    property <span class="type">bool</span> editable: <span class="keyword">false</span>
+    property <span class="type">bool</span> smooth: <span class="keyword">false</span>
 
-    mainColor: delegate<span class="operator">.</span>mainColor
-    textureColor: delegate<span class="operator">.</span>textureColor
-    borderColor: delegate<span class="operator">.</span>borderColor
+    <span class="operator">.</span><span class="operator">.</span><span class="operator">.</span>
 
+    WeightIndicator {
+        id: weightIndicator
+
+        <span class="operator">.</span><span class="operator">.</span><span class="operator">.</span>
+
+        weightTotal: delegate<span class="operator">.</span>weightTotal
+        weightLeft: delegate<span class="operator">.</span>weightLeft
+        weightUnit: delegate<span class="operator">.</span>weightUnit
+
+        mainColor: delegate<span class="operator">.</span>mainColor
+        textureColor: delegate<span class="operator">.</span>textureColor
+        borderColor: delegate<span class="operator">.</span>borderColor
+
+        borderWidth: delegate<span class="operator">.</span>borderWidth
+        textureType: delegate<span class="operator">.</span>textureType
+        textureHeight: delegate<span class="operator">.</span>textureHeight
+        textureWidth: delegate<span class="operator">.</span>textureWidth
+        editable: delegate<span class="operator">.</span>editable
+        smooth: delegate<span class="operator">.</span>smooth
+    }
+    <span class="operator">.</span><span class="operator">.</span><span class="operator">.</span>
+}
+
+SwipeOptionsContainer { <span class="comment">// in SwipableCollectionDelegate.qml</span>
+    id: swipeOptionsContainer
+
+    <span class="operator">.</span><span class="operator">.</span><span class="operator">.</span>
+
+    property string ageDescription: qsTr(<span class="string">&quot;collected %1 %2 ago&quot;</span>)
+    property <span class="type">int</span> borderWidth: <span class="number">0</span>
+    property <span class="type">int</span> textureType: WeightIndicator<span class="operator">.</span>None
+    property <span class="type">int</span> textureHeight: height
+    property <span class="type">int</span> textureWidth: width
+    property <span class="type">bool</span> editable: <span class="keyword">false</span>
+    property <span class="type">bool</span> smooth: <span class="keyword">false</span>
+
+    <span class="operator">.</span><span class="operator">.</span><span class="operator">.</span>
+
+    CollectionDelegate {
+        <span class="operator">.</span><span class="operator">.</span><span class="operator">.</span>
+
+        borderWidth: swipeOptionsContainer<span class="operator">.</span>borderWidth
+        textureType: swipeOptionsContainer<span class="operator">.</span>textureType
+        textureHeight: swipeOptionsContainer<span class="operator">.</span>textureHeight
+        textureWidth: swipeOptionsContainer<span class="operator">.</span>textureWidth
+        editable: swipeOptionsContainer<span class="operator">.</span>editable
+        smooth: swipeOptionsContainer<span class="operator">.</span>smooth
+    }
+}
+
+delegate: SwipableCollectionDelegate { <span class="comment">// in Main.qml</span>
+    width: pageMain<span class="operator">.</span>width
+
+    borderWidth: <span class="number">0</span>
     textureType: WeightIndicator<span class="operator">.</span>Texture<span class="operator">.</span>Noise
-    textureHeight: height <span class="operator">*</span> <span class="number">3</span> <span class="comment">// approx. 380, the height of texture.png</span>
-    textureWidth: width <span class="operator">*</span> <span class="number">4</span> <span class="comment">// approx. 200, the width of texture.png</span>
-}</pre>
-<p>and in <code translate="no">WeightIndicator.qml</code>:</p>
-<pre class="cpp" translate="no">Rectangle {
+    textureHeight: <span class="number">354</span> <span class="comment">// a bit less than 380, the height of texture.png</span>
+    textureWidth: <span class="number">220</span> <span class="comment">// approx. 220, the width of texture.png</span>
+    smooth: <span class="keyword">false</span>
+}
+
+Rectangle { <span class="comment">// in WeightIndicator.qml</span>
     id: wiRoot
 
     required property <span class="type">int</span> weightTotal
