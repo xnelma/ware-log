@@ -189,8 +189,8 @@
     changed via their
     \l {https://doc.qt.io/qt-6/qml-qtquick-palette.html} {palette}.
 
-    Add a component \c{LightDarkComboBox} with \c{ComboBox} as base type
-    and set the colors with bindings to color properties.
+    Add a component file \c{LightDarkComboBox.qml} with \c{ComboBox} as base
+    type and set the colors with bindings to color properties.
     This is trial and error and results in following properties:
 
     \code

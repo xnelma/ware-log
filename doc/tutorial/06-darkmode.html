@@ -144,7 +144,7 @@ component ColorButton : AppButton {
 }</pre>
 <h2 id="set-combobox-dark-mode-colors">Set combobox dark mode colors</h2>
 <p>The <code translate="no">ComboBox</code> components have no direct color properties, but can be changed via their <a href="https://doc.qt.io/qt-6/qml-qtquick-palette.html">palette</a>.</p>
-<p>Add a component <code translate="no">LightDarkComboBox</code> with <code translate="no">ComboBox</code> as base type and set the colors with bindings to color properties. This is trial and error and results in following properties:</p>
+<p>Add a component file <code translate="no">LightDarkComboBox.qml</code> with <code translate="no">ComboBox</code> as base type and set the colors with bindings to color properties. This is trial and error and results in following properties:</p>
 <pre class="cpp" translate="no">component LightDarkComboBox : ComboBox {
     palette {
         text: textColor
