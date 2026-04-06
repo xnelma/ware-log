@@ -82,6 +82,8 @@ AppPage {
                 onColorNameChanged: rowTitle.originColor = colorName
                 minimumWidth: 10
                 anchors.verticalCenter: parent.verticalCenter
+
+
             }
         } // rowTitle
 
@@ -141,7 +143,7 @@ AppPage {
 
             ColorButton {
                 id: btnMainColor
-                text: "Main Color"
+                text: qsTr("Main Color")
                 colorName: rowColors.mainColor
                 onColorNameChanged: rowColors.mainColor
                     = Qt.binding(function() { return colorName })
@@ -151,7 +153,7 @@ AppPage {
 
             ColorButton {
                 id: btnTextureColor
-                text: "Texture Color"
+                text: qsTr("Texture Color")
                 colorName: rowColors.textureColor
                 onColorNameChanged: rowColors.textureColor
                     = Qt.binding(function() { return colorName });
@@ -162,7 +164,7 @@ AppPage {
             // TODO disable border or texture button if not set for collection.
             ColorButton {
                 id: btnBorderColor
-                text: "Border Color"
+                text: qsTr("Border Color")
                 colorName: rowColors.borderColor
                 onColorNameChanged: rowColors.borderColor
                     = Qt.binding(function() { return colorName });
@@ -434,27 +436,6 @@ AppPage {
         }
     }
 
-    component ColorButton : AppButton {
-        property string colorName
-        backgroundColor: colorName
-        textColor: colorButtonTextColor
-        onClicked: {
-            dialogColor.selectedColor = colorName;
-            connectDialogColor.enabled = true;
-            dialogColor.open();
-        }
-
-        Connections {
-            id: connectDialogColor
-            target: dialogColor
-            enabled: false
-            function onAccepted() {
-                colorName = dialogColor.selectedColor;
-                connectDialogColor.enabled = false;
-            }
-        }
-    }
-
     component LightDarkComboBox : ComboBox {
         palette {
             text: textColor
@@ -469,10 +450,6 @@ AppPage {
             midlight: lightColor
             light: lighterColor
         }
-    }
-
-    ColorDialog {
-        id: dialogColor
     }
 
     function reset() {

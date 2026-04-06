@@ -556,19 +556,26 @@
     }
     \endcode
 
-    This dialog should be opened when one of the three buttons are clicked.
+    The dialog should be opened when one of the three buttons are clicked.
     It already has a full layout, including 'Cancel' and 'OK' buttons that
     close the dialog.
     We will have to set the initial color of the dialog depending on the
     clicked button, and get the selected color when the 'OK' button is clicked.
     But first, because it will be the same behavior for three buttons, just
-    with different colors, we will add a component \c{ColorButton} to the
-    bottom of the file, above \c{ColorDialog}.
+    with different colors, we will add a custom component
+    \c{ColorButton}, but in its own file \c{ColorButton.qml} so we
+    can use it in other views later on.
+    Also move the color dialog into this file, so as child element of
+    \c{AppButton}:
 
     \code
-    component ColorButton : AppButton {
+    AppButton { // in ColorButton.qml
         property string colorName
         backgroundColor: colorName
+
+        ColorDialog {
+            id: dialogColor
+        }
     }
     \endcode
 
@@ -608,15 +615,17 @@
     }
     \endcode
 
-    The overall structure of the inline component should now be as follows:
+    The overall structure of the component should now be as follows:
 
     \code
-    component ColorButton : AppButton {
+    AppButton {
         property string colorName
         backgroundColor: colorName
         onClicked: { ... }
 
-        Connections { }
+        Connections { ... }
+
+        ColorDialog { ... }
     }
     \endcode
 

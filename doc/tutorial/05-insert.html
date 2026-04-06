@@ -408,10 +408,14 @@ Row {
 <pre class="cpp" translate="no">ColorDialog {
     id: dialogColor
 }</pre>
-<p>This dialog should be opened when one of the three buttons are clicked. It already has a full layout, including 'Cancel' and 'OK' buttons that close the dialog. We will have to set the initial color of the dialog depending on the clicked button, and get the selected color when the 'OK' button is clicked. But first, because it will be the same behavior for three buttons, just with different colors, we will add a component <code translate="no">ColorButton</code> to the bottom of the file, above <code translate="no">ColorDialog</code>.</p>
-<pre class="cpp" translate="no">component ColorButton : AppButton {
+<p>The dialog should be opened when one of the three buttons are clicked. It already has a full layout, including 'Cancel' and 'OK' buttons that close the dialog. We will have to set the initial color of the dialog depending on the clicked button, and get the selected color when the 'OK' button is clicked. But first, because it will be the same behavior for three buttons, just with different colors, we will add a custom component <code translate="no">ColorButton</code>, but in its own file <code translate="no">ColorButton.qml</code> so we can use it in other views later on. Also move the color dialog into this file, so as child element of <code translate="no">AppButton</code>:</p>
+<pre class="cpp" translate="no">AppButton { <span class="comment">// in ColorButton.qml</span>
     property string colorName
     backgroundColor: colorName
+
+    ColorDialog {
+        id: dialogColor
+    }
 }</pre>
 <p>Replace the three buttons with this component, and set the color property instead of their background color.<br />
  The color type of the dialog has the QML type <code translate="no">color</code>, but we will keep using <code translate="no">string</code> because this is the only type we will use it as for now, namely for setting color properties and saving it to the database.</p>
@@ -432,13 +436,15 @@ Row {
     connectDialogColor<span class="operator">.</span>enabled <span class="operator">=</span> <span class="keyword">true</span>;
     dialogColor<span class="operator">.</span>open();
 }</pre>
-<p>The overall structure of the inline component should now be as follows:</p>
-<pre class="cpp" translate="no">component ColorButton : AppButton {
+<p>The overall structure of the component should now be as follows:</p>
+<pre class="cpp" translate="no">AppButton {
     property string colorName
     backgroundColor: colorName
     onClicked: { <span class="operator">.</span><span class="operator">.</span><span class="operator">.</span> }
 
-    Connections { }
+    Connections { <span class="operator">.</span><span class="operator">.</span><span class="operator">.</span> }
+
+    ColorDialog { <span class="operator">.</span><span class="operator">.</span><span class="operator">.</span> }
 }</pre>
 <p>The three buttons also need to handle the color name change, as the Property Bindings to it are one sided:</p>
 <pre class="cpp" translate="no">ColorButton {
