@@ -22,6 +22,7 @@ Column {
         mainColor: colColors.defaultMainColor
         textureColor: colColors.defaultTextureColor
         borderColor: colColors.defaultBorderColor
+        ageDescription: rowAgeContext.ageContext
         borderWidth: sliderBorderWidth.value
         textureType: comboTexture.currentIndex
         textureWidth: sliderWidth.value
@@ -82,11 +83,12 @@ Column {
     }
 
     Row {
+        id: rowAgeContext
         spacing: 10
         width: parent.width
 
-        property string ageContext: inputAgeContext1.text + " %1 %2 "
-                                    + inputAgeContext2.text
+        property string ageContext: (inputAgeContext1.text + " %1 %2 "
+                                    + inputAgeContext2.text).trim()
 
         AppTextField {
             id: inputAgeContext1

@@ -251,11 +251,12 @@ Dialog {
 }
 
 Row {
+    id: rowAgeContext
     spacing: <span class="number">10</span>
     width: parent<span class="operator">.</span>width
 
-    property string ageContext: inputAgeContext1<span class="operator">.</span>text <span class="operator">+</span> <span class="string">&quot; %1 %2 &quot;</span>
-                                <span class="operator">+</span> inputAgeContext2<span class="operator">.</span>text
+    property string ageContext: (inputAgeContext1<span class="operator">.</span>text <span class="operator">+</span> <span class="string">&quot; %1 %2 &quot;</span>
+                                <span class="operator">+</span> inputAgeContext2<span class="operator">.</span>text)<span class="operator">.</span>trim()
 
     AppTextField {
         id: inputAgeContext1
@@ -562,6 +563,7 @@ CollectionDelegate {
     tagStr: <span class="string">&quot;&quot;</span>
     tags: cdpRoot<span class="operator">.</span>tags
 
+    ageDescription: cdpRoot<span class="operator">.</span>ageDescription
     borderWidth: cdpRoot<span class="operator">.</span>borderWidth
     textureType: cdpRoot<span class="operator">.</span>textureType
     textureHeight: cdpRoot<span class="operator">.</span>textureHeight
@@ -618,6 +620,7 @@ Column {
         mainColor: colColors<span class="operator">.</span>defaultMainColor
         textureColor: colColors<span class="operator">.</span>defaultTextureColor
         borderColor: colColors<span class="operator">.</span>defaultBorderColor
+        ageDescription: rowAgeContext<span class="operator">.</span>ageContext
         borderWidth: sliderBorderWidth<span class="operator">.</span>value
         textureType: comboTexture<span class="operator">.</span>currentIndex
         textureWidth: sliderWidth<span class="operator">.</span>value

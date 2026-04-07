@@ -55,6 +55,7 @@ Rectangle {
         tagStr: ""
         tags: cdpRoot.tags
 
+        ageDescription: cdpRoot.ageDescription
         borderWidth: cdpRoot.borderWidth
         textureType: cdpRoot.textureType
         textureHeight: cdpRoot.textureHeight
