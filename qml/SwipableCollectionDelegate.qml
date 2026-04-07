@@ -24,7 +24,7 @@ SwipeOptionsContainer {
     required property string tagStr
     property list<string> tags
 
-    property string ageDescription: qsTr("collected %1 %2 ago")
+    property string ageDescription: qsTr("%1 %2")
     property int borderWidth: 0
     property int textureType: WeightIndicator.None
     property int textureHeight: height
@@ -133,6 +133,7 @@ SwipeOptionsContainer {
         tagStr: swipeOptionsContainer.tagStr
         tags: swipeOptionsContainer.tags
 
+        ageDescription: swipeOptionsContainer.ageDescription
         borderWidth: swipeOptionsContainer.borderWidth
         textureType: swipeOptionsContainer.textureType
         textureHeight: swipeOptionsContainer.textureHeight

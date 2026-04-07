@@ -51,7 +51,7 @@ Rectangle {
 
     <span class="operator">.</span><span class="operator">.</span><span class="operator">.</span>
 
-    property string ageDescription: qsTr(<span class="string">&quot;collected %1 %2 ago&quot;</span>)
+    property string ageDescription: qsTr(<span class="string">&quot;%1 %2&quot;</span>)
     property <span class="type">int</span> borderWidth: <span class="number">0</span>
     property <span class="type">int</span> textureType: WeightIndicator<span class="operator">.</span>None
     property <span class="type">int</span> textureHeight: height
@@ -89,7 +89,7 @@ SwipeOptionsContainer { <span class="comment">// in SwipableCollectionDelegate.q
 
     <span class="operator">.</span><span class="operator">.</span><span class="operator">.</span>
 
-    property string ageDescription: qsTr(<span class="string">&quot;collected %1 %2 ago&quot;</span>)
+    property string ageDescription: qsTr(<span class="string">&quot;%1 %2&quot;</span>)
     property <span class="type">int</span> borderWidth: <span class="number">0</span>
     property <span class="type">int</span> textureType: WeightIndicator<span class="operator">.</span>None
     property <span class="type">int</span> textureHeight: height
@@ -102,6 +102,7 @@ SwipeOptionsContainer { <span class="comment">// in SwipableCollectionDelegate.q
     CollectionDelegate {
         <span class="operator">.</span><span class="operator">.</span><span class="operator">.</span>
 
+        ageDescription: swipeOptionsContainer<span class="operator">.</span>ageDescription
         borderWidth: swipeOptionsContainer<span class="operator">.</span>borderWidth
         textureType: swipeOptionsContainer<span class="operator">.</span>textureType
         textureHeight: swipeOptionsContainer<span class="operator">.</span>textureHeight

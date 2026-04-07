@@ -18,6 +18,7 @@
 <ul>
 <li class="level1"><a href="#navigate-to-settings-page">Navigate to settings page</a></li>
 <li class="level1"><a href="#prepare-database">Prepare database</a></li>
+<li class="level2"><a href="#use-database-values-in-other-views">Use database values in other views</a></li>
 <li class="level1"><a href="#layout-settings">Layout settings</a></li>
 <li class="level2"><a href="#layout-name-and-domain-input">Layout name and domain input</a></li>
 <li class="level2"><a href="#add-age-context-input">Add age context input</a></li>
@@ -128,6 +129,22 @@ function getDomainTextureSmooth()
 }</pre>
 <p>The texture type is set as number using the index of the type. This is not robust and should be done differently for growing project sizes.</p>
 <p>In sum there should be 12x2 smaller methods. With those we have an interface to get the collection properties from the database and save them.</p>
+<h3 id="use-database-values-in-other-views">Use database values in other views</h3>
+<p>Before we continue with the collection settings view, let's assign the values from the database to list items and in the item edit view.</p>
+<p>For the list view and the item edit view, replace the sample values with calls to the javascript methods we just wrote:</p>
+<pre class="cpp" translate="no">ageDescription: (Data<span class="operator">.</span>getDomainAgeContextPrefix() <span class="operator">+</span> <span class="string">&quot; %1 %2 &quot;</span>
+                <span class="operator">+</span> Data<span class="operator">.</span>getDomainAgeContextSuffix())<span class="operator">.</span>trim()
+borderWidth: Data<span class="operator">.</span>getDomainBorderWidth()
+textureType: Data<span class="operator">.</span>getDomainTextureType()
+textureHeight: Data<span class="operator">.</span>getDomainTextureHeight()
+textureWidth: Data<span class="operator">.</span>getDomainTextureWidth()
+smooth: Data<span class="operator">.</span>getDomainTextureSmooth()</pre>
+<p>For the item edit view also replace the default colors with calls to the respective methods:</p>
+<pre class="cpp" translate="no">property string mainColor: Data<span class="operator">.</span>getDomainMainColor()
+property string textureColor: Data<span class="operator">.</span>getDomainTextureColor()
+property string borderColor: Data<span class="operator">.</span>getDomainBorderColor()</pre>
+<p>The texture height and width for the sample database would be 354 (a bit less than 380, the height of texture.png) and 220 (the width of texture.png). When we are done with the settings, you can go back here to set to those values to keep the texture appearance for the sample database.</p>
+<p>If you build now and run the app, you will only see default values, so some noise for the list items (100x100 was the size of the texture we return by default), and the age is formatted without context to e.g. &quot;2 months&quot;.</p>
 <h2 id="layout-settings">Layout settings</h2>
 <p>The content will be structured as a column, with margins and spacing of 10:</p>
 <pre class="cpp" translate="no">AppPage {

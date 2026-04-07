@@ -25,11 +25,13 @@ AppPage {
             mainColor: rowColors.mainColor
             textureColor: rowColors.textureColor
             borderColor: rowColors.borderColor
-            borderWidth: 0 // TODO get from database
-            textureType: WeightIndicator.Texture.Noise // TODO get from database
-            textureHeight: 354 // TODO get from database
-            textureWidth: 220 // TODO get from database
-            smooth: false // TODO get from database
+            ageDescription: (Data.getDomainAgeContextPrefix() + " %1 %2 "
+                            + Data.getDomainAgeContextSuffix()).trim()
+            borderWidth: Data.getDomainBorderWidth()
+            textureType: Data.getDomainTextureType()
+            textureHeight: Data.getDomainTextureHeight()
+            textureWidth: Data.getDomainTextureWidth()
+            smooth: Data.getDomainTextureSmooth()
             // remove parent margin and hide borders at sides:
             width: parent.width + 20 + border.width * 2
             x: - 10 - border.width
@@ -128,9 +130,9 @@ AppPage {
             id: rowColors
             spacing: 10
 
-            property string mainColor: defaultColor
-            property string textureColor: defaultColor
-            property string borderColor: defaultColor
+            property string mainColor: Data.getDomainMainColor()
+            property string textureColor: Data.getDomainTextureColor()
+            property string borderColor: Data.getDomainBorderColor()
 
             // Needed for reset().
             // TODO Why does the property binding have to be redone?

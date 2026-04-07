@@ -172,6 +172,44 @@
     With those we have an interface to get the collection properties from the
     database and save them.
 
+    \section2 Use database values in other views
+
+    Before we continue with the collection settings view, let's assign the
+    values from the database to list items and in the item edit view.
+
+    For the list view and the item edit view, replace the sample values
+    with calls to the javascript methods we just wrote:
+
+    \code
+    ageDescription: (Data.getDomainAgeContextPrefix() + " %1 %2 "
+                    + Data.getDomainAgeContextSuffix()).trim()
+    borderWidth: Data.getDomainBorderWidth()
+    textureType: Data.getDomainTextureType()
+    textureHeight: Data.getDomainTextureHeight()
+    textureWidth: Data.getDomainTextureWidth()
+    smooth: Data.getDomainTextureSmooth()
+    \endcode
+
+    For the item edit view also replace the default colors with calls to
+    the respective methods:
+
+    \code
+    property string mainColor: Data.getDomainMainColor()
+    property string textureColor: Data.getDomainTextureColor()
+    property string borderColor: Data.getDomainBorderColor()
+    \endcode
+
+    The texture height and width for the sample database would be
+    354 (a bit less than 380, the height of texture.png) and 220 (the
+    width of texture.png). When we are done with the settings, you can go
+    back here to set to those values to keep the texture appearance for the
+    sample database.
+
+    If you build now and run the app, you will only see default values, so
+    some noise for the list items (100x100 was the size of the texture we
+    return by default), and the age is formatted without context to e.g.
+    "2 months".
+
     \section1 Layout settings
 
     The content will be structured as a column, with margins and spacing

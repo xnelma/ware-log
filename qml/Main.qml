@@ -86,12 +86,13 @@ App {
                 delegate: SwipableCollectionDelegate {
                     width: pageMain.width
 
-                    // TODO get from database:
-                    borderWidth: 0
-                    textureType: WeightIndicator.Texture.Noise
-                    textureHeight: 354 // a bit less than 380, the height of texture.png
-                    textureWidth: 220 // approx. 220, the width of texture.png
-                    smooth: false
+                    ageDescription: (Data.getDomainAgeContextPrefix() + " %1 %2 "
+                                    + Data.getDomainAgeContextSuffix()).trim()
+                    borderWidth: Data.getDomainBorderWidth()
+                    textureType: Data.getDomainTextureType()
+                    textureHeight: Data.getDomainTextureHeight()
+                    textureWidth: Data.getDomainTextureWidth()
+                    smooth: Data.getDomainTextureSmooth()
                 }
             }
 
