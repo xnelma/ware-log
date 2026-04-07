@@ -141,6 +141,7 @@ import <span class="type">QtQuick</span><span class="operator">.</span>Dialogs</
         id: input
         placeholderText: labeledTextField<span class="operator">.</span>placeholderText
         text: labeledTextField<span class="operator">.</span>text
+        onTextChanged: labeledTextField<span class="operator">.</span>text <span class="operator">=</span> text
         Layout<span class="operator">.</span>alignment: <span class="type">Qt</span><span class="operator">.</span>AlignVCenter
         Layout<span class="operator">.</span>fillWidth: <span class="keyword">true</span>
     }

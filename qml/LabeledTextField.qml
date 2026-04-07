@@ -22,6 +22,7 @@ RowLayout {
         id: input
         placeholderText: labeledTextField.placeholderText
         text: labeledTextField.text
+        onTextChanged: labeledTextField.text = text
         Layout.alignment: Qt.AlignVCenter
         Layout.fillWidth: true
     }
