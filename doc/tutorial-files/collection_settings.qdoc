@@ -297,7 +297,7 @@
 
     ...
 
-    \section1 Add collection delegate preview
+    \section2 Add collection delegate preview
 
     While we could preview the texture directly on a \c{WeightIndicator}, the
     texture currently depends on the height of the rectangle.
@@ -495,4 +495,128 @@
     \endcode
 
     \image {delegate_preview_add_item.jpg} {Delegate preview in EditItemView}
+
+    \section2 Layout color buttons
+
+    The color buttons first need a label to give them context.
+    We will also allow setting the colors randomly from an item in the
+    database, since colors in a domain might be similar between items.
+    So next to the label, there will be an icon button for that, but also
+    an info button for the randomize button.
+
+    \code
+    AppText {
+        text: qsTr("Default values:")
+        ...
+    }
+
+    Row {
+        spacing: 10
+        height: txtImageColorsLabel.height + 4
+
+        AppText {
+            id: txtImageColorsLabel
+            text: qsTr("Item image colors:")
+            anchors.verticalCenter: parent.verticalCenter
+        }
+
+        // Show some background to group the buttons together.
+        Item {
+            width: btnRandomColors.width + btnRandomColorsInfo.width + 20
+            // The margin of 20 is the left margin (10) + the margin between the
+            // buttons (5) + a smaller right margin (5) to visually "group" the
+            // info button to the button it relates to.
+            height: parent.height
+
+            // The rectangle color depends on the text color to not have to
+            // specify light and dark colors.
+            // But to lower the opacity, the rectangle cannot be the parent item;
+            // otherwise the buttons would also be transparent.
+            Rectangle {
+                color: txtImageColorsLabel.color
+                opacity: 0.05
+                radius: height / 2
+                anchors.fill: parent
+            }
+
+            IconButton {
+                id: btnRandomColors
+                iconType: IconType.random
+                height: parent.height
+                width: height
+                anchors.left: parent.left
+                anchors.leftMargin: 10
+            }
+
+            IconButton {
+                id: btnRandomColorsInfo
+                iconType: IconType.infocircle
+                height: parent.height
+                width: height
+                anchors.left: btnRandomColors.right
+                anchors.leftMargin: 5
+                anchors.top: btnRandomColors.top
+                onClicked: {
+                    dlgInfo.message = qsTr("Get the colors of a random item in "
+                        + "the database.");
+                    dlgInfo.open();
+                }
+            }
+        } // Item
+    } // Row
+    \endcode
+
+    The color buttons will be inside a \c{ColumnLayout}, so setting them
+    all to the same width will be done by column layout properties.
+    The layout will also hold properties for the buttons and for use later on.
+    And then we will use the \c{ColorButton} component we wrote in a
+    previous chapter.
+
+    \code
+    Row { ... }
+
+    ColumnLayout {
+        id: colColors
+
+        property string defaultMainColor: defaultColor
+        property string defaultTextureColor: defaultColor
+        property string defaultBorderColor: defaultColor
+
+        ColorButton {
+            id: btnColorMain
+            text: qsTr("Default Main Color")
+            colorName: colColors.defaultMainColor
+            onColorNameChanged: colColors.defaultMainColor
+                = Qt.binding(function() { return colorName });
+            horizontalMargin: 0
+            verticalMargin: 0
+            Layout.fillHeight: true
+            Layout.fillWidth: true
+        }
+
+        ColorButton {
+            id: btnColorTexture
+            text: qsTr("Default Texture Color")
+            colorName: colColors.defaultTextureColor
+            onColorNameChanged: colColors.defaultTextureColor
+                                = Qt.binding(function() { return colorName });
+            horizontalMargin: 0
+            verticalMargin: 0
+            Layout.fillHeight: true
+            Layout.fillWidth: true
+        }
+
+        ColorButton {
+            id: btnColorBorder
+            text: qsTr("Default Border Color")
+            colorName: colColors.defaultBorderColor
+            onColorNameChanged: colColors.defaultBorderColor
+                                = Qt.binding(function() { return colorName });
+            horizontalMargin: 0
+            verticalMargin: 0
+            Layout.fillHeight: true
+            Layout.fillWidth: true
+        }
+    } // colColors
+    \endcode
 */

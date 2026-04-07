@@ -19,7 +19,8 @@
 <li class="level1"><a href="#navigate-to-settings-page">Navigate to settings page</a></li>
 <li class="level1"><a href="#layout-settings">Layout settings</a></li>
 <li class="level2"><a href="#layout-name-and-domain-input">Layout name and domain input</a></li>
-<li class="level1"><a href="#add-collection-delegate-preview">Add collection delegate preview</a></li>
+<li class="level2"><a href="#add-collection-delegate-preview">Add collection delegate preview</a></li>
+<li class="level2"><a href="#layout-color-buttons">Layout color buttons</a></li>
 </ul>
 </div>
 <div class="sidebar-content" id="sidebar-content"></div></div>
@@ -223,7 +224,7 @@ Dialog {
 
 } <span class="comment">// AppPage</span></pre>
 <p>...</p>
-<h2 id="add-collection-delegate-preview">Add collection delegate preview</h2>
+<h3 id="add-collection-delegate-preview">Add collection delegate preview</h3>
 <p>While we could preview the texture directly on a <code translate="no">WeightIndicator</code>, the texture currently depends on the height of the rectangle. To get the same scale of the texture as it will appear in the list view, we could preview it directly in a list delegate.</p>
 <p>Create another qml file <code translate="no">CollectionDelegatePreview.qml</code>. Needed imports are <code translate="no">QtQuick</code> und <code translate="no">Felgo</code>.</p>
 <p>The root component will be a <code translate="no">Rectangle</code>, and it will have a larger height than the delegate itself to add some margin: it would be handy to be able to switch between dark and light mode to try out the contrast of selected colors, so add some extra space to color around the delegate item.</p>
@@ -372,7 +373,114 @@ AppSwitch {
     }
     <span class="operator">.</span><span class="operator">.</span><span class="operator">.</span>
 }</pre>
-<p class="centerAlign"><img src="images/delegate_preview_add_item.jpg" alt="{Delegate preview in EditItemView}" /></p></div>
+<p class="centerAlign"><img src="images/delegate_preview_add_item.jpg" alt="{Delegate preview in EditItemView}" /></p><h3 id="layout-color-buttons">Layout color buttons</h3>
+<p>The color buttons first need a label to give them context. We will also allow setting the colors randomly from an item in the database, since colors in a domain might be similar between items. So next to the label, there will be an icon button for that, but also an info button for the randomize button.</p>
+<pre class="cpp" translate="no">AppText {
+    text: qsTr(<span class="string">&quot;Default values:&quot;</span>)
+    <span class="operator">.</span><span class="operator">.</span><span class="operator">.</span>
+}
+
+Row {
+    spacing: <span class="number">10</span>
+    height: txtImageColorsLabel<span class="operator">.</span>height <span class="operator">+</span> <span class="number">4</span>
+
+    AppText {
+        id: txtImageColorsLabel
+        text: qsTr(<span class="string">&quot;Item image colors:&quot;</span>)
+        anchors<span class="operator">.</span>verticalCenter: parent<span class="operator">.</span>verticalCenter
+    }
+
+    <span class="comment">// Show some background to group the buttons together.</span>
+    Item {
+        width: btnRandomColors<span class="operator">.</span>width <span class="operator">+</span> btnRandomColorsInfo<span class="operator">.</span>width <span class="operator">+</span> <span class="number">20</span>
+        <span class="comment">// The margin of 20 is the left margin (10) + the margin between the</span>
+        <span class="comment">// buttons (5) + a smaller right margin (5) to visually &quot;group&quot; the</span>
+        <span class="comment">// info button to the button it relates to.</span>
+        height: parent<span class="operator">.</span>height
+
+        <span class="comment">// The rectangle color depends on the text color to not have to</span>
+        <span class="comment">// specify light and dark colors.</span>
+        <span class="comment">// But to lower the opacity, the rectangle cannot be the parent item;</span>
+        <span class="comment">// otherwise the buttons would also be transparent.</span>
+        Rectangle {
+            color: txtImageColorsLabel<span class="operator">.</span>color
+            opacity: <span class="number">0.05</span>
+            radius: height <span class="operator">/</span> <span class="number">2</span>
+            anchors<span class="operator">.</span>fill: parent
+        }
+
+        IconButton {
+            id: btnRandomColors
+            iconType: IconType<span class="operator">.</span>random
+            height: parent<span class="operator">.</span>height
+            width: height
+            anchors<span class="operator">.</span>left: parent<span class="operator">.</span>left
+            anchors<span class="operator">.</span>leftMargin: <span class="number">10</span>
+        }
+
+        IconButton {
+            id: btnRandomColorsInfo
+            iconType: IconType<span class="operator">.</span>infocircle
+            height: parent<span class="operator">.</span>height
+            width: height
+            anchors<span class="operator">.</span>left: btnRandomColors<span class="operator">.</span>right
+            anchors<span class="operator">.</span>leftMargin: <span class="number">5</span>
+            anchors<span class="operator">.</span>top: btnRandomColors<span class="operator">.</span>top
+            onClicked: {
+                dlgInfo<span class="operator">.</span>message <span class="operator">=</span> qsTr(<span class="string">&quot;Get the colors of a random item in &quot;</span>
+                    <span class="operator">+</span> <span class="string">&quot;the database.&quot;</span>);
+                dlgInfo<span class="operator">.</span>open();
+            }
+        }
+    } <span class="comment">// Item</span>
+} <span class="comment">// Row</span></pre>
+<p>The color buttons will be inside a <code translate="no">ColumnLayout</code>, so setting them all to the same width will be done by column layout properties. The layout will also hold properties for the buttons and for use later on. And then we will use the <code translate="no">ColorButton</code> component we wrote in a previous chapter.</p>
+<pre class="cpp" translate="no">Row { <span class="operator">.</span><span class="operator">.</span><span class="operator">.</span> }
+
+ColumnLayout {
+    id: colColors
+
+    property string defaultMainColor: defaultColor
+    property string defaultTextureColor: defaultColor
+    property string defaultBorderColor: defaultColor
+
+    ColorButton {
+        id: btnColorMain
+        text: qsTr(<span class="string">&quot;Default Main Color&quot;</span>)
+        colorName: colColors<span class="operator">.</span>defaultMainColor
+        onColorNameChanged: colColors<span class="operator">.</span>defaultMainColor
+            <span class="operator">=</span> <span class="type">Qt</span><span class="operator">.</span>binding(function() { <span class="keyword">return</span> colorName });
+        horizontalMargin: <span class="number">0</span>
+        verticalMargin: <span class="number">0</span>
+        Layout<span class="operator">.</span>fillHeight: <span class="keyword">true</span>
+        Layout<span class="operator">.</span>fillWidth: <span class="keyword">true</span>
+    }
+
+    ColorButton {
+        id: btnColorTexture
+        text: qsTr(<span class="string">&quot;Default Texture Color&quot;</span>)
+        colorName: colColors<span class="operator">.</span>defaultTextureColor
+        onColorNameChanged: colColors<span class="operator">.</span>defaultTextureColor
+                            <span class="operator">=</span> <span class="type">Qt</span><span class="operator">.</span>binding(function() { <span class="keyword">return</span> colorName });
+        horizontalMargin: <span class="number">0</span>
+        verticalMargin: <span class="number">0</span>
+        Layout<span class="operator">.</span>fillHeight: <span class="keyword">true</span>
+        Layout<span class="operator">.</span>fillWidth: <span class="keyword">true</span>
+    }
+
+    ColorButton {
+        id: btnColorBorder
+        text: qsTr(<span class="string">&quot;Default Border Color&quot;</span>)
+        colorName: colColors<span class="operator">.</span>defaultBorderColor
+        onColorNameChanged: colColors<span class="operator">.</span>defaultBorderColor
+                            <span class="operator">=</span> <span class="type">Qt</span><span class="operator">.</span>binding(function() { <span class="keyword">return</span> colorName });
+        horizontalMargin: <span class="number">0</span>
+        verticalMargin: <span class="number">0</span>
+        Layout<span class="operator">.</span>fillHeight: <span class="keyword">true</span>
+        Layout<span class="operator">.</span>fillWidth: <span class="keyword">true</span>
+    }
+} <span class="comment">// colColors</span></pre>
+</div>
 <!-- @@@09-setup.html -->
 <p class="naviNextPrevious footerNavi">
 <a class="prevPage" href="08-update.html">Update Weight and Cost</a>
