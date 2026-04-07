@@ -63,7 +63,56 @@
 
     \section1 Layout settings
 
-    ...
+    The content will be structured as a column, with margins and spacing
+    of 10:
+
+    \code
+    AppPage {
+        title: qsTr("CollectionSettings")
+
+    Column {
+        id: content
+        anchors.fill: parent
+        anchors.margins: 10
+        spacing: 10
+    } // Column
+    } // AppPage
+    \endcode
+
+    As the content will get longer than the page width, wrap it inside
+    a \c{Flickable}:
+
+    \code
+    AppPage {
+        ...
+
+    Flickable {
+        anchors.fill: parent
+        contentHeight: content.height
+
+    Column {
+        id: content
+        ...
+    } // Column
+    } // Flickable
+    } // AppPage
+    \endcode
+
+    The ident for those components is on the same level to have less
+    indentation for the content.
+
+    All the imports needed in this chapter are
+
+    \code
+    import Felgo
+    import QtQuick
+    import QtQuick.Layouts
+    import QtQuick.Controls as QtControls
+    import QtQuick.Dialogs
+    \endcode
+
+    The controls are imported with an alias due to the name clash with the
+    Felgo \c{Dialog}.
 
     There will be two sections: one for domain settings, and one for
     default values.
@@ -91,6 +140,14 @@
         }
     } // Column
     \endcode
+
+    The section for domain settings will have components for setting a name
+    of the collection and the domain, (e.g. "My Sand Collection" with "Sand"),
+    and the texture (and border) settings for the \c{WeightIndicator} of
+    a list item.
+    The section for default values would for now allow setting default
+    colors for the \c{WeightIndicator}, since items in one domain might have
+    similar colors.
 
     \section2 Layout name and domain input
 

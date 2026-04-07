@@ -60,7 +60,39 @@ AppPage {
 <span class="operator">.</span><span class="operator">.</span><span class="operator">.</span></pre>
 <p>...</p>
 <h2 id="layout-settings">Layout settings</h2>
-<p>...</p>
+<p>The content will be structured as a column, with margins and spacing of 10:</p>
+<pre class="cpp" translate="no">AppPage {
+    title: qsTr(<span class="string">&quot;CollectionSettings&quot;</span>)
+
+Column {
+    id: content
+    anchors<span class="operator">.</span>fill: parent
+    anchors<span class="operator">.</span>margins: <span class="number">10</span>
+    spacing: <span class="number">10</span>
+} <span class="comment">// Column</span>
+} <span class="comment">// AppPage</span></pre>
+<p>As the content will get longer than the page width, wrap it inside a <code translate="no">Flickable</code>:</p>
+<pre class="cpp" translate="no">AppPage {
+    <span class="operator">.</span><span class="operator">.</span><span class="operator">.</span>
+
+Flickable {
+    anchors<span class="operator">.</span>fill: parent
+    contentHeight: content<span class="operator">.</span>height
+
+Column {
+    id: content
+    <span class="operator">.</span><span class="operator">.</span><span class="operator">.</span>
+} <span class="comment">// Column</span>
+} <span class="comment">// Flickable</span>
+} <span class="comment">// AppPage</span></pre>
+<p>The ident for those components is on the same level to have less indentation for the content.</p>
+<p>All the imports needed in this chapter are</p>
+<pre class="cpp" translate="no">import Felgo
+import <span class="type">QtQuick</span>
+import <span class="type">QtQuick</span><span class="operator">.</span>Layouts
+import <span class="type">QtQuick</span><span class="operator">.</span>Controls as <span class="type">QtControls</span>
+import <span class="type">QtQuick</span><span class="operator">.</span>Dialogs</pre>
+<p>The controls are imported with an alias due to the name clash with the Felgo <code translate="no">Dialog</code>.</p>
 <p>There will be two sections: one for domain settings, and one for default values. Add an <code translate="no">AppText</code> as title for each section, with a low opacity, and a <code translate="no">MenuSeparator</code> before the second title.</p>
 <pre class="cpp" translate="no">Column {
     id: content
@@ -81,6 +113,7 @@ AppPage {
         opacity: <span class="number">0.3</span>
     }
 } <span class="comment">// Column</span></pre>
+<p>The section for domain settings will have components for setting a name of the collection and the domain, (e.g. &quot;My Sand Collection&quot; with &quot;Sand&quot;), and the texture (and border) settings for the <code translate="no">WeightIndicator</code> of a list item. The section for default values would for now allow setting default colors for the <code translate="no">WeightIndicator</code>, since items in one domain might have similar colors.</p>
 <h3 id="layout-name-and-domain-input">Layout name and domain input</h3>
 <p>Both the name of a collection and the domain are arbitrary strings, so they would be set through input items. As they should also show the current value from the database, the hint can not be used to explain the input type; at least not if the value is available. So we need a label for the input item. And even with the label the input type might not be clear, so a short explanation with an example should also be shown. Since showing it directly as text would take up quite a lot of space, an info button should be shown next to the input that could e.g. open a dialog with the description and example.</p>
 <p>So add a component file <code translate="no">LabeledTextField.qml</code>. The needed imports are <code translate="no">QtQuick, QtQuick.Layouts</code> and <code translate="no">Felgo</code>.</p>

@@ -7,6 +7,10 @@ import QtQuick.Dialogs
 AppPage {
     title: qsTr("Collection Settings")
 
+Flickable {
+    anchors.fill: parent
+    contentHeight: content.height
+
 Column {
     id: content
     anchors.fill: parent
@@ -48,6 +52,7 @@ Column {
         opacity: 0.3
     }
 } // Column
+} // Flickable
 
 Dialog {
     id: dlgInfo
