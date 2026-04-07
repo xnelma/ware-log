@@ -61,6 +61,150 @@
 
     ...
 
+    \section1 Layout settings
+
+    ...
+
+    \section2 Layout name and domain input
+
+    Both the name of a collection and the domain are arbitrary strings, so
+    they would be set through input items.
+    As they should also show the current value from the database, the hint
+    can not be used to explain the input type; at least not if the value
+    is available.
+    So we need a label for the input item.
+    And even with the label the input type might not be clear, so a
+    short explanation with an example should also be shown. Since showing it
+    directly as text would take up quite a lot of space,
+    an info button should be shown next to the input that
+    could e.g. open a dialog with the description and example.
+
+    So add a component file \c{LabeledTextField.qml}. The needed imports are
+    \c{QtQuick, QtQuick.Layouts} and \c{Felgo}.
+
+    To fill the width of the parent component and have the input item
+    fill the space between label and icon button, the base type will be a
+    \c{RowLayout}.
+    It has required properties for the label, the input placeholder
+    and the dialog message, and an optional property for an initial input text.
+    The child items are \c{AppText} for the label, the \c{AppTextField} itself
+    and an \c{IconButton} with \c{IconType.infocircle}.
+    The message can be shown inside a \c{Dialog}, but it should be
+    added to the settings view directly, as it would
+    otherwise be opened inside the row instead of the full page.
+    It should have properties for the message (\c{string message}) and a
+    general title \c{qsTr("Info")}.
+    Also add a signal \c{infoClicked} to the row layout and call it when the button
+    is clicked.
+
+    \code
+    RowLayout {
+        id: labeledTextField
+        required property string label
+        required property string placeholderText
+        property string text
+        required property string info
+        signal infoClicked()
+        spacing: 10
+        width: parent.width
+
+        AppText {
+            id: txtLabel
+            text: labeledTextField.label
+            Layout.alignment: Qt.AlignVCenter
+        }
+
+        AppTextField {
+            id: input
+            placeholderText: labeledTextField.placeholderText
+            text: labeledTextField.text
+            Layout.alignment: Qt.AlignVCenter
+            Layout.fillWidth: true
+        }
+
+        IconButton {
+            iconType: IconType.infocircle
+            Layout.alignment: Qt.AlignVCenter
+            Layout.preferredHeight: txtLabel.height
+            Layout.preferredWidth: Layout.preferredHeight
+            onClicked: infoClicked()
+        }
+    }
+
+    Dialog { // in CollectionSettingsView.qml
+        id: dlgInfo
+        property string message
+        title: qsTr("Info")
+        negativeAction: false
+        onAccepted: close()
+        autoSize: true
+
+        AppText {
+            text: dlgInfo.message
+            width: parent.width - 40
+            anchors.left: parent.left
+            anchors.leftMargin: 20
+            anchors.top: parent.top
+            anchors.topMargin: 10
+        }
+    }
+    \endcode
+
+    Add two \c{LabeledTextField} items to the settings view, and set their
+    labels, placeholder, input text and messages for collection name and domain.
+    Also add handlers for the custom signal \c{infoClicked} that set the dialog message and
+    open it.
+
+    \code
+    AppPage {
+        ...
+    Column {
+        id: content
+
+        LabeledTextField {
+            label: qsTr("Name:")
+            placeholderText: qsTr("Enter Name")
+            info: qsTr("The name of your collection. E.g. My Sand Collection")
+            onInfoClicked: {
+                dlgInfo.message = info;
+                dlgInfo.open();
+            }
+        }
+
+        LabeledTextField {
+            label: qsTr("Domain:")
+            placeholderText: qsTr("Enter Domain")
+            info: qsTr("The domain of your collection. E.g. Sand, Lemonade, ...")
+            onInfoClicked: {
+                dlgInfo.message = info;
+                dlgInfo.open();
+            }
+        }
+    } // Column
+
+    Dialog {
+        id: dlgInfo
+        property string message
+        title: qsTr("Info")
+        negativeAction: false
+        onAccepted: close()
+        autoSize: true
+
+        AppText {
+            text: dlgInfo.message
+            width: parent.width - 40
+            anchors.left: parent.left
+            anchors.leftMargin: 20
+            anchors.top: parent.top
+            anchors.topMargin: 10
+        }
+    }
+
+    } // AppPage
+    \endcode
+
+    ...
+
     \section1 Add collection delegate preview
 
     While we could preview the texture directly on a \c{WeightIndicator}, the

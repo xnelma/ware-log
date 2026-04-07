@@ -17,6 +17,8 @@
 <h3 id="toc">Contents</h3>
 <ul>
 <li class="level1"><a href="#navigate-to-settings-page">Navigate to settings page</a></li>
+<li class="level1"><a href="#layout-settings">Layout settings</a></li>
+<li class="level2"><a href="#layout-name-and-domain-input">Layout name and domain input</a></li>
 <li class="level1"><a href="#add-collection-delegate-preview">Add collection delegate preview</a></li>
 </ul>
 </div>
@@ -56,6 +58,109 @@ AppPage {
                         <span class="operator">.</span>push(compCollectionSettings)
                 }
 <span class="operator">.</span><span class="operator">.</span><span class="operator">.</span></pre>
+<p>...</p>
+<h2 id="layout-settings">Layout settings</h2>
+<p>...</p>
+<h3 id="layout-name-and-domain-input">Layout name and domain input</h3>
+<p>Both the name of a collection and the domain are arbitrary strings, so they would be set through input items. As they should also show the current value from the database, the hint can not be used to explain the input type; at least not if the value is available. So we need a label for the input item. And even with the label the input type might not be clear, so a short explanation with an example should also be shown. Since showing it directly as text would take up quite a lot of space, an info button should be shown next to the input that could e.g. open a dialog with the description and example.</p>
+<p>So add a component file <code translate="no">LabeledTextField.qml</code>. The needed imports are <code translate="no">QtQuick, QtQuick.Layouts</code> and <code translate="no">Felgo</code>.</p>
+<p>To fill the width of the parent component and have the input item fill the space between label and icon button, the base type will be a <code translate="no">RowLayout</code>. It has required properties for the label, the input placeholder and the dialog message, and an optional property for an initial input text. The child items are <code translate="no">AppText</code> for the label, the <code translate="no">AppTextField</code> itself and an <code translate="no">IconButton</code> with <code translate="no">IconType.infocircle</code>. The message can be shown inside a <code translate="no">Dialog</code>, but it should be added to the settings view directly, as it would otherwise be opened inside the row instead of the full page. It should have properties for the message (<code translate="no">string message</code>) and a general title <code translate="no">qsTr(&quot;Info&quot;)</code>. Also add a signal <code translate="no">infoClicked</code> to the row layout and call it when the button is clicked.</p>
+<pre class="cpp" translate="no">RowLayout {
+    id: labeledTextField
+    required property string label
+    required property string placeholderText
+    property string text
+    required property string info
+    signal infoClicked()
+    spacing: <span class="number">10</span>
+    width: parent<span class="operator">.</span>width
+
+    AppText {
+        id: txtLabel
+        text: labeledTextField<span class="operator">.</span>label
+        Layout<span class="operator">.</span>alignment: <span class="type">Qt</span><span class="operator">.</span>AlignVCenter
+    }
+
+    AppTextField {
+        id: input
+        placeholderText: labeledTextField<span class="operator">.</span>placeholderText
+        text: labeledTextField<span class="operator">.</span>text
+        Layout<span class="operator">.</span>alignment: <span class="type">Qt</span><span class="operator">.</span>AlignVCenter
+        Layout<span class="operator">.</span>fillWidth: <span class="keyword">true</span>
+    }
+
+    IconButton {
+        iconType: IconType<span class="operator">.</span>infocircle
+        Layout<span class="operator">.</span>alignment: <span class="type">Qt</span><span class="operator">.</span>AlignVCenter
+        Layout<span class="operator">.</span>preferredHeight: txtLabel<span class="operator">.</span>height
+        Layout<span class="operator">.</span>preferredWidth: Layout<span class="operator">.</span>preferredHeight
+        onClicked: infoClicked()
+    }
+}
+
+Dialog { <span class="comment">// in CollectionSettingsView.qml</span>
+    id: dlgInfo
+    property string message
+    title: qsTr(<span class="string">&quot;Info&quot;</span>)
+    negativeAction: <span class="keyword">false</span>
+    onAccepted: close()
+    autoSize: <span class="keyword">true</span>
+
+    AppText {
+        text: dlgInfo<span class="operator">.</span>message
+        width: parent<span class="operator">.</span>width <span class="operator">-</span> <span class="number">40</span>
+        anchors<span class="operator">.</span>left: parent<span class="operator">.</span>left
+        anchors<span class="operator">.</span>leftMargin: <span class="number">20</span>
+        anchors<span class="operator">.</span>top: parent<span class="operator">.</span>top
+        anchors<span class="operator">.</span>topMargin: <span class="number">10</span>
+    }
+}</pre>
+<p>Add two <code translate="no">LabeledTextField</code> items to the settings view, and set their labels, placeholder, input text and messages for collection name and domain. Also add handlers for the custom signal <code translate="no">infoClicked</code> that set the dialog message and open it.</p>
+<pre class="cpp" translate="no">AppPage {
+    <span class="operator">.</span><span class="operator">.</span><span class="operator">.</span>
+Column {
+    id: content
+
+    LabeledTextField {
+        label: qsTr(<span class="string">&quot;Name:&quot;</span>)
+        placeholderText: qsTr(<span class="string">&quot;Enter Name&quot;</span>)
+        info: qsTr(<span class="string">&quot;The name of your collection. E.g. My Sand Collection&quot;</span>)
+        onInfoClicked: {
+            dlgInfo<span class="operator">.</span>message <span class="operator">=</span> info;
+            dlgInfo<span class="operator">.</span>open();
+        }
+    }
+
+    LabeledTextField {
+        label: qsTr(<span class="string">&quot;Domain:&quot;</span>)
+        placeholderText: qsTr(<span class="string">&quot;Enter Domain&quot;</span>)
+        info: qsTr(<span class="string">&quot;The domain of your collection. E.g. Sand, Lemonade, ...&quot;</span>)
+        onInfoClicked: {
+            dlgInfo<span class="operator">.</span>message <span class="operator">=</span> info;
+            dlgInfo<span class="operator">.</span>open();
+        }
+    }
+} <span class="comment">// Column</span>
+
+Dialog {
+    id: dlgInfo
+    property string message
+    title: qsTr(<span class="string">&quot;Info&quot;</span>)
+    negativeAction: <span class="keyword">false</span>
+    onAccepted: close()
+    autoSize: <span class="keyword">true</span>
+
+    AppText {
+        text: dlgInfo<span class="operator">.</span>message
+        width: parent<span class="operator">.</span>width <span class="operator">-</span> <span class="number">40</span>
+        anchors<span class="operator">.</span>left: parent<span class="operator">.</span>left
+        anchors<span class="operator">.</span>leftMargin: <span class="number">20</span>
+        anchors<span class="operator">.</span>top: parent<span class="operator">.</span>top
+        anchors<span class="operator">.</span>topMargin: <span class="number">10</span>
+    }
+}
+
+} <span class="comment">// AppPage</span></pre>
 <p>...</p>
 <h2 id="add-collection-delegate-preview">Add collection delegate preview</h2>
 <p>While we could preview the texture directly on a <code translate="no">WeightIndicator</code>, the texture currently depends on the height of the rectangle. To get the same scale of the texture as it will appear in the list view, we could preview it directly in a list delegate.</p>
