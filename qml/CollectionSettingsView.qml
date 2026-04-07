@@ -15,7 +15,23 @@ Column {
     id: content
     anchors.fill: parent
     anchors.margins: 10
+    anchors.topMargin: 0
     spacing: 10
+
+    CollectionDelegatePreview {
+        mainColor: colColors.defaultMainColor
+        textureColor: colColors.defaultTextureColor
+        borderColor: colColors.defaultBorderColor
+        borderWidth: sliderBorderWidth.value
+        textureType: comboTexture.currentIndex
+        textureWidth: sliderWidth.value
+        textureHeight: sliderHeight.value
+        editable: true
+        smooth: switchSmooth.checked
+        // remove parent margin and hide borders at sides:
+        width: parent.width + 20 + border.width * 2
+        x: - 10 - border.width
+    }
 
     AppText {
         text: qsTr("Domain settings:")
