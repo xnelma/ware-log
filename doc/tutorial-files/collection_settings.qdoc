@@ -295,6 +295,70 @@
     } // AppPage
     \endcode
 
+    \section2 Add age context input
+
+    The age can have a different meaning for domains. For sand and other
+    collectibles it might be "collected 2 months ago", but there might be
+    a different context, too.
+    Assumed the unit always follows the number, the context can get
+    described with some text preceding and following number and unit.
+    So we could add two input fields, and some sample number and unit.
+    As this would span the complete width, lets add the label and info button
+    in a separate row:
+
+    \code
+    Row {
+        spacing: 10
+
+        AppText {
+            id: txtAgeContextLabel
+            text: qsTr("Age context:")
+            anchors.verticalCenter: parent.verticalCenter
+        }
+
+        IconButton {
+            iconType: IconType.infocircle
+            Layout.alignment: Qt.AlignVCenter
+            height: txtAgeContextLabel.height
+            width: height
+            onClicked: {
+                dlgInfo.message = qsTr("The context of 'age' in your domain, "
+                    + "e.g. \"collected <n> <dmwy> ago\" (collected 2 months "
+                    + "ago)")
+                dlgInfo.open();
+            }
+        }
+    }
+
+    Row {
+        spacing: 10
+        width: parent.width
+
+        property string ageContext: inputAgeContext1.text + " %1 %2 "
+                                    + inputAgeContext2.text
+
+        AppTextField {
+            id: inputAgeContext1
+            placeholderText: qsTr("Input context") // TODO get from database
+        }
+
+        AppText {
+            id: txtAgeContextSample
+            text: qsTr("2 months")
+            opacity: 0.7
+            anchors.verticalCenter: parent.verticalCenter
+        }
+
+        AppTextField {
+            id: inputAgeContext2
+            placeholderText: qsTr("Input context")
+            anchors.verticalCenter: parent.verticalCenter
+            width: parent.width - inputAgeContext1.width - 10
+                                - txtAgeContextSample.width - 10
+        }
+    }
+    \endcode
+
     ...
 
     \section2 Add collection delegate preview

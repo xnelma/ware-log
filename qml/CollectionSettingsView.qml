@@ -42,6 +42,57 @@ Column {
         }
     }
 
+    Row {
+        spacing: 10
+
+        AppText {
+            id: txtAgeContextLabel
+            text: qsTr("Age context:")
+            anchors.verticalCenter: parent.verticalCenter
+        }
+
+        IconButton {
+            iconType: IconType.infocircle
+            Layout.alignment: Qt.AlignVCenter
+            height: txtAgeContextLabel.height
+            width: height
+            onClicked: {
+                dlgInfo.message = qsTr("The context of 'age' in your domain, "
+                    + "e.g. \"collected <n> <dmwy> ago\" (collected 2 months "
+                    + "ago)")
+                dlgInfo.open();
+            }
+        }
+    }
+
+    Row {
+        spacing: 10
+        width: parent.width
+
+        property string ageContext: inputAgeContext1.text + " %1 %2 "
+                                    + inputAgeContext2.text
+
+        AppTextField {
+            id: inputAgeContext1
+            placeholderText: qsTr("Input context") // TODO get from database
+        }
+
+        AppText {
+            id: txtAgeContextSample
+            text: qsTr("2 months")
+            opacity: 0.7
+            anchors.verticalCenter: parent.verticalCenter
+        }
+
+        AppTextField {
+            id: inputAgeContext2
+            placeholderText: qsTr("Input context")
+            anchors.verticalCenter: parent.verticalCenter
+            width: parent.width - inputAgeContext1.width - 10
+                                - txtAgeContextSample.width - 10
+        }
+    }
+
     QtControls.MenuSeparator {
         width: parent.width
         padding: 0

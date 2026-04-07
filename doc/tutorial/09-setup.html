@@ -19,6 +19,7 @@
 <li class="level1"><a href="#navigate-to-settings-page">Navigate to settings page</a></li>
 <li class="level1"><a href="#layout-settings">Layout settings</a></li>
 <li class="level2"><a href="#layout-name-and-domain-input">Layout name and domain input</a></li>
+<li class="level2"><a href="#add-age-context-input">Add age context input</a></li>
 <li class="level2"><a href="#add-collection-delegate-preview">Add collection delegate preview</a></li>
 <li class="level2"><a href="#layout-color-buttons">Layout color buttons</a></li>
 </ul>
@@ -223,6 +224,58 @@ Dialog {
 }
 
 } <span class="comment">// AppPage</span></pre>
+<h3 id="add-age-context-input">Add age context input</h3>
+<p>The age can have a different meaning for domains. For sand and other collectibles it might be &quot;collected 2 months ago&quot;, but there might be a different context, too. Assumed the unit always follows the number, the context can get described with some text preceding and following number and unit. So we could add two input fields, and some sample number and unit. As this would span the complete width, lets add the label and info button in a separate row:</p>
+<pre class="cpp" translate="no">Row {
+    spacing: <span class="number">10</span>
+
+    AppText {
+        id: txtAgeContextLabel
+        text: qsTr(<span class="string">&quot;Age context:&quot;</span>)
+        anchors<span class="operator">.</span>verticalCenter: parent<span class="operator">.</span>verticalCenter
+    }
+
+    IconButton {
+        iconType: IconType<span class="operator">.</span>infocircle
+        Layout<span class="operator">.</span>alignment: <span class="type">Qt</span><span class="operator">.</span>AlignVCenter
+        height: txtAgeContextLabel<span class="operator">.</span>height
+        width: height
+        onClicked: {
+            dlgInfo<span class="operator">.</span>message <span class="operator">=</span> qsTr(<span class="string">&quot;The context of 'age' in your domain, &quot;</span>
+                <span class="operator">+</span> <span class="string">&quot;e.g. \&quot;collected &lt;n&gt; &lt;dmwy&gt; ago\&quot; (collected 2 months &quot;</span>
+                <span class="operator">+</span> <span class="string">&quot;ago)&quot;</span>)
+            dlgInfo<span class="operator">.</span>open();
+        }
+    }
+}
+
+Row {
+    spacing: <span class="number">10</span>
+    width: parent<span class="operator">.</span>width
+
+    property string ageContext: inputAgeContext1<span class="operator">.</span>text <span class="operator">+</span> <span class="string">&quot; %1 %2 &quot;</span>
+                                <span class="operator">+</span> inputAgeContext2<span class="operator">.</span>text
+
+    AppTextField {
+        id: inputAgeContext1
+        placeholderText: qsTr(<span class="string">&quot;Input context&quot;</span>) <span class="comment">// TODO get from database</span>
+    }
+
+    AppText {
+        id: txtAgeContextSample
+        text: qsTr(<span class="string">&quot;2 months&quot;</span>)
+        opacity: <span class="number">0.7</span>
+        anchors<span class="operator">.</span>verticalCenter: parent<span class="operator">.</span>verticalCenter
+    }
+
+    AppTextField {
+        id: inputAgeContext2
+        placeholderText: qsTr(<span class="string">&quot;Input context&quot;</span>)
+        anchors<span class="operator">.</span>verticalCenter: parent<span class="operator">.</span>verticalCenter
+        width: parent<span class="operator">.</span>width <span class="operator">-</span> inputAgeContext1<span class="operator">.</span>width <span class="operator">-</span> <span class="number">10</span>
+                            <span class="operator">-</span> txtAgeContextSample<span class="operator">.</span>width <span class="operator">-</span> <span class="number">10</span>
+    }
+}</pre>
 <p>...</p>
 <h3 id="add-collection-delegate-preview">Add collection delegate preview</h3>
 <p>While we could preview the texture directly on a <code translate="no">WeightIndicator</code>, the texture currently depends on the height of the rectangle. To get the same scale of the texture as it will appear in the list view, we could preview it directly in a list delegate.</p>
