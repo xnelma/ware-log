@@ -1018,4 +1018,55 @@
 
     \image {delegate_preview_add_item.jpg} {Delegate preview in EditItemView}
 
+    \section2 Get random colors from database
+
+    Add an on-clicked handler to the button for randomizing colors.
+    We will write a method in \c{data.js} that returns an array of three
+    colors: the main color, texture color and border color.
+
+    \code
+    IconButton {
+        id: btnRandomColors
+        ...
+        onClicked: {
+            var colors = Data.getRandomColors();
+            colColors.defaultMainColor = colors[0];
+            colColors.defaultTextureColor = colors[1];
+            colColors.defaultBorderColor = colors[2];
+        }
+    }
+    \endcode
+
+    Inside the method, define variables for each color.
+    Then start a transaction to read the corresponding columns from the
+    collection table, randomize an index over the length of the results
+    and write the colors into the variables.
+
+    \code
+    function getRandomColors()
+    {
+        var mainColor = "";
+        var textureColor = "";
+        var borderColor = "";
+
+        var db = openDatabase();
+        db.transaction(function(tx) {
+            var res = tx.executeSql('SELECT mainColor, textureColor, borderColor ' +
+                                    'FROM Collection');
+            if (res.rows.length === 0)
+                return;
+
+            var index = Math.floor(Math.random() * res.rows.length);
+            var item = res.rows.item(index);
+            mainColor = item.mainColor;
+            textureColor = item.textureColor;
+            borderColor = item.borderColor;
+        });
+
+        return [mainColor, textureColor, borderColor];
+    }
+    \endcode
+
+    And that's it, now you can load sample colors from other items in the
+    database.
 */

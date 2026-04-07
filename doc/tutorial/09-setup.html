@@ -25,6 +25,7 @@
 <li class="level2"><a href="#set-texture-and-border-properties">Set texture and border properties</a></li>
 <li class="level2"><a href="#layout-color-buttons">Layout color buttons</a></li>
 <li class="level2"><a href="#add-collection-delegate-preview">Add collection delegate preview</a></li>
+<li class="level2"><a href="#get-random-colors-from-database">Get random colors from database</a></li>
 </ul>
 </div>
 <div class="sidebar-content" id="sidebar-content"></div></div>
@@ -773,7 +774,43 @@ Column {
     }
     <span class="operator">.</span><span class="operator">.</span><span class="operator">.</span>
 }</pre>
-<p class="centerAlign"><img src="images/delegate_preview_add_item.jpg" alt="{Delegate preview in EditItemView}" /></p></div>
+<p class="centerAlign"><img src="images/delegate_preview_add_item.jpg" alt="{Delegate preview in EditItemView}" /></p><h3 id="get-random-colors-from-database">Get random colors from database</h3>
+<p>Add an on-clicked handler to the button for randomizing colors. We will write a method in <code translate="no">data.js</code> that returns an array of three colors: the main color, texture color and border color.</p>
+<pre class="cpp" translate="no">IconButton {
+    id: btnRandomColors
+    <span class="operator">.</span><span class="operator">.</span><span class="operator">.</span>
+    onClicked: {
+        var colors <span class="operator">=</span> Data<span class="operator">.</span>getRandomColors();
+        colColors<span class="operator">.</span>defaultMainColor <span class="operator">=</span> colors<span class="operator">[</span><span class="number">0</span><span class="operator">]</span>;
+        colColors<span class="operator">.</span>defaultTextureColor <span class="operator">=</span> colors<span class="operator">[</span><span class="number">1</span><span class="operator">]</span>;
+        colColors<span class="operator">.</span>defaultBorderColor <span class="operator">=</span> colors<span class="operator">[</span><span class="number">2</span><span class="operator">]</span>;
+    }
+}</pre>
+<p>Inside the method, define variables for each color. Then start a transaction to read the corresponding columns from the collection table, randomize an index over the length of the results and write the colors into the variables.</p>
+<pre class="cpp" translate="no">function getRandomColors()
+{
+    var mainColor <span class="operator">=</span> <span class="string">&quot;&quot;</span>;
+    var textureColor <span class="operator">=</span> <span class="string">&quot;&quot;</span>;
+    var borderColor <span class="operator">=</span> <span class="string">&quot;&quot;</span>;
+
+    var db <span class="operator">=</span> openDatabase();
+    db<span class="operator">.</span>transaction(function(tx) {
+        var res <span class="operator">=</span> tx<span class="operator">.</span>executeSql(<span class="char">'SELECT mainColor, textureColor, borderColor '</span> <span class="operator">+</span>
+                                <span class="char">'FROM Collection'</span>);
+        <span class="keyword">if</span> (res<span class="operator">.</span>rows<span class="operator">.</span>length <span class="operator">=</span><span class="operator">=</span><span class="operator">=</span> <span class="number">0</span>)
+            <span class="keyword">return</span>;
+
+        var index <span class="operator">=</span> Math<span class="operator">.</span>floor(Math<span class="operator">.</span>random() <span class="operator">*</span> res<span class="operator">.</span>rows<span class="operator">.</span>length);
+        var item <span class="operator">=</span> res<span class="operator">.</span>rows<span class="operator">.</span>item(index);
+        mainColor <span class="operator">=</span> item<span class="operator">.</span>mainColor;
+        textureColor <span class="operator">=</span> item<span class="operator">.</span>textureColor;
+        borderColor <span class="operator">=</span> item<span class="operator">.</span>borderColor;
+    });
+
+    <span class="keyword">return</span> <span class="operator">[</span>mainColor<span class="operator">,</span> textureColor<span class="operator">,</span> borderColor<span class="operator">]</span>;
+}</pre>
+<p>And that's it, now you can load sample colors from other items in the database.</p>
+</div>
 <!-- @@@09-setup.html -->
 <p class="naviNextPrevious footerNavi">
 <a class="prevPage" href="08-update.html">Update Weight and Cost</a>

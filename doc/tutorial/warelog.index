@@ -63,6 +63,7 @@
             <contents name="set-texture-and-border-properties" title="Set texture and border properties" level="2"/>
             <contents name="layout-color-buttons" title="Layout color buttons" level="2"/>
             <contents name="add-collection-delegate-preview" title="Add collection delegate preview" level="2"/>
+            <contents name="get-random-colors-from-database" title="Get random colors from database" level="2"/>
         </page>
         <page name="tutorial.html" href="tutorial.html" status="active" location="home.qdoc" filepath="/home/maja/Desktop/ware-log/doc/tutorial-files/home.qdoc" lineno="1" documented="true" subtype="page" title="Tutorial for the WareLog App" fulltitle="Tutorial for the WareLog App" subtitle="" brief="Steps for creating an app for entering a catalogue of items"/>
         <page name="08-update.html" href="08-update.html" status="active" location="update_weight_and_cost.qdoc" filepath="/home/maja/Desktop/ware-log/doc/tutorial-files/update_weight_and_cost.qdoc" lineno="1" documented="true" subtype="page" title="Update Weight and Cost" fulltitle="Update Weight and Cost" subtitle="" brief="Steps for showing inputs to update weight and cost">

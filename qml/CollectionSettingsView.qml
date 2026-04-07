@@ -276,6 +276,12 @@ Column {
                 width: height
                 anchors.left: parent.left
                 anchors.leftMargin: 10
+                onClicked: {
+                    var colors = Data.getRandomColors();
+                    colColors.defaultMainColor = colors[0];
+                    colColors.defaultTextureColor = colors[1];
+                    colColors.defaultBorderColor = colors[2];
+                }
             }
 
             IconButton {

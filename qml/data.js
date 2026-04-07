@@ -196,6 +196,29 @@ function getAllTags()
     return allTags;
 }
 
+function getRandomColors()
+{
+    var mainColor = "";
+    var textureColor = "";
+    var borderColor = "";
+
+    var db = openDatabase();
+    db.transaction(function(tx) {
+        var res = tx.executeSql('SELECT mainColor, textureColor, borderColor ' +
+                                'FROM Collection');
+        if (res.rows.length === 0)
+            return;
+
+        var index = Math.floor(Math.random() * res.rows.length);
+        var item = res.rows.item(index);
+        mainColor = item.mainColor;
+        textureColor = item.textureColor;
+        borderColor = item.borderColor;
+    });
+
+    return [mainColor, textureColor, borderColor];
+}
+
 function getAllTypes()
 {
     const allTypes = [];
