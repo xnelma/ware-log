@@ -65,6 +65,33 @@
 
     ...
 
+    There will be two sections: one for domain settings, and one for
+    default values.
+    Add an \c{AppText} as title for each section, with a low opacity, and
+    a \c{MenuSeparator} before the second title.
+
+    \code
+    Column {
+        id: content
+        ...
+
+        AppText {
+            text: qsTr("Domain settings:")
+            opacity: 0.3
+        }
+
+        QtControls.MenuSeparator {
+            width: parent.width
+            padding: 0
+        }
+
+        AppText {
+            text: qsTr("Default values:")
+            opacity: 0.3
+        }
+    } // Column
+    \endcode
+
     \section2 Layout name and domain input
 
     Both the name of a collection and the domain are arbitrary strings, so
@@ -160,6 +187,12 @@
         ...
     Column {
         id: content
+        ...
+
+        AppText {
+            text: qsTr("Domain settings:")
+            ...
+        }
 
         LabeledTextField {
             label: qsTr("Name:")
@@ -180,6 +213,8 @@
                 dlgInfo.open();
             }
         }
+
+        ...
     } // Column
 
     Dialog {

@@ -13,6 +13,11 @@ Column {
     anchors.margins: 10
     spacing: 10
 
+    AppText {
+        text: qsTr("Domain settings:")
+        opacity: 0.3
+    }
+
     LabeledTextField {
         label: qsTr("Name:")
         placeholderText: qsTr("Enter Name") // TODO get from database
@@ -31,6 +36,16 @@ Column {
             dlgInfo.message = info;
             dlgInfo.open();
         }
+    }
+
+    QtControls.MenuSeparator {
+        width: parent.width
+        padding: 0
+    }
+
+    AppText {
+        text: qsTr("Default values:")
+        opacity: 0.3
     }
 } // Column
 

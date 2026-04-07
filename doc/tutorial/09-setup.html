@@ -61,6 +61,26 @@ AppPage {
 <p>...</p>
 <h2 id="layout-settings">Layout settings</h2>
 <p>...</p>
+<p>There will be two sections: one for domain settings, and one for default values. Add an <code translate="no">AppText</code> as title for each section, with a low opacity, and a <code translate="no">MenuSeparator</code> before the second title.</p>
+<pre class="cpp" translate="no">Column {
+    id: content
+    <span class="operator">.</span><span class="operator">.</span><span class="operator">.</span>
+
+    AppText {
+        text: qsTr(<span class="string">&quot;Domain settings:&quot;</span>)
+        opacity: <span class="number">0.3</span>
+    }
+
+    <span class="type">QtControls</span><span class="operator">.</span>MenuSeparator {
+        width: parent<span class="operator">.</span>width
+        padding: <span class="number">0</span>
+    }
+
+    AppText {
+        text: qsTr(<span class="string">&quot;Default values:&quot;</span>)
+        opacity: <span class="number">0.3</span>
+    }
+} <span class="comment">// Column</span></pre>
 <h3 id="layout-name-and-domain-input">Layout name and domain input</h3>
 <p>Both the name of a collection and the domain are arbitrary strings, so they would be set through input items. As they should also show the current value from the database, the hint can not be used to explain the input type; at least not if the value is available. So we need a label for the input item. And even with the label the input type might not be clear, so a short explanation with an example should also be shown. Since showing it directly as text would take up quite a lot of space, an info button should be shown next to the input that could e.g. open a dialog with the description and example.</p>
 <p>So add a component file <code translate="no">LabeledTextField.qml</code>. The needed imports are <code translate="no">QtQuick, QtQuick.Layouts</code> and <code translate="no">Felgo</code>.</p>
@@ -120,6 +140,12 @@ Dialog { <span class="comment">// in CollectionSettingsView.qml</span>
     <span class="operator">.</span><span class="operator">.</span><span class="operator">.</span>
 Column {
     id: content
+    <span class="operator">.</span><span class="operator">.</span><span class="operator">.</span>
+
+    AppText {
+        text: qsTr(<span class="string">&quot;Domain settings:&quot;</span>)
+        <span class="operator">.</span><span class="operator">.</span><span class="operator">.</span>
+    }
 
     LabeledTextField {
         label: qsTr(<span class="string">&quot;Name:&quot;</span>)
@@ -140,6 +166,8 @@ Column {
             dlgInfo<span class="operator">.</span>open();
         }
     }
+
+    <span class="operator">.</span><span class="operator">.</span><span class="operator">.</span>
 } <span class="comment">// Column</span>
 
 Dialog {
