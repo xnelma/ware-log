@@ -93,6 +93,104 @@ Column {
         }
     }
 
+    AppText {
+        text: qsTr("Item image style:")
+    }
+
+    RowLayout {
+        spacing: 10
+        width: parent.width
+
+        AppText {
+            text: qsTr("Border width: ")
+            opacity: 0.5
+            Layout.alignment: Qt.AlignVCenter
+        }
+
+        AppSlider {
+            id: sliderBorderWidth
+            from: 0
+            to: 10
+            padding: 0
+            Layout.alignment: Qt.AlignVCenter
+            Layout.fillWidth: true
+        }
+    }
+
+    RowLayout {
+        uniformCellSizes: true // Make the combobox span half the full width
+        height: comboTexture.height
+        width: parent.width
+
+        LightDarkComboBox {
+            id: comboTexture
+            model: ["No Texture", "Noise"]
+            Layout.fillWidth: true
+        }
+
+        // Center in cell:
+        Row {
+            spacing: 10
+            Layout.alignment: Qt.AlignCenter
+
+            AppText {
+                text: qsTr("Smooth:")
+                opacity: 0.5
+            }
+
+            AppSwitch {
+                id: switchSmooth
+            }
+        }
+    }
+
+    AppText {
+        text: qsTr("Scale texture:")
+        opacity: 0.5
+    }
+
+    GridLayout {
+        columns: 2
+        rows: 2
+        columnSpacing: 10
+        rowSpacing: 10
+        width: parent.width
+
+        AppText {
+            text: qsTr("v:")
+            Layout.row: 0
+            Layout.column: 0
+        }
+
+        AppSlider {
+            id: sliderHeight
+            from: 1
+            to: 400
+            value: (to - from) / 4
+            padding: 0
+            Layout.row: 0
+            Layout.column: 1
+            Layout.fillWidth: true
+        }
+
+        AppText {
+            text: qsTr("h:")
+            Layout.row: 1
+            Layout.column: 0
+        }
+
+        AppSlider {
+            id: sliderWidth
+            from: 1
+            to: 400
+            value: (to - from) / 4
+            padding: 0
+            Layout.row: 1
+            Layout.column: 1
+            Layout.fillWidth: true
+        }
+    } // GridLayout
+
     QtControls.MenuSeparator {
         width: parent.width
         padding: 0

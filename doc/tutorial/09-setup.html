@@ -20,6 +20,7 @@
 <li class="level1"><a href="#layout-settings">Layout settings</a></li>
 <li class="level2"><a href="#layout-name-and-domain-input">Layout name and domain input</a></li>
 <li class="level2"><a href="#add-age-context-input">Add age context input</a></li>
+<li class="level2"><a href="#set-texture-and-border-properties">Set texture and border properties</a></li>
 <li class="level2"><a href="#add-collection-delegate-preview">Add collection delegate preview</a></li>
 <li class="level2"><a href="#layout-color-buttons">Layout color buttons</a></li>
 </ul>
@@ -276,7 +277,107 @@ Row {
                             <span class="operator">-</span> txtAgeContextSample<span class="operator">.</span>width <span class="operator">-</span> <span class="number">10</span>
     }
 }</pre>
-<p>...</p>
+<h3 id="set-texture-and-border-properties">Set texture and border properties</h3>
+<p>We will add a slider for the border thickness and the texture height and width, and a combobox to select a texture and a switch to smooth out the texture.</p>
+<p>The sliders for the height and width of the texture are in a grid layout to set them to the same width together with some labels, but the border width and texture setting will both take a row layout, again to span the full width.</p>
+<p>But before the layouts, there will be a label to summarize them:</p>
+<pre class="cpp" translate="no">AppText {
+    text: qsTr(<span class="string">&quot;Item image style:&quot;</span>)
+}</pre>
+<p>Then add the <code translate="no">RowLayout</code> components for the border width and texture:</p>
+<pre class="cpp" translate="no">RowLayout {
+    spacing: <span class="number">10</span>
+    width: parent<span class="operator">.</span>width
+
+    AppText {
+        text: qsTr(<span class="string">&quot;Border width: &quot;</span>)
+        opacity: <span class="number">0.5</span>
+        Layout<span class="operator">.</span>alignment: <span class="type">Qt</span><span class="operator">.</span>AlignVCenter
+    }
+
+    AppSlider {
+        id: sliderBorderWidth
+        from: <span class="number">0</span>
+        to: <span class="number">10</span>
+        padding: <span class="number">0</span>
+        Layout<span class="operator">.</span>alignment: <span class="type">Qt</span><span class="operator">.</span>AlignVCenter
+        Layout<span class="operator">.</span>fillWidth: <span class="keyword">true</span>
+    }
+}
+
+RowLayout {
+    uniformCellSizes: <span class="keyword">true</span> <span class="comment">// Make the combobox span half the full width</span>
+    height: comboTexture<span class="operator">.</span>height
+    width: parent<span class="operator">.</span>width
+
+    LightDarkComboBox {
+        id: comboTexture
+        model: <span class="operator">[</span><span class="string">&quot;No Texture&quot;</span><span class="operator">,</span> <span class="string">&quot;Noise&quot;</span><span class="operator">]</span>
+        Layout<span class="operator">.</span>fillWidth: <span class="keyword">true</span>
+    }
+
+    <span class="comment">// Center in cell:</span>
+    Row {
+        spacing: <span class="number">10</span>
+        Layout<span class="operator">.</span>alignment: <span class="type">Qt</span><span class="operator">.</span>AlignCenter
+
+        AppText {
+            text: qsTr(<span class="string">&quot;Smooth:&quot;</span>)
+            opacity: <span class="number">0.5</span>
+        }
+
+        AppSwitch {
+            id: switchSmooth
+        }
+    }
+}</pre>
+<p>Then a label for the height and width sliders:</p>
+<pre class="cpp" translate="no">AppText {
+    text: qsTr(<span class="string">&quot;Scale texture:&quot;</span>)
+    opacity: <span class="number">0.5</span>
+}</pre>
+<p>And finally the <code translate="no">GridLayout</code> for the height and width sliders:</p>
+<pre class="cpp" translate="no">GridLayout {
+    columns: <span class="number">2</span>
+    rows: <span class="number">2</span>
+    columnSpacing: <span class="number">10</span>
+    rowSpacing: <span class="number">10</span>
+    width: parent<span class="operator">.</span>width
+
+    AppText {
+        text: qsTr(<span class="string">&quot;v:&quot;</span>)
+        Layout<span class="operator">.</span>row: <span class="number">0</span>
+        Layout<span class="operator">.</span>column: <span class="number">0</span>
+    }
+
+    AppSlider {
+        id: sliderHeight
+        from: <span class="number">1</span>
+        to: <span class="number">400</span>
+        value: (to <span class="operator">-</span> from) <span class="operator">/</span> <span class="number">4</span>
+        padding: <span class="number">0</span>
+        Layout<span class="operator">.</span>row: <span class="number">0</span>
+        Layout<span class="operator">.</span>column: <span class="number">1</span>
+        Layout<span class="operator">.</span>fillWidth: <span class="keyword">true</span>
+    }
+
+    AppText {
+        text: qsTr(<span class="string">&quot;h:&quot;</span>)
+        Layout<span class="operator">.</span>row: <span class="number">1</span>
+        Layout<span class="operator">.</span>column: <span class="number">0</span>
+    }
+
+    AppSlider {
+        id: sliderWidth
+        from: <span class="number">1</span>
+        to: <span class="number">400</span>
+        value: (to <span class="operator">-</span> from) <span class="operator">/</span> <span class="number">4</span>
+        padding: <span class="number">0</span>
+        Layout<span class="operator">.</span>row: <span class="number">1</span>
+        Layout<span class="operator">.</span>column: <span class="number">1</span>
+        Layout<span class="operator">.</span>fillWidth: <span class="keyword">true</span>
+    }
+} <span class="comment">// GridLayout</span></pre>
 <h3 id="add-collection-delegate-preview">Add collection delegate preview</h3>
 <p>While we could preview the texture directly on a <code translate="no">WeightIndicator</code>, the texture currently depends on the height of the rectangle. To get the same scale of the texture as it will appear in the list view, we could preview it directly in a list delegate.</p>
 <p>Create another qml file <code translate="no">CollectionDelegatePreview.qml</code>. Needed imports are <code translate="no">QtQuick</code> und <code translate="no">Felgo</code>.</p>

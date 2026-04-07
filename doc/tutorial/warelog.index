@@ -58,6 +58,7 @@
             <contents name="layout-settings" title="Layout settings" level="1"/>
             <contents name="layout-name-and-domain-input" title="Layout name and domain input" level="2"/>
             <contents name="add-age-context-input" title="Add age context input" level="2"/>
+            <contents name="set-texture-and-border-properties" title="Set texture and border properties" level="2"/>
             <contents name="add-collection-delegate-preview" title="Add collection delegate preview" level="2"/>
             <contents name="layout-color-buttons" title="Layout color buttons" level="2"/>
         </page>

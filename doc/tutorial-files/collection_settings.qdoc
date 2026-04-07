@@ -359,7 +359,130 @@
     }
     \endcode
 
-    ...
+    \section2 Set texture and border properties
+
+    We will add a slider for the border thickness and the texture height
+    and width, and a combobox to select a texture and a switch to smooth out
+    the texture.
+
+    The sliders for the height and width of the texture are in a grid
+    layout to set them to the same width together with some labels, but the
+    border width and texture setting will both take a row layout, again to
+    span the full width.
+
+    But before the layouts, there will be a label to summarize them:
+
+    \code
+    AppText {
+        text: qsTr("Item image style:")
+    }
+    \endcode
+
+    Then add the \c{RowLayout} components for the border width and texture:
+
+    \code
+    RowLayout {
+        spacing: 10
+        width: parent.width
+
+        AppText {
+            text: qsTr("Border width: ")
+            opacity: 0.5
+            Layout.alignment: Qt.AlignVCenter
+        }
+
+        AppSlider {
+            id: sliderBorderWidth
+            from: 0
+            to: 10
+            padding: 0
+            Layout.alignment: Qt.AlignVCenter
+            Layout.fillWidth: true
+        }
+    }
+
+    RowLayout {
+        uniformCellSizes: true // Make the combobox span half the full width
+        height: comboTexture.height
+        width: parent.width
+
+        LightDarkComboBox {
+            id: comboTexture
+            model: ["No Texture", "Noise"]
+            Layout.fillWidth: true
+        }
+
+        // Center in cell:
+        Row {
+            spacing: 10
+            Layout.alignment: Qt.AlignCenter
+
+            AppText {
+                text: qsTr("Smooth:")
+                opacity: 0.5
+            }
+
+            AppSwitch {
+                id: switchSmooth
+            }
+        }
+    }
+    \endcode
+
+    Then a label for the height and width sliders:
+
+    \code
+    AppText {
+        text: qsTr("Scale texture:")
+        opacity: 0.5
+    }
+    \endcode
+
+    And finally the \c{GridLayout} for the height and width sliders:
+
+    \code
+    GridLayout {
+        columns: 2
+        rows: 2
+        columnSpacing: 10
+        rowSpacing: 10
+        width: parent.width
+
+        AppText {
+            text: qsTr("v:")
+            Layout.row: 0
+            Layout.column: 0
+        }
+
+        AppSlider {
+            id: sliderHeight
+            from: 1
+            to: 400
+            value: (to - from) / 4
+            padding: 0
+            Layout.row: 0
+            Layout.column: 1
+            Layout.fillWidth: true
+        }
+
+        AppText {
+            text: qsTr("h:")
+            Layout.row: 1
+            Layout.column: 0
+        }
+
+        AppSlider {
+            id: sliderWidth
+            from: 1
+            to: 400
+            value: (to - from) / 4
+            padding: 0
+            Layout.row: 1
+            Layout.column: 1
+            Layout.fillWidth: true
+        }
+    } // GridLayout
+    \endcode
 
     \section2 Add collection delegate preview
 
