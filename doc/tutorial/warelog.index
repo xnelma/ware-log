@@ -55,6 +55,7 @@
         <page name="04-theme.html" href="04-theme.html" status="active" location="theme_colors.qdoc" filepath="/home/maja/Desktop/ware-log/doc/tutorial-files/theme_colors.qdoc" lineno="1" documented="true" subtype="page" title="Set Theme Colors" fulltitle="Set Theme Colors" subtitle="" brief="Steps for setting theme colors"/>
         <page name="09-setup.html" href="09-setup.html" status="active" location="collection_settings.qdoc" filepath="/home/maja/Desktop/ware-log/doc/tutorial-files/collection_settings.qdoc" lineno="1" documented="true" subtype="page" title="Set Up Collection" fulltitle="Set Up Collection" subtitle="" brief="Steps for configuring domain properties of a collection">
             <contents name="navigate-to-settings-page" title="Navigate to settings page" level="1"/>
+            <contents name="prepare-database" title="Prepare database" level="1"/>
             <contents name="layout-settings" title="Layout settings" level="1"/>
             <contents name="layout-name-and-domain-input" title="Layout name and domain input" level="2"/>
             <contents name="add-age-context-input" title="Add age context input" level="2"/>

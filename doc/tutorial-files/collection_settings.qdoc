@@ -57,9 +57,120 @@
                             .push(compCollectionSettings)
                     }
     ...
+
+    }
     \endcode
 
-    ...
+    \section1 Prepare database
+
+    The domain properties would go into a different table than the collection.
+    So we will create another table in \c{openDatabase} and insert a default
+    row, to not have to handle undefined values.
+    For now there will only be one row in it, but we will already
+    identify it with an id, which is useful for being able to change the
+    collection name.
+    Though the id will only be a hardcoded placeholder id at the top
+    of \c{"data.js"} for now.
+
+    \code
+    var id = "placeholderid";
+    \endcode
+
+    In \c{openDatabase}, after the lines for creating the "Collection" table
+    and filling it with the sample values, create and fill a "Domain" table:
+
+    \code
+    tx.executeSql('CREATE TABLE IF NOT EXISTS Domain(id TEXT, name TEXT, ' +
+                  'domain TEXT, ' +
+                  'ageContextPrefix TEXT, ageContextSuffix TEXT, ' +
+                  'borderWidth NUMERIC, ' +
+                  'textureType NUMERIC, smooth NUMERIC, ' +
+                  'textureHeight NUMERIC, textureWidth NUMERIC, ' +
+                  'mainColor TEXT, textureColor TEXT, borderColor TEXT)');
+    res = tx.executeSql('SELECT * FROM Domain WHERE id = \'' + id + '\'');
+    if (res.rows.length === 0)
+        tx.executeSql('INSERT INTO Domain VALUES(?,?,?,?,?,?,?,?,?,?,?,?,?)',
+                      [id, "", "", "", "", 0, 0, 0, 100, 100, "", "", ""]);
+    \endcode
+
+    The '100' for the texture height and width is just an arbitrary value
+    to make the texture visible if the size is not yet set and the texture is
+    selected. This matches a default initialization of
+    \c{(to - from) / 4} for the sliders, so at a quarter of a slider.
+
+    The color is not initialized by default to e.g. black, as this would
+    be handled by \c{defaultColor} we added in a previous chapter.
+
+    Now we need methods to read and write single values. While this could
+    lead to performance issues unlike just saving once on pressing a button,
+    this should rarely be the case nowadays.
+    We will add two general methods, and then call them from smaller methods
+    for each property.
+
+    \code
+    function setDomainValue(col, value)
+    {
+        var db = openDatabase();
+        db.transaction(function(tx) {
+            tx.executeSql('UPDATE Domain SET ' + col + ' = \'' + value + '\' ' +
+                          'WHERE id = \'' + id + '\'');
+        });
+    }
+
+    function getDomainValue(col)
+    {
+        var item = "";
+        var db = openDatabase();
+        db.transaction(function(tx) {
+            var res = tx.executeSql('SELECT ' + col + ' FROM Domain ' +
+                                    'WHERE id = \'' + id + '\'');
+            if (res.rows.length === 0 )
+                return;
+            item = res.rows.item(0);
+        });
+        return item;
+    }
+    \endcode
+
+    The lot of smaller methods all have the same structure, so I will only
+    show one and the special case for 'smooth'.
+    For the other methods remember returning 100 as default value for
+    texture height and width, and an empty string for the colors.
+
+    \code
+    function setDomainName(name)
+    {
+        setDomainValue("name", name);
+    }
+
+    function getDomainName()
+    {
+        var item = getDomainValue("name");
+        return item === "" ? "" : item.name;
+    }
+    \endcode
+
+    For 'smooth' we take and return a boolean, but get and write a number:
+
+    \code
+    function setDomainTextureSmooth(isSmooth)
+    {
+        setDomainValue("smooth", isSmooth ? 1 : 0);
+    }
+
+    function getDomainTextureSmooth()
+    {
+        var item = getDomainValue("smooth");
+        return item !== "" && item.smooth !== 0;
+    }
+    \endcode
+
+    The texture type is set as number using the index of the type.
+    This is not robust and should be done differently for growing project sizes.
+
+    In sum there should be 12x2 smaller methods.
+    With those we have an interface to get the collection properties from the
+    database and save them.
 
     \section1 Layout settings
 
@@ -109,6 +220,7 @@
     import QtQuick.Layouts
     import QtQuick.Controls as QtControls
     import QtQuick.Dialogs
+    import "data.js" as Data
     \endcode
 
     The controls are imported with an alias due to the name clash with the
@@ -255,6 +367,8 @@
         LabeledTextField {
             label: qsTr("Name:")
             placeholderText: qsTr("Enter Name")
+            text: Data.getDomainName()
+            onTextChanged: Data.setDomainName(text)
             info: qsTr("The name of your collection. E.g. My Sand Collection")
             onInfoClicked: {
                 dlgInfo.message = info;
@@ -265,6 +379,8 @@
         LabeledTextField {
             label: qsTr("Domain:")
             placeholderText: qsTr("Enter Domain")
+            text: Data.getDomainType()
+            onTextChanged: Data.setDomainType(text)
             info: qsTr("The domain of your collection. E.g. Sand, Lemonade, ...")
             onInfoClicked: {
                 dlgInfo.message = info;
@@ -341,7 +457,9 @@
 
         AppTextField {
             id: inputAgeContext1
-            placeholderText: qsTr("Input context") // TODO get from database
+            placeholderText: qsTr("Input context")
+            text: Data.getDomainAgeContextPrefix()
+            onTextChanged: Data.setDomainAgeContextPrefix(text)
         }
 
         AppText {
@@ -354,6 +472,8 @@
         AppTextField {
             id: inputAgeContext2
             placeholderText: qsTr("Input context")
+            text: Data.getDomainAgeContextSuffix()
+            onTextChanged: Data.setDomainAgeContextSuffix(text);
             anchors.verticalCenter: parent.verticalCenter
             width: parent.width - inputAgeContext1.width - 10
                                 - txtAgeContextSample.width - 10
@@ -397,6 +517,8 @@
             id: sliderBorderWidth
             from: 0
             to: 10
+            value: Data.getDomainBorderWidth()
+            onValueChanged: Data.setDomainBorderWidth(value)
             padding: 0
             Layout.alignment: Qt.AlignVCenter
             Layout.fillWidth: true
@@ -411,6 +533,8 @@
         LightDarkComboBox {
             id: comboTexture
             model: ["No Texture", "Noise"]
+            currentIndex: Data.getDomainTextureType()
+            onCurrentIndexChanged: Data.setDomainTextureType(currentIndex)
             Layout.fillWidth: true
         }
 
@@ -426,6 +550,8 @@
 
             AppSwitch {
                 id: switchSmooth
+                checked: Data.getDomainTextureSmooth()
+                onCheckedChanged: Data.setDomainTextureSmooth(checked)
             }
         }
     }
@@ -460,7 +586,8 @@
             id: sliderHeight
             from: 1
             to: 400
-            value: (to - from) / 4
+            value: Data.getDomainTextureHeight()
+            onValueChanged: Data.setDomainTextureHeight(value)
             padding: 0
             Layout.row: 0
             Layout.column: 1
@@ -477,7 +604,8 @@
             id: sliderWidth
             from: 1
             to: 400
-            value: (to - from) / 4
+            value: Data.getDomainTextureWidth();
+            onValueChanged: Data.setDomainTextureWidth(value);
             padding: 0
             Layout.row: 1
             Layout.column: 1
@@ -568,16 +696,28 @@
     ColumnLayout {
         id: colColors
 
-        property string defaultMainColor: defaultColor
-        property string defaultTextureColor: defaultColor
-        property string defaultBorderColor: defaultColor
+        property string defaultMainColor: {
+            var c = Data.getDomainMainColor();
+            return c === "" ? defaultColor : c;
+        }
+        property string defaultTextureColor: {
+            var c = Data.getDomainTextureColor();
+            return c === "" ? defaultColor : c;
+        }
+        property string defaultBorderColor: {
+            var c = Data.getDomainBorderColor();
+            return c === "" ? defaultColor : c;
+        }
 
         ColorButton {
             id: btnColorMain
             text: qsTr("Default Main Color")
             colorName: colColors.defaultMainColor
-            onColorNameChanged: colColors.defaultMainColor
-                = Qt.binding(function() { return colorName });
+            onColorNameChanged: {
+                colColors.defaultMainColor
+                    = Qt.binding(function() { return colorName });
+                Data.setDomainMainColor(colorName);
+            }
             horizontalMargin: 0
             verticalMargin: 0
             Layout.fillHeight: true
@@ -588,8 +728,11 @@
             id: btnColorTexture
             text: qsTr("Default Texture Color")
             colorName: colColors.defaultTextureColor
-            onColorNameChanged: colColors.defaultTextureColor
-                                = Qt.binding(function() { return colorName });
+            onColorNameChanged: {
+                colColors.defaultTextureColor
+                    = Qt.binding(function() { return colorName });
+                Data.setDomainTextureColor(colorName);
+            }
             horizontalMargin: 0
             verticalMargin: 0
             Layout.fillHeight: true
@@ -600,8 +743,11 @@
             id: btnColorBorder
             text: qsTr("Default Border Color")
             colorName: colColors.defaultBorderColor
-            onColorNameChanged: colColors.defaultBorderColor
-                                = Qt.binding(function() { return colorName });
+            onColorNameChanged: {
+                colColors.defaultBorderColor
+                    = Qt.binding(function() { return colorName });
+                Data.setDomainBorderColor(colorName);
+            }
             horizontalMargin: 0
             verticalMargin: 0
             Layout.fillHeight: true

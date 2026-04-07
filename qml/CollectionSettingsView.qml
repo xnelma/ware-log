@@ -3,6 +3,7 @@ import QtQuick
 import QtQuick.Layouts
 import QtQuick.Controls as QtControls
 import QtQuick.Dialogs
+import "data.js" as Data
 
 AppPage {
     title: qsTr("Collection Settings")
@@ -41,7 +42,9 @@ Column {
 
     LabeledTextField {
         label: qsTr("Name:")
-        placeholderText: qsTr("Enter Name") // TODO get from database
+        placeholderText: qsTr("Enter Name")
+        text: Data.getDomainName()
+        onTextChanged: Data.setDomainName(text)
         info: qsTr("The name of your collection. E.g. My Sand Collection")
         onInfoClicked: {
             dlgInfo.message = info;
@@ -51,7 +54,9 @@ Column {
 
     LabeledTextField {
         label: qsTr("Domain:")
-        placeholderText: qsTr("Enter Domain") // TODO get from database
+        placeholderText: qsTr("Enter Domain")
+        text: Data.getDomainType()
+        onTextChanged: Data.setDomainType(text)
         info: qsTr("The domain of your collection. E.g. Sand, Lemonade, ...")
         onInfoClicked: {
             dlgInfo.message = info;
@@ -92,7 +97,9 @@ Column {
 
         AppTextField {
             id: inputAgeContext1
-            placeholderText: qsTr("Input context") // TODO get from database
+            placeholderText: qsTr("Input context")
+            text: Data.getDomainAgeContextPrefix()
+            onTextChanged: Data.setDomainAgeContextPrefix(text)
         }
 
         AppText {
@@ -105,6 +112,8 @@ Column {
         AppTextField {
             id: inputAgeContext2
             placeholderText: qsTr("Input context")
+            text: Data.getDomainAgeContextSuffix()
+            onTextChanged: Data.setDomainAgeContextSuffix(text);
             anchors.verticalCenter: parent.verticalCenter
             width: parent.width - inputAgeContext1.width - 10
                                 - txtAgeContextSample.width - 10
@@ -129,6 +138,11 @@ Column {
             id: sliderBorderWidth
             from: 0
             to: 10
+            value: Data.getDomainBorderWidth()
+            // This handler is called very often; not just on releasing the
+            // slider but with every movement. There are no performance issues
+            // though, so leave it for now.
+            onValueChanged: Data.setDomainBorderWidth(value)
             padding: 0
             Layout.alignment: Qt.AlignVCenter
             Layout.fillWidth: true
@@ -143,6 +157,8 @@ Column {
         LightDarkComboBox {
             id: comboTexture
             model: ["No Texture", "Noise"]
+            currentIndex: Data.getDomainTextureType()
+            onCurrentIndexChanged: Data.setDomainTextureType(currentIndex)
             Layout.fillWidth: true
         }
 
@@ -158,6 +174,8 @@ Column {
 
             AppSwitch {
                 id: switchSmooth
+                checked: Data.getDomainTextureSmooth()
+                onCheckedChanged: Data.setDomainTextureSmooth(checked)
             }
         }
     }
@@ -175,7 +193,7 @@ Column {
         width: parent.width
 
         AppText {
-            text: qsTr("v:")
+            text: qsTr("v:") // vertical
             Layout.row: 0
             Layout.column: 0
         }
@@ -184,7 +202,8 @@ Column {
             id: sliderHeight
             from: 1
             to: 400
-            value: (to - from) / 4
+            value: Data.getDomainTextureHeight()
+            onValueChanged: Data.setDomainTextureHeight(value)
             padding: 0
             Layout.row: 0
             Layout.column: 1
@@ -192,7 +211,7 @@ Column {
         }
 
         AppText {
-            text: qsTr("h:")
+            text: qsTr("h:") // horizontal
             Layout.row: 1
             Layout.column: 0
         }
@@ -201,7 +220,8 @@ Column {
             id: sliderWidth
             from: 1
             to: 400
-            value: (to - from) / 4
+            value: Data.getDomainTextureWidth();
+            onValueChanged: Data.setDomainTextureWidth(value);
             padding: 0
             Layout.row: 1
             Layout.column: 1
@@ -278,16 +298,28 @@ Column {
     ColumnLayout {
         id: colColors
 
-        property string defaultMainColor: defaultColor
-        property string defaultTextureColor: defaultColor
-        property string defaultBorderColor: defaultColor
+        property string defaultMainColor: {
+            var c = Data.getDomainMainColor();
+            return c === "" ? defaultColor : c;
+        }
+        property string defaultTextureColor: {
+            var c = Data.getDomainTextureColor();
+            return c === "" ? defaultColor : c;
+        }
+        property string defaultBorderColor: {
+            var c = Data.getDomainBorderColor();
+            return c === "" ? defaultColor : c;
+        }
 
         ColorButton {
             id: btnColorMain
             text: qsTr("Default Main Color")
             colorName: colColors.defaultMainColor
-            onColorNameChanged: colColors.defaultMainColor
-                = Qt.binding(function() { return colorName });
+            onColorNameChanged: {
+                colColors.defaultMainColor
+                    = Qt.binding(function() { return colorName });
+                Data.setDomainMainColor(colorName);
+            }
             horizontalMargin: 0
             verticalMargin: 0
             Layout.fillHeight: true
@@ -298,8 +330,11 @@ Column {
             id: btnColorTexture
             text: qsTr("Default Texture Color")
             colorName: colColors.defaultTextureColor
-            onColorNameChanged: colColors.defaultTextureColor
-                                = Qt.binding(function() { return colorName });
+            onColorNameChanged: {
+                colColors.defaultTextureColor
+                    = Qt.binding(function() { return colorName });
+                Data.setDomainTextureColor(colorName);
+            }
             horizontalMargin: 0
             verticalMargin: 0
             Layout.fillHeight: true
@@ -310,8 +345,11 @@ Column {
             id: btnColorBorder
             text: qsTr("Default Border Color")
             colorName: colColors.defaultBorderColor
-            onColorNameChanged: colColors.defaultBorderColor
-                                = Qt.binding(function() { return colorName });
+            onColorNameChanged: {
+                colColors.defaultBorderColor
+                    = Qt.binding(function() { return colorName });
+                Data.setDomainBorderColor(colorName);
+            }
             horizontalMargin: 0
             verticalMargin: 0
             Layout.fillHeight: true

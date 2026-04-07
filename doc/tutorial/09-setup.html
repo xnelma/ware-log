@@ -17,6 +17,7 @@
 <h3 id="toc">Contents</h3>
 <ul>
 <li class="level1"><a href="#navigate-to-settings-page">Navigate to settings page</a></li>
+<li class="level1"><a href="#prepare-database">Prepare database</a></li>
 <li class="level1"><a href="#layout-settings">Layout settings</a></li>
 <li class="level2"><a href="#layout-name-and-domain-input">Layout name and domain input</a></li>
 <li class="level2"><a href="#add-age-context-input">Add age context input</a></li>
@@ -60,8 +61,73 @@ AppPage {
                     onClicked: pageMain<span class="operator">.</span>navigationStack
                         <span class="operator">.</span>push(compCollectionSettings)
                 }
-<span class="operator">.</span><span class="operator">.</span><span class="operator">.</span></pre>
-<p>...</p>
+<span class="operator">.</span><span class="operator">.</span><span class="operator">.</span>
+
+}</pre>
+<h2 id="prepare-database">Prepare database</h2>
+<p>The domain properties would go into a different table than the collection. So we will create another table in <code translate="no">openDatabase</code> and insert a default row, to not have to handle undefined values. For now there will only be one row in it, but we will already identify it with an id, which is useful for being able to change the collection name. Though the id will only be a hardcoded placeholder id at the top of <code translate="no">&quot;data.js&quot;</code> for now.</p>
+<pre class="cpp" translate="no">var id <span class="operator">=</span> <span class="string">&quot;placeholderid&quot;</span>;</pre>
+<p>In <code translate="no">openDatabase</code>, after the lines for creating the &quot;Collection&quot; table and filling it with the sample values, create and fill a &quot;Domain&quot; table:</p>
+<pre class="cpp" translate="no">tx<span class="operator">.</span>executeSql(<span class="char">'CREATE TABLE IF NOT EXISTS Domain(id TEXT, name TEXT, '</span> <span class="operator">+</span>
+              <span class="char">'domain TEXT, '</span> <span class="operator">+</span>
+              <span class="char">'ageContextPrefix TEXT, ageContextSuffix TEXT, '</span> <span class="operator">+</span>
+              <span class="char">'borderWidth NUMERIC, '</span> <span class="operator">+</span>
+              <span class="char">'textureType NUMERIC, smooth NUMERIC, '</span> <span class="operator">+</span>
+              <span class="char">'textureHeight NUMERIC, textureWidth NUMERIC, '</span> <span class="operator">+</span>
+              <span class="char">'mainColor TEXT, textureColor TEXT, borderColor TEXT)'</span>);
+res <span class="operator">=</span> tx<span class="operator">.</span>executeSql(<span class="char">'SELECT * FROM Domain WHERE id = \''</span> <span class="operator">+</span> id <span class="operator">+</span> <span class="char">'\''</span>);
+<span class="keyword">if</span> (res<span class="operator">.</span>rows<span class="operator">.</span>length <span class="operator">=</span><span class="operator">=</span><span class="operator">=</span> <span class="number">0</span>)
+    tx<span class="operator">.</span>executeSql(<span class="char">'INSERT INTO Domain VALUES(?,?,?,?,?,?,?,?,?,?,?,?,?)'</span><span class="operator">,</span>
+                  <span class="operator">[</span>id<span class="operator">,</span> <span class="string">&quot;&quot;</span><span class="operator">,</span> <span class="string">&quot;&quot;</span><span class="operator">,</span> <span class="string">&quot;&quot;</span><span class="operator">,</span> <span class="string">&quot;&quot;</span><span class="operator">,</span> <span class="number">0</span><span class="operator">,</span> <span class="number">0</span><span class="operator">,</span> <span class="number">0</span><span class="operator">,</span> <span class="number">100</span><span class="operator">,</span> <span class="number">100</span><span class="operator">,</span> <span class="string">&quot;&quot;</span><span class="operator">,</span> <span class="string">&quot;&quot;</span><span class="operator">,</span> <span class="string">&quot;&quot;</span><span class="operator">]</span>);</pre>
+<p>The '100' for the texture height and width is just an arbitrary value to make the texture visible if the size is not yet set and the texture is selected. This matches a default initialization of <code translate="no">(to - from) / 4</code> for the sliders, so at a quarter of a slider.</p>
+<p>The color is not initialized by default to e.g. black, as this would be handled by <code translate="no">defaultColor</code> we added in a previous chapter.</p>
+<p>Now we need methods to read and write single values. While this could lead to performance issues unlike just saving once on pressing a button, this should rarely be the case nowadays. We will add two general methods, and then call them from smaller methods for each property.</p>
+<pre class="cpp" translate="no">function setDomainValue(col<span class="operator">,</span> value)
+{
+    var db <span class="operator">=</span> openDatabase();
+    db<span class="operator">.</span>transaction(function(tx) {
+        tx<span class="operator">.</span>executeSql(<span class="char">'UPDATE Domain SET '</span> <span class="operator">+</span> col <span class="operator">+</span> <span class="char">' = \''</span> <span class="operator">+</span> value <span class="operator">+</span> <span class="char">'\' '</span> <span class="operator">+</span>
+                      <span class="char">'WHERE id = \''</span> <span class="operator">+</span> id <span class="operator">+</span> <span class="char">'\''</span>);
+    });
+}
+
+function getDomainValue(col)
+{
+    var item <span class="operator">=</span> <span class="string">&quot;&quot;</span>;
+    var db <span class="operator">=</span> openDatabase();
+    db<span class="operator">.</span>transaction(function(tx) {
+        var res <span class="operator">=</span> tx<span class="operator">.</span>executeSql(<span class="char">'SELECT '</span> <span class="operator">+</span> col <span class="operator">+</span> <span class="char">' FROM Domain '</span> <span class="operator">+</span>
+                                <span class="char">'WHERE id = \''</span> <span class="operator">+</span> id <span class="operator">+</span> <span class="char">'\''</span>);
+        <span class="keyword">if</span> (res<span class="operator">.</span>rows<span class="operator">.</span>length <span class="operator">=</span><span class="operator">=</span><span class="operator">=</span> <span class="number">0</span> )
+            <span class="keyword">return</span>;
+        item <span class="operator">=</span> res<span class="operator">.</span>rows<span class="operator">.</span>item(<span class="number">0</span>);
+    });
+    <span class="keyword">return</span> item;
+}</pre>
+<p>The lot of smaller methods all have the same structure, so I will only show one and the special case for 'smooth'. For the other methods remember returning 100 as default value for texture height and width, and an empty string for the colors.</p>
+<pre class="cpp" translate="no">function setDomainName(name)
+{
+    setDomainValue(<span class="string">&quot;name&quot;</span><span class="operator">,</span> name);
+}
+
+function getDomainName()
+{
+    var item <span class="operator">=</span> getDomainValue(<span class="string">&quot;name&quot;</span>);
+    <span class="keyword">return</span> item <span class="operator">=</span><span class="operator">=</span><span class="operator">=</span> <span class="string">&quot;&quot;</span> <span class="operator">?</span> <span class="string">&quot;&quot;</span> : item<span class="operator">.</span>name;
+}</pre>
+<p>For 'smooth' we take and return a boolean, but get and write a number:</p>
+<pre class="cpp" translate="no">function setDomainTextureSmooth(isSmooth)
+{
+    setDomainValue(<span class="string">&quot;smooth&quot;</span><span class="operator">,</span> isSmooth <span class="operator">?</span> <span class="number">1</span> : <span class="number">0</span>);
+}
+
+function getDomainTextureSmooth()
+{
+    var item <span class="operator">=</span> getDomainValue(<span class="string">&quot;smooth&quot;</span>);
+    <span class="keyword">return</span> item <span class="operator">!</span><span class="operator">=</span><span class="operator">=</span> <span class="string">&quot;&quot;</span> <span class="operator">&amp;</span><span class="operator">&amp;</span> item<span class="operator">.</span>smooth <span class="operator">!</span><span class="operator">=</span><span class="operator">=</span> <span class="number">0</span>;
+}</pre>
+<p>The texture type is set as number using the index of the type. This is not robust and should be done differently for growing project sizes.</p>
+<p>In sum there should be 12x2 smaller methods. With those we have an interface to get the collection properties from the database and save them.</p>
 <h2 id="layout-settings">Layout settings</h2>
 <p>The content will be structured as a column, with margins and spacing of 10:</p>
 <pre class="cpp" translate="no">AppPage {
@@ -94,7 +160,8 @@ Column {
 import <span class="type">QtQuick</span>
 import <span class="type">QtQuick</span><span class="operator">.</span>Layouts
 import <span class="type">QtQuick</span><span class="operator">.</span>Controls as <span class="type">QtControls</span>
-import <span class="type">QtQuick</span><span class="operator">.</span>Dialogs</pre>
+import <span class="type">QtQuick</span><span class="operator">.</span>Dialogs
+import <span class="string">&quot;data.js&quot;</span> as Data</pre>
 <p>The controls are imported with an alias due to the name clash with the Felgo <code translate="no">Dialog</code>.</p>
 <p>There will be two sections: one for domain settings, and one for default values. Add an <code translate="no">AppText</code> as title for each section, with a low opacity, and a <code translate="no">MenuSeparator</code> before the second title.</p>
 <pre class="cpp" translate="no">Column {
@@ -187,6 +254,8 @@ Column {
     LabeledTextField {
         label: qsTr(<span class="string">&quot;Name:&quot;</span>)
         placeholderText: qsTr(<span class="string">&quot;Enter Name&quot;</span>)
+        text: Data<span class="operator">.</span>getDomainName()
+        onTextChanged: Data<span class="operator">.</span>setDomainName(text)
         info: qsTr(<span class="string">&quot;The name of your collection. E.g. My Sand Collection&quot;</span>)
         onInfoClicked: {
             dlgInfo<span class="operator">.</span>message <span class="operator">=</span> info;
@@ -197,6 +266,8 @@ Column {
     LabeledTextField {
         label: qsTr(<span class="string">&quot;Domain:&quot;</span>)
         placeholderText: qsTr(<span class="string">&quot;Enter Domain&quot;</span>)
+        text: Data<span class="operator">.</span>getDomainType()
+        onTextChanged: Data<span class="operator">.</span>setDomainType(text)
         info: qsTr(<span class="string">&quot;The domain of your collection. E.g. Sand, Lemonade, ...&quot;</span>)
         onInfoClicked: {
             dlgInfo<span class="operator">.</span>message <span class="operator">=</span> info;
@@ -261,7 +332,9 @@ Row {
 
     AppTextField {
         id: inputAgeContext1
-        placeholderText: qsTr(<span class="string">&quot;Input context&quot;</span>) <span class="comment">// TODO get from database</span>
+        placeholderText: qsTr(<span class="string">&quot;Input context&quot;</span>)
+        text: Data<span class="operator">.</span>getDomainAgeContextPrefix()
+        onTextChanged: Data<span class="operator">.</span>setDomainAgeContextPrefix(text)
     }
 
     AppText {
@@ -274,6 +347,8 @@ Row {
     AppTextField {
         id: inputAgeContext2
         placeholderText: qsTr(<span class="string">&quot;Input context&quot;</span>)
+        text: Data<span class="operator">.</span>getDomainAgeContextSuffix()
+        onTextChanged: Data<span class="operator">.</span>setDomainAgeContextSuffix(text);
         anchors<span class="operator">.</span>verticalCenter: parent<span class="operator">.</span>verticalCenter
         width: parent<span class="operator">.</span>width <span class="operator">-</span> inputAgeContext1<span class="operator">.</span>width <span class="operator">-</span> <span class="number">10</span>
                             <span class="operator">-</span> txtAgeContextSample<span class="operator">.</span>width <span class="operator">-</span> <span class="number">10</span>
@@ -301,6 +376,8 @@ Row {
         id: sliderBorderWidth
         from: <span class="number">0</span>
         to: <span class="number">10</span>
+        value: Data<span class="operator">.</span>getDomainBorderWidth()
+        onValueChanged: Data<span class="operator">.</span>setDomainBorderWidth(value)
         padding: <span class="number">0</span>
         Layout<span class="operator">.</span>alignment: <span class="type">Qt</span><span class="operator">.</span>AlignVCenter
         Layout<span class="operator">.</span>fillWidth: <span class="keyword">true</span>
@@ -315,6 +392,8 @@ RowLayout {
     LightDarkComboBox {
         id: comboTexture
         model: <span class="operator">[</span><span class="string">&quot;No Texture&quot;</span><span class="operator">,</span> <span class="string">&quot;Noise&quot;</span><span class="operator">]</span>
+        currentIndex: Data<span class="operator">.</span>getDomainTextureType()
+        onCurrentIndexChanged: Data<span class="operator">.</span>setDomainTextureType(currentIndex)
         Layout<span class="operator">.</span>fillWidth: <span class="keyword">true</span>
     }
 
@@ -330,6 +409,8 @@ RowLayout {
 
         AppSwitch {
             id: switchSmooth
+            checked: Data<span class="operator">.</span>getDomainTextureSmooth()
+            onCheckedChanged: Data<span class="operator">.</span>setDomainTextureSmooth(checked)
         }
     }
 }</pre>
@@ -356,7 +437,8 @@ RowLayout {
         id: sliderHeight
         from: <span class="number">1</span>
         to: <span class="number">400</span>
-        value: (to <span class="operator">-</span> from) <span class="operator">/</span> <span class="number">4</span>
+        value: Data<span class="operator">.</span>getDomainTextureHeight()
+        onValueChanged: Data<span class="operator">.</span>setDomainTextureHeight(value)
         padding: <span class="number">0</span>
         Layout<span class="operator">.</span>row: <span class="number">0</span>
         Layout<span class="operator">.</span>column: <span class="number">1</span>
@@ -373,7 +455,8 @@ RowLayout {
         id: sliderWidth
         from: <span class="number">1</span>
         to: <span class="number">400</span>
-        value: (to <span class="operator">-</span> from) <span class="operator">/</span> <span class="number">4</span>
+        value: Data<span class="operator">.</span>getDomainTextureWidth();
+        onValueChanged: Data<span class="operator">.</span>setDomainTextureWidth(value);
         padding: <span class="number">0</span>
         Layout<span class="operator">.</span>row: <span class="number">1</span>
         Layout<span class="operator">.</span>column: <span class="number">1</span>
@@ -447,16 +530,28 @@ Row {
 ColumnLayout {
     id: colColors
 
-    property string defaultMainColor: defaultColor
-    property string defaultTextureColor: defaultColor
-    property string defaultBorderColor: defaultColor
+    property string defaultMainColor: {
+        var c <span class="operator">=</span> Data<span class="operator">.</span>getDomainMainColor();
+        <span class="keyword">return</span> c <span class="operator">=</span><span class="operator">=</span><span class="operator">=</span> <span class="string">&quot;&quot;</span> <span class="operator">?</span> defaultColor : c;
+    }
+    property string defaultTextureColor: {
+        var c <span class="operator">=</span> Data<span class="operator">.</span>getDomainTextureColor();
+        <span class="keyword">return</span> c <span class="operator">=</span><span class="operator">=</span><span class="operator">=</span> <span class="string">&quot;&quot;</span> <span class="operator">?</span> defaultColor : c;
+    }
+    property string defaultBorderColor: {
+        var c <span class="operator">=</span> Data<span class="operator">.</span>getDomainBorderColor();
+        <span class="keyword">return</span> c <span class="operator">=</span><span class="operator">=</span><span class="operator">=</span> <span class="string">&quot;&quot;</span> <span class="operator">?</span> defaultColor : c;
+    }
 
     ColorButton {
         id: btnColorMain
         text: qsTr(<span class="string">&quot;Default Main Color&quot;</span>)
         colorName: colColors<span class="operator">.</span>defaultMainColor
-        onColorNameChanged: colColors<span class="operator">.</span>defaultMainColor
-            <span class="operator">=</span> <span class="type">Qt</span><span class="operator">.</span>binding(function() { <span class="keyword">return</span> colorName });
+        onColorNameChanged: {
+            colColors<span class="operator">.</span>defaultMainColor
+                <span class="operator">=</span> <span class="type">Qt</span><span class="operator">.</span>binding(function() { <span class="keyword">return</span> colorName });
+            Data<span class="operator">.</span>setDomainMainColor(colorName);
+        }
         horizontalMargin: <span class="number">0</span>
         verticalMargin: <span class="number">0</span>
         Layout<span class="operator">.</span>fillHeight: <span class="keyword">true</span>
@@ -467,8 +562,11 @@ ColumnLayout {
         id: btnColorTexture
         text: qsTr(<span class="string">&quot;Default Texture Color&quot;</span>)
         colorName: colColors<span class="operator">.</span>defaultTextureColor
-        onColorNameChanged: colColors<span class="operator">.</span>defaultTextureColor
-                            <span class="operator">=</span> <span class="type">Qt</span><span class="operator">.</span>binding(function() { <span class="keyword">return</span> colorName });
+        onColorNameChanged: {
+            colColors<span class="operator">.</span>defaultTextureColor
+                <span class="operator">=</span> <span class="type">Qt</span><span class="operator">.</span>binding(function() { <span class="keyword">return</span> colorName });
+            Data<span class="operator">.</span>setDomainTextureColor(colorName);
+        }
         horizontalMargin: <span class="number">0</span>
         verticalMargin: <span class="number">0</span>
         Layout<span class="operator">.</span>fillHeight: <span class="keyword">true</span>
@@ -479,8 +577,11 @@ ColumnLayout {
         id: btnColorBorder
         text: qsTr(<span class="string">&quot;Default Border Color&quot;</span>)
         colorName: colColors<span class="operator">.</span>defaultBorderColor
-        onColorNameChanged: colColors<span class="operator">.</span>defaultBorderColor
-                            <span class="operator">=</span> <span class="type">Qt</span><span class="operator">.</span>binding(function() { <span class="keyword">return</span> colorName });
+        onColorNameChanged: {
+            colColors<span class="operator">.</span>defaultBorderColor
+                <span class="operator">=</span> <span class="type">Qt</span><span class="operator">.</span>binding(function() { <span class="keyword">return</span> colorName });
+            Data<span class="operator">.</span>setDomainBorderColor(colorName);
+        }
         horizontalMargin: <span class="number">0</span>
         verticalMargin: <span class="number">0</span>
         Layout<span class="operator">.</span>fillHeight: <span class="keyword">true</span>
