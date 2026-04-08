@@ -146,6 +146,33 @@ textureType: Data<span class="operator">.</span>getDomainTextureType()
 textureHeight: Data<span class="operator">.</span>getDomainTextureHeight()
 textureWidth: Data<span class="operator">.</span>getDomainTextureWidth()
 smooth: Data<span class="operator">.</span>getDomainTextureSmooth()</pre>
+<p>But for the list view, we will save them in properties in list view, since they will be the same for each item so they do not require opening the database and reading the value for each list item.</p>
+<pre class="cpp" translate="no">AppListView { <span class="comment">// in Main.qml</span>
+    id: listView
+
+    <span class="operator">.</span><span class="operator">.</span><span class="operator">.</span>
+
+    property string ageDescription: Data<span class="operator">.</span>formatDomainAgeContext(
+            Data<span class="operator">.</span>getDomainAgeContextPrefix()<span class="operator">,</span>
+            Data<span class="operator">.</span>getDomainAgeContextSuffix())
+    property var textureBorderWidth: Data<span class="operator">.</span>getDomainBorderWidth()
+    property var textureType: Data<span class="operator">.</span>getDomainTextureType()
+    property var textureHeight: Data<span class="operator">.</span>getDomainTextureHeight()
+    property var textureWidth: Data<span class="operator">.</span>getDomainTextureWidth()
+    property <span class="type">bool</span> textureSmooth: Data<span class="operator">.</span>getDomainTextureSmooth()
+
+    delegate: SwipableCollectionDelegate {
+        <span class="operator">.</span><span class="operator">.</span><span class="operator">.</span>
+
+        ageDescription: listView<span class="operator">.</span>ageDescription
+        borderWidth: listView<span class="operator">.</span>textureBorderWidth
+        textureType: listView<span class="operator">.</span>textureType
+        textureHeight: listView<span class="operator">.</span>textureHeight
+        textureWidth: listView<span class="operator">.</span>textureWidth
+        editable: <span class="keyword">false</span>
+        smooth: listView<span class="operator">.</span>textureSmooth
+    }
+}</pre>
 <p>For the item edit view also replace the default colors with calls to the respective methods:</p>
 <pre class="cpp" translate="no">property string mainColor: Data<span class="operator">.</span>getDomainMainColor()
 property string textureColor: Data<span class="operator">.</span>getDomainTextureColor()

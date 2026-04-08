@@ -204,6 +204,39 @@
     smooth: Data.getDomainTextureSmooth()
     \endcode
 
+    But for the list view, we will save them in properties in list view,
+    since they will be the same for each item so they do not require
+    opening the database and reading the value for each list item.
+
+    \code
+    AppListView { // in Main.qml
+        id: listView
+
+        ...
+
+        property string ageDescription: Data.formatDomainAgeContext(
+                Data.getDomainAgeContextPrefix(),
+                Data.getDomainAgeContextSuffix())
+        property var textureBorderWidth: Data.getDomainBorderWidth()
+        property var textureType: Data.getDomainTextureType()
+        property var textureHeight: Data.getDomainTextureHeight()
+        property var textureWidth: Data.getDomainTextureWidth()
+        property bool textureSmooth: Data.getDomainTextureSmooth()
+
+        delegate: SwipableCollectionDelegate {
+            ...
+
+            ageDescription: listView.ageDescription
+            borderWidth: listView.textureBorderWidth
+            textureType: listView.textureType
+            textureHeight: listView.textureHeight
+            textureWidth: listView.textureWidth
+            editable: false
+            smooth: listView.textureSmooth
+        }
+    }
+    \endcode
+
     For the item edit view also replace the default colors with calls to
     the respective methods:
 

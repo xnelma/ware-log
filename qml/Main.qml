@@ -67,6 +67,7 @@ App {
             }
 
             AppListView {
+                id: listView
                 spacing: 10
                 anchors.top: parent.top
                 anchors.topMargin: 10
@@ -83,18 +84,25 @@ App {
                     }
                 }
 
+                property string ageDescription: Data.formatDomainAgeContext(
+                        Data.getDomainAgeContextPrefix(),
+                        Data.getDomainAgeContextSuffix())
+                property var textureBorderWidth: Data.getDomainBorderWidth()
+                property var textureType: Data.getDomainTextureType()
+                property var textureHeight: Data.getDomainTextureHeight()
+                property var textureWidth: Data.getDomainTextureWidth()
+                property bool textureSmooth: Data.getDomainTextureSmooth()
+
                 delegate: SwipableCollectionDelegate {
                     width: pageMain.width
 
-                    ageDescription: Data.formatDomainAgeContext(
-                        Data.getDomainAgeContextPrefix(),
-                        Data.getDomainAgeContextSuffix())
-                    borderWidth: Data.getDomainBorderWidth()
-                    textureType: Data.getDomainTextureType()
-                    textureHeight: Data.getDomainTextureHeight()
-                    textureWidth: Data.getDomainTextureWidth()
+                    ageDescription: listView.ageDescription
+                    borderWidth: listView.textureBorderWidth
+                    textureType: listView.textureType
+                    textureHeight: listView.textureHeight
+                    textureWidth: listView.textureWidth
                     editable: false
-                    smooth: Data.getDomainTextureSmooth()
+                    smooth: listView.textureSmooth
                 }
             }
 
