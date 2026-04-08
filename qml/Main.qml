@@ -93,6 +93,7 @@ App {
                     textureType: Data.getDomainTextureType()
                     textureHeight: Data.getDomainTextureHeight()
                     textureWidth: Data.getDomainTextureWidth()
+                    editable: false
                     smooth: Data.getDomainTextureSmooth()
                 }
             }

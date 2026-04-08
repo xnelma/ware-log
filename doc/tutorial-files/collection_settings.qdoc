@@ -224,6 +224,13 @@
     return by default), and the age is formatted without context to e.g.
     "2 months".
 
+    We can now also make the properties required, so we won't have to
+    specify hardcoded default values in different places.
+    This concerns \c{SwipableCollectionDelegate.qml,
+    CollectionDelegatePreview.qml} and \c{CollectionDelegate.qml}.
+    Also specify the property \c{editable: false} in \c{Main.qml} and
+    \c{EditItemView.qml}.
+
     \section1 Layout settings
 
     The content will be structured as a column, with margins and spacing

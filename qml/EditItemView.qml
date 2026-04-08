@@ -32,6 +32,7 @@ AppPage {
             textureType: Data.getDomainTextureType()
             textureHeight: Data.getDomainTextureHeight()
             textureWidth: Data.getDomainTextureWidth()
+            editable: false
             smooth: Data.getDomainTextureSmooth()
             // remove parent margin and hide borders at sides:
             width: parent.width + 20 + border.width * 2

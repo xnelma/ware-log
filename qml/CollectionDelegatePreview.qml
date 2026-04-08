@@ -20,13 +20,13 @@ Rectangle {
     property string borderColor: defaultColor
     property list<string> tags: ["Tag 1", "Tag 2", "Tag 3"]
 
-    property string ageDescription: qsTr("collected %1 %2 ago")
-    property int borderWidth: 0
-    property int textureType: WeightIndicator.None
-    property int textureHeight: height
-    property int textureWidth: width
-    property bool editable: false
-    property bool smooth: false
+    required property string ageDescription
+    required property int borderWidth
+    required property int textureType
+    required property int textureHeight
+    required property int textureWidth
+    required property bool editable
+    required property bool smooth
 
     color: switchDarkStyle.checked? "black" : "white"
     property color textColor: switchDarkStyle.checked? "white" : "black"

@@ -152,6 +152,7 @@ property string textureColor: Data<span class="operator">.</span>getDomainTextur
 property string borderColor: Data<span class="operator">.</span>getDomainBorderColor()</pre>
 <p>The texture height and width for the sample database would be 354 (a bit less than 380, the height of texture.png) and 220 (the width of texture.png). When we are done with the settings, you can go back here to set to those values to keep the texture appearance for the sample database.</p>
 <p>If you build now and run the app, you will only see default values, so some noise for the list items (100x100 was the size of the texture we return by default), and the age is formatted without context to e.g. &quot;2 months&quot;.</p>
+<p>We can now also make the properties required, so we won't have to specify hardcoded default values in different places. This concerns <code translate="no">SwipableCollectionDelegate.qml, CollectionDelegatePreview.qml</code> and <code translate="no">CollectionDelegate.qml</code>. Also specify the property <code translate="no">editable: false</code> in <code translate="no">Main.qml</code> and <code translate="no">EditItemView.qml</code>.</p>
 <h2 id="layout-settings">Layout settings</h2>
 <p>The content will be structured as a column, with margins and spacing of 10:</p>
 <pre class="cpp" translate="no">AppPage {
