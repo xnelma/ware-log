@@ -36,11 +36,6 @@ function openDatabase()
                       'mainColor TEXT, textureColor TEXT, borderColor TEXT, ' +
                       'tags TEXT)');
 
-        var res = tx.executeSql('SELECT * FROM Collection');
-        if (res.rows.length === 0) {
-            Data.fillDatabase(db);
-        }
-
         tx.executeSql('CREATE TABLE IF NOT EXISTS Domain(id TEXT, name TEXT, ' +
                       'domain TEXT, ' +
                       'ageContextPrefix TEXT, ageContextSuffix TEXT, ' +
@@ -48,13 +43,28 @@ function openDatabase()
                       'textureType NUMERIC, smooth NUMERIC, ' +
                       'textureHeight NUMERIC, textureWidth NUMERIC, ' +
                       'mainColor TEXT, textureColor TEXT, borderColor TEXT)');
-        res = tx.executeSql('SELECT * FROM Domain WHERE id = \'' + id + '\'');
+        var res = tx.executeSql('SELECT * FROM Domain WHERE id = \'' + id + '\'');
         if (res.rows.length === 0)
             tx.executeSql('INSERT INTO Domain VALUES(?,?,?,?,?,?,?,?,?,?,?,?,?)',
                           [id, "", "", "", "", 0, 0, 0, 100, 100, "", "", ""]);
     });
 
     return db;
+}
+
+function fillSampleDatabase(db)
+{
+    var data = parseSampleData();
+
+    db.transaction(function(tx) {
+        var res = tx.executeSql('SELECT * FROM Collection');
+        if (res.rows.length !== 0)
+            return;
+
+        data.forEach(function(item) {
+            insertItem(item, tx);
+        });
+    });
 }
 
 function insertItem(item, tx)
@@ -85,21 +95,6 @@ function insertItem(item, tx)
     default:
         break;
     }
-}
-
-function fillDatabase(db)
-{
-    var data = parseSampleData();
-
-    db.transaction(function(tx) {
-        var res = tx.executeSql('SELECT * FROM Collection');
-        if (res.rows.length !== 0)
-            return;
-
-        data.forEach(function(item) {
-            insertItem(item, tx);
-        });
-    });
 }
 
 function tagStr(tags)

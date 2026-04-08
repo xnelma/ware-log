@@ -66,9 +66,20 @@ App {
                 }
             }
 
+            AppButton {
+                text: qsTr("Collection Settings")
+                visible: listModel.count === 0
+                width: parent.width - 20
+                anchors.horizontalCenter: parent.horizontalCenter
+                anchors.top: parent.top
+                anchors.topMargin: 10
+                onClicked: pageMain.navigationStack.push(compCollectionSettings)
+            }
+
             AppListView {
                 id: listView
                 spacing: 10
+                visible: listModel.count > 0
                 anchors.top: parent.top
                 anchors.topMargin: 10
 
