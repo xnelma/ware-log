@@ -11,7 +11,7 @@
     Then, (after clearing the data of the current installation)
     starting the app the first time greets the user with an empty view.
 
-    In this chapter we will remove the call to the sample data in that
+    In this chapter we will remove the call to the sample data that
     was so far used to fill the database, and we will
     add a button that leads to the collection set up in case of an empty
     database.
