@@ -201,25 +201,11 @@
     \section2 Use database values in other views
 
     Before we continue with the collection settings view, let's assign the
-    values from the database to list items and in the item edit view.
-
-    For the list view and the item edit view, replace the sample values
-    with calls to the javascript methods we just wrote:
-
-    \code
-    ageDescription: Data.formatDomainAgeContext(
-        Data.getDomainAgeContextPrefix(),
-        Data.getDomainAgeContextSuffix())
-    borderWidth: Data.getDomainBorderWidth()
-    textureType: Data.getDomainTextureType()
-    textureHeight: Data.getDomainTextureHeight()
-    textureWidth: Data.getDomainTextureWidth()
-    smooth: Data.getDomainTextureSmooth()
-    \endcode
-
-    But for the list view, we will save them in properties in list view,
-    since they will be the same for each item so they do not require
-    opening the database and reading the value for each list item.
+    values from the database to list items and use the colors in
+    the item edit view.
+    Since the domain properties will be the same for each list item they do
+    not require opening the database and reading the value for each item,
+    so we will save them in properties in the list view.
 
     \code
     AppListView { // in Main.qml
@@ -250,10 +236,11 @@
     }
     \endcode
 
-    For the item edit view also replace the default colors with calls to
+    For the item edit view replace the default colors with calls to
     the respective methods:
 
     \code
+    // in rowColors in EditItemView.qml
     property string mainColor: Data.getDomainMainColor()
     property string textureColor: Data.getDomainTextureColor()
     property string borderColor: Data.getDomainBorderColor()
@@ -265,17 +252,15 @@
     back here to set to those values to keep the texture appearance for the
     sample database.
 
+    We can now also make the properties required, so we won't have to
+    specify hardcoded default values in different places.
+    This concerns \c{SwipableCollectionDelegate.qml} and
+    \c{CollectionDelegate.qml}.
+
     If you build now and run the app, you will only see default values, so
     some noise for the list items (100x100 was the size of the texture we
     return by default), and the age is formatted without context to e.g.
     "2 months".
-
-    We can now also make the properties required, so we won't have to
-    specify hardcoded default values in different places.
-    This concerns \c{SwipableCollectionDelegate.qml,
-    CollectionDelegatePreview.qml} and \c{CollectionDelegate.qml}.
-    Also specify the property \c{editable: false} in \c{Main.qml} and
-    \c{EditItemView.qml}.
 
     \section1 Layout settings
 
@@ -914,8 +899,8 @@
     }
     \endcode
 
-    Add properties to expose the delegate properties, but initialize them with
-    sample values:
+    Add properties to expose the delegate properties, but initialize the
+    item specific values with sample values:
 
     \code
     Rectangle {
@@ -937,13 +922,13 @@
         property string borderColor: defaultColor
         property list<string> tags: ["Tag 1", "Tag 2", "Tag 3"]
 
-        property string ageDescription: qsTr("collected %1 %2 ago")
-        property int borderWidth: 0
-        property int textureType: WeightIndicator.None
-        property int textureHeight: height
-        property int textureWidth: width
-        property bool editable: false
-        property bool smooth: false
+        required property string ageDescription
+        required property int borderWidth
+        required property int textureType
+        required property int textureHeight
+        required property int textureWidth
+        required property bool editable
+        required property bool smooth
     }
     \endcode
 
@@ -1070,11 +1055,15 @@
             mainColor: rowColors.mainColor
             textureColor: rowColors.textureColor
             borderColor: rowColors.borderColor
-            borderWidth: 0
-            textureType: WeightIndicator.Texture.Noise
-            textureHeight: 354
-            textureWidth: 220
-            smooth: false
+            ageDescription: Data.formatDomainAgeContext(
+                Data.getDomainAgeContextPrefix(),
+                Data.getDomainAgeContextSuffix())
+            borderWidth: Data.getDomainBorderWidth()
+            textureType: Data.getDomainTextureType()
+            textureHeight: Data.getDomainTextureHeight()
+            textureWidth: Data.getDomainTextureWidth()
+            editable: false
+            smooth: Data.getDomainTextureSmooth()
             // remove parent margin and hide borders at sides:
             width: parent.width + 20 + border.width * 2
             x: - 10 - border.width

@@ -137,17 +137,7 @@ function getDomainTextureSmooth()
 }</pre>
 <p>In sum there should be 12x2 smaller methods. With those we have an interface to get the collection properties from the database and save them.</p>
 <h3 id="use-database-values-in-other-views">Use database values in other views</h3>
-<p>Before we continue with the collection settings view, let's assign the values from the database to list items and in the item edit view.</p>
-<p>For the list view and the item edit view, replace the sample values with calls to the javascript methods we just wrote:</p>
-<pre class="cpp" translate="no">ageDescription: Data<span class="operator">.</span>formatDomainAgeContext(
-    Data<span class="operator">.</span>getDomainAgeContextPrefix()<span class="operator">,</span>
-    Data<span class="operator">.</span>getDomainAgeContextSuffix())
-borderWidth: Data<span class="operator">.</span>getDomainBorderWidth()
-textureType: Data<span class="operator">.</span>getDomainTextureType()
-textureHeight: Data<span class="operator">.</span>getDomainTextureHeight()
-textureWidth: Data<span class="operator">.</span>getDomainTextureWidth()
-smooth: Data<span class="operator">.</span>getDomainTextureSmooth()</pre>
-<p>But for the list view, we will save them in properties in list view, since they will be the same for each item so they do not require opening the database and reading the value for each list item.</p>
+<p>Before we continue with the collection settings view, let's assign the values from the database to list items and use the colors in the item edit view. Since the domain properties will be the same for each list item they do not require opening the database and reading the value for each item, so we will save them in properties in the list view.</p>
 <pre class="cpp" translate="no">AppListView { <span class="comment">// in Main.qml</span>
     id: listView
 
@@ -174,13 +164,14 @@ smooth: Data<span class="operator">.</span>getDomainTextureSmooth()</pre>
         smooth: listView<span class="operator">.</span>textureSmooth
     }
 }</pre>
-<p>For the item edit view also replace the default colors with calls to the respective methods:</p>
-<pre class="cpp" translate="no">property string mainColor: Data<span class="operator">.</span>getDomainMainColor()
+<p>For the item edit view replace the default colors with calls to the respective methods:</p>
+<pre class="cpp" translate="no"><span class="comment">// in rowColors in EditItemView.qml</span>
+property string mainColor: Data<span class="operator">.</span>getDomainMainColor()
 property string textureColor: Data<span class="operator">.</span>getDomainTextureColor()
 property string borderColor: Data<span class="operator">.</span>getDomainBorderColor()</pre>
 <p>The texture height and width for the sample database would be 354 (a bit less than 380, the height of texture.png) and 220 (the width of texture.png). When we are done with the settings, you can go back here to set to those values to keep the texture appearance for the sample database.</p>
+<p>We can now also make the properties required, so we won't have to specify hardcoded default values in different places. This concerns <code translate="no">SwipableCollectionDelegate.qml</code> and <code translate="no">CollectionDelegate.qml</code>.</p>
 <p>If you build now and run the app, you will only see default values, so some noise for the list items (100x100 was the size of the texture we return by default), and the age is formatted without context to e.g. &quot;2 months&quot;.</p>
-<p>We can now also make the properties required, so we won't have to specify hardcoded default values in different places. This concerns <code translate="no">SwipableCollectionDelegate.qml, CollectionDelegatePreview.qml</code> and <code translate="no">CollectionDelegate.qml</code>. Also specify the property <code translate="no">editable: false</code> in <code translate="no">Main.qml</code> and <code translate="no">EditItemView.qml</code>.</p>
 <h2 id="layout-settings">Layout settings</h2>
 <p>The content will be structured as a column, with margins and spacing of 10:</p>
 <pre class="cpp" translate="no">AppPage {
@@ -669,7 +660,7 @@ CollectionDelegate {
     property color textColor: switchDarkStyle<span class="operator">.</span>checked<span class="operator">?</span> <span class="string">&quot;white&quot;</span> : <span class="string">&quot;black&quot;</span>
     <span class="operator">.</span><span class="operator">.</span><span class="operator">.</span>
 }</pre>
-<p>Add properties to expose the delegate properties, but initialize them with sample values:</p>
+<p>Add properties to expose the delegate properties, but initialize the item specific values with sample values:</p>
 <pre class="cpp" translate="no">Rectangle {
     id: cdpRoot
 
@@ -689,13 +680,13 @@ CollectionDelegate {
     property string borderColor: defaultColor
     property list<span class="operator">&lt;</span>string<span class="operator">&gt;</span> tags: <span class="operator">[</span><span class="string">&quot;Tag 1&quot;</span><span class="operator">,</span> <span class="string">&quot;Tag 2&quot;</span><span class="operator">,</span> <span class="string">&quot;Tag 3&quot;</span><span class="operator">]</span>
 
-    property string ageDescription: qsTr(<span class="string">&quot;collected %1 %2 ago&quot;</span>)
-    property <span class="type">int</span> borderWidth: <span class="number">0</span>
-    property <span class="type">int</span> textureType: WeightIndicator<span class="operator">.</span>None
-    property <span class="type">int</span> textureHeight: height
-    property <span class="type">int</span> textureWidth: width
-    property <span class="type">bool</span> editable: <span class="keyword">false</span>
-    property <span class="type">bool</span> smooth: <span class="keyword">false</span>
+    required property string ageDescription
+    required property <span class="type">int</span> borderWidth
+    required property <span class="type">int</span> textureType
+    required property <span class="type">int</span> textureHeight
+    required property <span class="type">int</span> textureWidth
+    required property <span class="type">bool</span> editable
+    required property <span class="type">bool</span> smooth
 }</pre>
 <p>And add property bindings to the delegate:</p>
 <pre class="cpp" translate="no">CollectionDelegate {
@@ -798,11 +789,15 @@ Column {
         mainColor: rowColors<span class="operator">.</span>mainColor
         textureColor: rowColors<span class="operator">.</span>textureColor
         borderColor: rowColors<span class="operator">.</span>borderColor
-        borderWidth: <span class="number">0</span>
-        textureType: WeightIndicator<span class="operator">.</span>Texture<span class="operator">.</span>Noise
-        textureHeight: <span class="number">354</span>
-        textureWidth: <span class="number">220</span>
-        smooth: <span class="keyword">false</span>
+        ageDescription: Data<span class="operator">.</span>formatDomainAgeContext(
+            Data<span class="operator">.</span>getDomainAgeContextPrefix()<span class="operator">,</span>
+            Data<span class="operator">.</span>getDomainAgeContextSuffix())
+        borderWidth: Data<span class="operator">.</span>getDomainBorderWidth()
+        textureType: Data<span class="operator">.</span>getDomainTextureType()
+        textureHeight: Data<span class="operator">.</span>getDomainTextureHeight()
+        textureWidth: Data<span class="operator">.</span>getDomainTextureWidth()
+        editable: <span class="keyword">false</span>
+        smooth: Data<span class="operator">.</span>getDomainTextureSmooth()
         <span class="comment">// remove parent margin and hide borders at sides:</span>
         width: parent<span class="operator">.</span>width <span class="operator">+</span> <span class="number">20</span> <span class="operator">+</span> border<span class="operator">.</span>width <span class="operator">*</span> <span class="number">2</span>
         x: <span class="operator">-</span> <span class="number">10</span> <span class="operator">-</span> border<span class="operator">.</span>width
