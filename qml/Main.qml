@@ -86,8 +86,9 @@ App {
                 delegate: SwipableCollectionDelegate {
                     width: pageMain.width
 
-                    ageDescription: (Data.getDomainAgeContextPrefix() + " %1 %2 "
-                                    + Data.getDomainAgeContextSuffix()).trim()
+                    ageDescription: Data.formatDomainAgeContext(
+                        Data.getDomainAgeContextPrefix(),
+                        Data.getDomainAgeContextSuffix())
                     borderWidth: Data.getDomainBorderWidth()
                     textureType: Data.getDomainTextureType()
                     textureHeight: Data.getDomainTextureHeight()

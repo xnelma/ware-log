@@ -301,6 +301,11 @@ function getDomainAgeContextSuffix()
     return item === "" ? "" : item.ageContextSuffix;
 }
 
+function formatDomainAgeContext(prefix, suffix)
+{
+    return (prefix + " %1 %2 " + suffix).trim();
+}
+
 function setDomainBorderWidth(borderWidth)
 {
     setDomainValue("borderWidth", borderWidth);

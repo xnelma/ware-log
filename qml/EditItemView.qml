@@ -25,8 +25,9 @@ AppPage {
             mainColor: rowColors.mainColor
             textureColor: rowColors.textureColor
             borderColor: rowColors.borderColor
-            ageDescription: (Data.getDomainAgeContextPrefix() + " %1 %2 "
-                            + Data.getDomainAgeContextSuffix()).trim()
+            ageDescription: Data.formatDomainAgeContext(
+                Data.getDomainAgeContextPrefix(),
+                Data.getDomainAgeContextSuffix())
             borderWidth: Data.getDomainBorderWidth()
             textureType: Data.getDomainTextureType()
             textureHeight: Data.getDomainTextureHeight()

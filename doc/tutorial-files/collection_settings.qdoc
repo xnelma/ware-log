@@ -168,6 +168,19 @@
     The texture type is set as number using the index of the type.
     This is not robust and should be done differently for growing project sizes.
 
+    For the age context there can be a third method that returns the
+    combined string. While it could just be a getter calling the prefix
+    and suffix methods, let's make it independent from those methods
+    and instead just format parameters.
+    We will want to use the method with input item text in the settings view.
+
+    \code
+    function formatDomainAgeContext(prefix, suffix)
+    {
+        return (prefix + " %1 %2 " + suffix).trim();
+    }
+    \endcode
+
     In sum there should be 12x2 smaller methods.
     With those we have an interface to get the collection properties from the
     database and save them.
@@ -181,8 +194,9 @@
     with calls to the javascript methods we just wrote:
 
     \code
-    ageDescription: (Data.getDomainAgeContextPrefix() + " %1 %2 "
-                    + Data.getDomainAgeContextSuffix()).trim()
+    ageDescription: Data.formatDomainAgeContext(
+        Data.getDomainAgeContextPrefix(),
+        Data.getDomainAgeContextSuffix())
     borderWidth: Data.getDomainBorderWidth()
     textureType: Data.getDomainTextureType()
     textureHeight: Data.getDomainTextureHeight()
@@ -490,8 +504,8 @@
         spacing: 10
         width: parent.width
 
-        property string ageContext: (inputAgeContext1.text + " %1 %2 "
-                                    + inputAgeContext2.text).trim()
+        property string ageContext: Data.formatDomainAgeContext(
+            inputAgeContext1.text, inputAgeContext2.text)
 
         AppTextField {
             id: inputAgeContext1

@@ -92,8 +92,8 @@ Column {
         spacing: 10
         width: parent.width
 
-        property string ageContext: (inputAgeContext1.text + " %1 %2 "
-                                    + inputAgeContext2.text).trim()
+        property string ageContext: Data.formatDomainAgeContext(
+            inputAgeContext1.text, inputAgeContext2.text)
 
         AppTextField {
             id: inputAgeContext1

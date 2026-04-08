@@ -129,12 +129,18 @@ function getDomainTextureSmooth()
     <span class="keyword">return</span> item <span class="operator">!</span><span class="operator">=</span><span class="operator">=</span> <span class="string">&quot;&quot;</span> <span class="operator">&amp;</span><span class="operator">&amp;</span> item<span class="operator">.</span>smooth <span class="operator">!</span><span class="operator">=</span><span class="operator">=</span> <span class="number">0</span>;
 }</pre>
 <p>The texture type is set as number using the index of the type. This is not robust and should be done differently for growing project sizes.</p>
+<p>For the age context there can be a third method that returns the combined string. While it could just be a getter calling the prefix and suffix methods, let's make it independent from those methods and instead just format parameters. We will want to use the method with input item text in the settings view.</p>
+<pre class="cpp" translate="no">function formatDomainAgeContext(prefix<span class="operator">,</span> suffix)
+{
+    <span class="keyword">return</span> (prefix <span class="operator">+</span> <span class="string">&quot; %1 %2 &quot;</span> <span class="operator">+</span> suffix)<span class="operator">.</span>trim();
+}</pre>
 <p>In sum there should be 12x2 smaller methods. With those we have an interface to get the collection properties from the database and save them.</p>
 <h3 id="use-database-values-in-other-views">Use database values in other views</h3>
 <p>Before we continue with the collection settings view, let's assign the values from the database to list items and in the item edit view.</p>
 <p>For the list view and the item edit view, replace the sample values with calls to the javascript methods we just wrote:</p>
-<pre class="cpp" translate="no">ageDescription: (Data<span class="operator">.</span>getDomainAgeContextPrefix() <span class="operator">+</span> <span class="string">&quot; %1 %2 &quot;</span>
-                <span class="operator">+</span> Data<span class="operator">.</span>getDomainAgeContextSuffix())<span class="operator">.</span>trim()
+<pre class="cpp" translate="no">ageDescription: Data<span class="operator">.</span>formatDomainAgeContext(
+    Data<span class="operator">.</span>getDomainAgeContextPrefix()<span class="operator">,</span>
+    Data<span class="operator">.</span>getDomainAgeContextSuffix())
 borderWidth: Data<span class="operator">.</span>getDomainBorderWidth()
 textureType: Data<span class="operator">.</span>getDomainTextureType()
 textureHeight: Data<span class="operator">.</span>getDomainTextureHeight()
@@ -345,8 +351,8 @@ Row {
     spacing: <span class="number">10</span>
     width: parent<span class="operator">.</span>width
 
-    property string ageContext: (inputAgeContext1<span class="operator">.</span>text <span class="operator">+</span> <span class="string">&quot; %1 %2 &quot;</span>
-                                <span class="operator">+</span> inputAgeContext2<span class="operator">.</span>text)<span class="operator">.</span>trim()
+    property string ageContext: Data<span class="operator">.</span>formatDomainAgeContext(
+        inputAgeContext1<span class="operator">.</span>text<span class="operator">,</span> inputAgeContext2<span class="operator">.</span>text)
 
     AppTextField {
         id: inputAgeContext1
