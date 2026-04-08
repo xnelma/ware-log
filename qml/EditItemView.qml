@@ -446,9 +446,12 @@ AppPage {
         rowTitle.originColor = Qt.binding(function() { return defaultColor });
         comboTypes.currentIndex = 0;
         comboTypes.model = Data.getAllTypes();
-        rowColors.mainColor = Qt.binding(function() { return defaultColor });
-        rowColors.textureColor = Qt.binding(function() { return defaultColor });
-        rowColors.borderColor = Qt.binding(function() { return defaultColor });
+        rowColors.mainColor = Qt.binding(
+            function() { return Data.getDomainMainColor() });
+        rowColors.textureColor = Qt.binding(
+            function() { return Data.getDomainTextureColor() });
+        rowColors.borderColor = Qt.binding(
+            function() { return Data.getDomainBorderColor() });
         inputCost.text = "";
         comboCostPerWeightUnit.currentIndex = 0;
         inputWeight.text = "";
