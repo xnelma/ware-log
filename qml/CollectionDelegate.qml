@@ -3,10 +3,12 @@ import QtQuick
 import QtQuick.Layouts
 import "data.js" as Data
 
-SwipeOptionsContainer {
+Item {
     id: delegate
 
-    height: content.height
+    width: parent.width
+    height: colContent.height + 2
+    property color textColor: Theme.colors.textColor
 
     required property string title
     required property string origin
@@ -19,12 +21,19 @@ SwipeOptionsContainer {
     required property string weightUnit
     required property int cost
     required property int secondaryCost
-    required property string primaryColor
-    required property string secondaryColor
+    required property string mainColor
+    required property string textureColor
+    required property string borderColor
     required property string tagStr
     property list<string> tags
 
-    property string ageDescription: qsTr("collected %1 %2 ago")
+    required property string ageDescription
+    required property int borderWidth
+    required property int textureType
+    required property int textureHeight
+    required property int textureWidth
+    required property bool editable
+    required property bool smooth
 
     Component.onCompleted: {
         // TODO Somehow the datatype of the string list is lost
@@ -32,200 +41,133 @@ SwipeOptionsContainer {
         // A list<string> would be empty, and a var would get
         // the datatype of QQmlListProperty, but with empty
         // strings. Why?
-        tags = Data.tagList(tagStr);
+        if (tags.length == 0) // But also allow passing a tag list.
+            tags = Data.tagList(tagStr);
     }
 
-    rightOption: SwipeButton {
-        iconType: IconType.remove
+    WeightIndicator {
+        id: weightIndicator
+
         height: parent.height
-        onClicked: {
-            Data.deleteItem(title);
-            listModel.deleteItem(title);
-        }
+        width: delegate.width / 7
+
+        weightTotal: delegate.weightTotal
+        weightLeft: delegate.weightLeft
+        weightUnit: delegate.weightUnit
+
+        mainColor: delegate.mainColor
+        textureColor: delegate.textureColor
+        borderColor: delegate.borderColor
+
+        borderWidth: delegate.borderWidth
+        textureType: delegate.textureType
+        textureHeight: delegate.textureHeight
+        textureWidth: delegate.textureWidth
+        editable: delegate.editable
+        smooth: delegate.smooth
     }
 
-    // FIXME Swiping both sides or scrolling the list view while swiping
-    // sometimes deactivates swiping for an item completely.
-    // It happens more often if not just one SwipeButton is used, but the Row.
-    leftOption: Row {
-        SwipeButton {
-            iconType: IconType.money
-            height: delegate.height
-            onClicked: {
-                dlgCostConnection.itemTitle = delegate.title;
-                dlgCostConnection.enabled = true;
-                dlgUpdateCost.cost = delegate.cost
-                dlgUpdateCost.secondaryCost = delegate.secondaryCost
-                dlgUpdateCost.open()
-            }
+    Column {
+        id: colContent
 
-            Connections {
-                id: dlgCostConnection
-                target: dlgUpdateCost
-                enabled: false
+        anchors.left: weightIndicator.right
+        anchors.leftMargin: 10
 
-                property string itemTitle
+        Row {
+            spacing: 10
+            AppText {
+                id: txtTitle
 
-                function onNumberAccepted(num) {
-                    if (itemTitle === delegate.title) {
-                        Data.updateCost(delegate.title, num);
-                        delegate.secondaryCost = num;
-                        dlgCostConnection.enabled = false;
-                    }
-                }
-            }
-        }
-
-        SwipeButton {
-            iconType: IconType.beer
-            height: delegate.height
-            onClicked: {
-                dlgWeightConnection.itemTitle = delegate.title;
-                dlgWeightConnection.enabled = true;
-                dlgUpdateWeight.weightTotal = delegate.weightTotal
-                dlgUpdateWeight.weightLeft = delegate.weightLeft
-                dlgUpdateWeight.weightUnit = delegate.weightUnit
-                dlgUpdateWeight.open()
-            }
-
-            Connections {
-                id: dlgWeightConnection
-                target: dlgUpdateWeight
-                enabled: false
-
-                property string itemTitle
-
-                function onNumberAccepted(num) {
-                    if (itemTitle === delegate.title) {
-                        Data.updateWeight(delegate.title, num);
-                        delegate.weightLeft = num;
-                        dlgWeightConnection.enabled = false;
-                    }
-                }
-            }
-        }
-    }
-
-    Item {
-        id: content
-
-        height: colContent.height + 2
-
-        WeightIndicator {
-            id: weightIndicator
-
-            height: parent.height
-            width: delegate.width / 7
-
-            weightTotal: delegate.weightTotal
-            weightLeft: delegate.weightLeft
-            weightUnit: delegate.weightUnit
-
-            primaryColor: delegate.primaryColor
-            secondaryColor: delegate.secondaryColor
-        }
-
-        Column {
-            id: colContent
-
-            anchors.left: weightIndicator.right
-            anchors.leftMargin: 10
-
-            Row {
-                spacing: 10
-                AppText {
-                    id: txtTitle
-
-                    text: delegate.title
-                    font.bold: true
-                }
-
-                AppText {
-                    id: txtOrigin
-
-                    text: delegate.origin
-                    color: delegate.originColor
-                }
-            }
-
-            Item {
-                height: txtType.height + 2
-                width: txtType.width + 4
-
-                Rectangle {
-                    height: parent.height
-                    width: parent.width
-                    color: txtType.color
-                    opacity: 0.2
-                }
-
-                AppText {
-                    id: txtType
-
-                    text: delegate.type
-
-                    anchors.centerIn: parent
-                }
-            }
-
-            Row {
-                spacing: 2
-
-                AppText {
-                        text: delegate.cost + "€"
-                        font.strikeout: delegate.cost !== delegate.secondaryCost
-                }
-
-                AppText {
-                    text: delegate.secondaryCost + "€"
-                    visible: delegate.cost !== delegate.secondaryCost
-                }
-
-                AppText {
-                    text: "/10g"
-                    opacity: 0.7
-                }
+                text: delegate.title
+                color: delegate.textColor
+                font.bold: true
             }
 
             AppText {
-                text: delegate.ageDescription.arg(delegate.age)
-                                             .arg(delegate.ageUnit)
+                id: txtOrigin
+
+                text: delegate.origin
+                color: delegate.originColor
+            }
+        }
+
+        Item {
+            height: txtType.height + 2
+            width: txtType.width + 4
+
+            Rectangle {
+                height: parent.height
+                width: parent.width
+                color: txtType.color
+                opacity: 0.2
             }
 
-            Row {
-                Repeater {
-                    model: delegate.tags
+            AppText {
+                id: txtType
+                text: delegate.type
+                color: delegate.textColor
+                anchors.centerIn: parent
+            }
+        }
 
-                    Item {
-                        required property string modelData
+        Row {
+            spacing: 2
 
-                        height: rectPropBg.height
-                        width: rectPropBg.width + 3
+            AppText {
+                text: delegate.cost + "€"
+                font.strikeout: delegate.cost !== delegate.secondaryCost
+                color: delegate.textColor
+            }
 
-                        AppText {
-                            id: txtProp
+            AppText {
+                text: delegate.secondaryCost + "€"
+                visible: delegate.cost !== delegate.secondaryCost
+                color: delegate.textColor
+            }
 
-                            text: parent.modelData
+            AppText {
+                text: "/10g"
+                opacity: 0.7
+                color: delegate.textColor
+            }
+        }
 
-                            opacity: 0.8
-                            anchors.centerIn: rectPropBg
-                        }
+        AppText {
+            text: delegate.ageDescription.arg(delegate.age)
+                                         .arg(delegate.ageUnit)
+            color: delegate.textColor
+        }
 
-                        Rectangle {
-                            id: rectPropBg
+        Row {
+            Repeater {
+                model: delegate.tags
 
-                            color: txtProp.color
-                            opacity: 0.1
-                            radius: height / 2 - 2
+                Item {
+                    required property string modelData
 
-                            height: txtProp.height + 4
-                            width: txtProp.width + 10
-                        }
+                    height: rectTagBackground.height
+                    width: rectTagBackground.width + 3
 
+                    AppText {
+                        id: txtTag
+                        text: parent.modelData
+                        opacity: 0.8
+                        color: delegate.textColor
+                        anchors.centerIn: rectTagBackground
                     }
+
+                    Rectangle {
+                        id: rectTagBackground
+                        color: txtTag.color
+                        opacity: 0.1
+                        radius: height / 2 - 2
+                        height: txtTag.height + 4
+                        width: txtTag.width + 10
+                    }
+
                 }
             }
+        } // Row
 
-        }
-    }
-}
+    } // colContent
+} // delegate

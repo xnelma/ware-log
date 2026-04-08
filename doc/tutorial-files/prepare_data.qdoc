@@ -25,7 +25,8 @@
                 "age": 0, "ageUnit": "years",
                 "weightTotal": 0, "weightLeft": 0, "weightUnit": "g",
                 "cost": 0, "secondaryCost": 0,
-                "primaryColor: "#000", "secondaryColor": "#000",
+                "mainColor: "#000", "textureColor": "#000",
+                "borderColor": "#000",
                 "tags": ["", "", ...]
             },
             ...
@@ -129,7 +130,8 @@
                       'weightTotal NUMERIC, weightLeft NUMERIC, ' +
                       'weightUnit TEXT, ' +
                       'cost NUMERIC, secondaryCost NUMERIC, ' +
-                      'primaryColor TEXT, secondaryColor TEXT, ' +
+                      'mainColor TEXT, textureColor TEXT, ' +
+                      'borderColor TEXT, ' +
                       'tags TEXT)');
     });
     \endcode
@@ -174,7 +176,7 @@
 
                 data.forEach(function(item) {
                     tx.executeSql(
-                        'INSERT INTO Collection VALUES(?,?,?,?,?,?,?,?,?,?,?,?,?,?)',
+                        'INSERT INTO Collection VALUES(?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)',
                         [item.title,
                          item.origin, item.originColor,
                          item.type,
@@ -182,7 +184,7 @@
                          item.weightTotal, item.weightLeft,
                          item.weightUnit,
                          item.cost, item.secondaryCost,
-                         item.primaryColor, item.secondaryColor,
+                         item.mainColor, item.textureColor, item.borderColor,
                          tagStr(item.tags)]
                     );
                 });
@@ -239,8 +241,9 @@
                   weightLeft: item.weightLeft,
                   weightUnit: item.weightUnit,
                   cost: item.cost, secondaryCost: item.secondaryCost,
-                  primaryColor: item.primaryColor,
-                  secondaryColor: item.secondaryColor,
+                  mainColor: item.mainColor,
+                  textureColor: item.textureColor,
+                  borderColor: item.borderColor,
                   tagStr: item.tags
                 } );
         };

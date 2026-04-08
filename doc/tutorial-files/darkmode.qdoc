@@ -157,8 +157,9 @@
     \code
     property string originColor: defaultColor
     ...
-    property string primaryColor: defaultColor
-    property string secondaryColor: defaultColor
+    property string mainColor: defaultColor
+    property string textureColor: defaultColor
+    property string borderColor: defaultColor
     ...
 
     component ColorButton : AppButton {
@@ -175,8 +176,9 @@
         ...
         rowTitle.originColor = Qt.binding(function() { return defaultColor });
         ...
-        rowColors.primaryColor = Qt.binding(function() { return defaultColor });
-        rowColors.secondaryColor = Qt.binding(function() { return defaultColor });
+        rowColors.mainColor = Qt.binding(function() { return defaultColor });
+        rowColors.textureColor = Qt.binding(function() { return defaultColor });
+        rowColors.borderColor = Qt.binding(function() { return defaultColor });
         ...
     }
     \endcode
@@ -187,8 +189,8 @@
     changed via their
     \l {https://doc.qt.io/qt-6/qml-qtquick-palette.html} {palette}.
 
-    Add a component \c{LightDarkComboBox} with \c{ComboBox} as base type
-    and set the colors with bindings to color properties.
+    Add a component file \c{LightDarkComboBox.qml} with \c{ComboBox} as base
+    type and set the colors with bindings to color properties.
     This is trial and error and results in following properties:
 
     \code

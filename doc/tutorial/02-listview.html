@@ -88,13 +88,15 @@ required property <span class="type">int</span> weightLeft
 required property string weightUnit
 required property <span class="type">int</span> cost
 required property <span class="type">int</span> secondaryCost
-required property string primaryColor
-required property string secondaryColor
+required property string mainColor
+required property string textureColor
+required property string borderColor
 required property string tagStr
 property list<span class="operator">&lt;</span>string<span class="operator">&gt;</span> tags</pre>
-<p>The list of tags will be created from <code translate="no">tagStr</code> when it is available:</p>
+<p>The list of tags will be created from <code translate="no">tagStr</code> if the tags are not passed as list. While <code translate="no">tagStr</code> is also not mandatory, it still needs to be marked as <code translate="no">required</code> to be associated with model data in case the delegate is used inside a list view.</p>
 <pre class="cpp" translate="no">Component<span class="operator">.</span>onCompleted: {
-    tags <span class="operator">=</span> Data<span class="operator">.</span>tagList(tagStr);
+    <span class="keyword">if</span> (tags<span class="operator">.</span>length <span class="operator">=</span><span class="operator">=</span> <span class="number">0</span>)
+        tags <span class="operator">=</span> Data<span class="operator">.</span>tagList(tagStr);
 }</pre>
 <p>There should also be a property <code translate="no">ageDescription</code> to give some domain specific context to the meaning of the entry type. I picked it to be:</p>
 <pre class="cpp" translate="no">property string ageDescription: qsTr(<span class="string">&quot;collected %1 %2 ago&quot;</span>)</pre>
@@ -107,7 +109,7 @@ property list<span class="operator">&lt;</span>string<span class="operator">&gt;
     height: parent<span class="operator">.</span>height
     width: delegate<span class="operator">.</span>width <span class="operator">/</span> <span class="number">7</span>
 
-    color: delegate<span class="operator">.</span>primaryColor
+    color: delegate<span class="operator">.</span>mainColor
 }
 
 Column {
@@ -126,6 +128,8 @@ Column {
 
     <span class="operator">.</span><span class="operator">.</span><span class="operator">.</span>
 }</pre>
+<p>As a small add-on, it would also be nice to be able to set the text color of the item. There is no background set so it would already be possible to change it from outside the component, but the text color would be fix. So add another property that would per default be set to the theme color.</p>
+<pre class="cpp" translate="no">property color textColor: Theme<span class="operator">.</span>colors<span class="operator">.</span>textColor</pre>
 <h3 id="layout-of-properties-title-and-origin">Layout of properties title and origin</h3>
 <p>The first line of the content column will be title and origin. The origin is colored.</p>
 <pre class="cpp" translate="no">Row {
@@ -134,6 +138,7 @@ Column {
         id: txtTitle
 
         text: delegate<span class="operator">.</span>title
+        color: delegate<span class="operator">.</span>textColor
         font<span class="operator">.</span>bold: <span class="keyword">true</span>
     }
 
@@ -159,9 +164,8 @@ Column {
 
     AppText {
         id: txtType
-
         text: delegate<span class="operator">.</span>type
-
+        color: delegate<span class="operator">.</span>textColor
         anchors<span class="operator">.</span>centerIn: parent
     }
 }</pre>
@@ -171,18 +175,21 @@ Column {
     spacing: <span class="number">2</span>
 
     AppText {
-            text: delegate<span class="operator">.</span>cost <span class="operator">+</span> <span class="string">&quot;€&quot;</span>
-            font<span class="operator">.</span>strikeout: delegate<span class="operator">.</span>cost <span class="operator">!</span><span class="operator">=</span><span class="operator">=</span> delegate<span class="operator">.</span>secondaryCost
+        text: delegate<span class="operator">.</span>cost <span class="operator">+</span> <span class="string">&quot;€&quot;</span>
+        font<span class="operator">.</span>strikeout: delegate<span class="operator">.</span>cost <span class="operator">!</span><span class="operator">=</span><span class="operator">=</span> delegate<span class="operator">.</span>secondaryCost
+        color: delegate<span class="operator">.</span>textColor
     }
 
     AppText {
         text: delegate<span class="operator">.</span>secondaryCost <span class="operator">+</span> <span class="string">&quot;€&quot;</span>
         visible: delegate<span class="operator">.</span>cost <span class="operator">!</span><span class="operator">=</span><span class="operator">=</span> delegate<span class="operator">.</span>secondaryCost
+        color: delegate<span class="operator">.</span>textColor
     }
 
     AppText {
         text: <span class="string">&quot;/10g&quot;</span>
         opacity: <span class="number">0.7</span>
+        color: delegate<span class="operator">.</span>textColor
     }
 }</pre>
 <h3 id="layout-of-the-age-property">Layout of the age property</h3>
@@ -190,6 +197,7 @@ Column {
 <pre class="cpp" translate="no">AppText {
     text: delegate<span class="operator">.</span>ageDescription<span class="operator">.</span>arg(delegate<span class="operator">.</span>age)
                                  <span class="operator">.</span>arg(delegate<span class="operator">.</span>ageUnit)
+    color: delegate<span class="operator">.</span>textColor
 }</pre>
 <h3 id="layout-for-the-tag-list">Layout for the tag list</h3>
 <p>Now for the tag list. We will format it as a <code translate="no">Repeater</code> in a <code translate="no">Row</code>. The model will be the string list for the tags we parsed earlier. It is available as property <code translate="no">modelData</code> of type <code translate="no">string</code>. Each tag should have a light grey background with round corners, but not half circles, so decrement the radius with <code translate="no">2</code>. The light grey is achieved by using the text color of the text item, and setting an opacity of <code translate="no">0.1</code>. The text is also not black, but a bit lighter, using an opacity of <code translate="no">0.8</code>.</p>
@@ -200,27 +208,24 @@ Column {
         Item {
             required property string modelData
 
-            height: rectPropBg<span class="operator">.</span>height
-            width: rectPropBg<span class="operator">.</span>width <span class="operator">+</span> <span class="number">3</span>
+            height: rectTagBackground<span class="operator">.</span>height
+            width: rectTagBackground<span class="operator">.</span>width <span class="operator">+</span> <span class="number">3</span>
 
             AppText {
-                id: txtProp
-
+                id: txtTag
                 text: parent<span class="operator">.</span>modelData
-
                 opacity: <span class="number">0.8</span>
-                anchors<span class="operator">.</span>centerIn: rectPropBg
+                color: delegate<span class="operator">.</span>textColor
+                anchors<span class="operator">.</span>centerIn: rectTagBackground
             }
 
             Rectangle {
-                id: rectPropBg
-
-                color: txtProp<span class="operator">.</span>color
+                id: rectTagBackground
+                color: txtTag<span class="operator">.</span>color
                 opacity: <span class="number">0.1</span>
                 radius: height <span class="operator">/</span> <span class="number">2</span> <span class="operator">-</span> <span class="number">2</span>
-
-                height: txtProp<span class="operator">.</span>height <span class="operator">+</span> <span class="number">4</span>
-                width: txtProp<span class="operator">.</span>width <span class="operator">+</span> <span class="number">10</span>
+                height: txtTag<span class="operator">.</span>height <span class="operator">+</span> <span class="number">4</span>
+                width: txtTag<span class="operator">.</span>width <span class="operator">+</span> <span class="number">10</span>
             }
         }
     }

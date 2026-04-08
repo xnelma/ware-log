@@ -39,7 +39,8 @@
             <span class="string">&quot;age&quot;</span>: <span class="number">0</span><span class="operator">,</span> <span class="string">&quot;ageUnit&quot;</span>: <span class="string">&quot;years&quot;</span><span class="operator">,</span>
             <span class="string">&quot;weightTotal&quot;</span>: <span class="number">0</span><span class="operator">,</span> <span class="string">&quot;weightLeft&quot;</span>: <span class="number">0</span><span class="operator">,</span> <span class="string">&quot;weightUnit&quot;</span>: <span class="string">&quot;g&quot;</span><span class="operator">,</span>
             <span class="string">&quot;cost&quot;</span>: <span class="number">0</span><span class="operator">,</span> <span class="string">&quot;secondaryCost&quot;</span>: <span class="number">0</span><span class="operator">,</span>
-            <span class="string">&quot;primaryColor: &quot;</span><span class="preprocessor">#000&quot;, &quot;secondaryColor&quot;: &quot;#000&quot;,</span>
+            <span class="string">&quot;mainColor: &quot;</span><span class="preprocessor">#000&quot;, &quot;textureColor&quot;: &quot;#000&quot;,</span>
+            <span class="string">&quot;borderColor&quot;</span>: <span class="string">&quot;#000&quot;</span><span class="operator">,</span>
             <span class="string">&quot;tags&quot;</span>: <span class="operator">[</span><span class="string">&quot;&quot;</span><span class="operator">,</span> <span class="string">&quot;&quot;</span><span class="operator">,</span> <span class="operator">.</span><span class="operator">.</span><span class="operator">.</span><span class="operator">]</span>
         }<span class="operator">,</span>
         <span class="operator">.</span><span class="operator">.</span><span class="operator">.</span>
@@ -94,7 +95,8 @@ var obj <span class="operator">=</span> JSON<span class="operator">.</span>parse
                   <span class="char">'weightTotal NUMERIC, weightLeft NUMERIC, '</span> <span class="operator">+</span>
                   <span class="char">'weightUnit TEXT, '</span> <span class="operator">+</span>
                   <span class="char">'cost NUMERIC, secondaryCost NUMERIC, '</span> <span class="operator">+</span>
-                  <span class="char">'primaryColor TEXT, secondaryColor TEXT, '</span> <span class="operator">+</span>
+                  <span class="char">'mainColor TEXT, textureColor TEXT, '</span> <span class="operator">+</span>
+                  <span class="char">'borderColor TEXT, '</span> <span class="operator">+</span>
                   <span class="char">'tags TEXT)'</span>);
 });</pre>
 <p>Then we return the database object <code translate="no">db</code> to be able to use it for more transaction calls.</p>
@@ -119,7 +121,7 @@ var obj <span class="operator">=</span> JSON<span class="operator">.</span>parse
 
             data<span class="operator">.</span>forEach(function(item) {
                 tx<span class="operator">.</span>executeSql(
-                    <span class="char">'INSERT INTO Collection VALUES(?,?,?,?,?,?,?,?,?,?,?,?,?,?)'</span><span class="operator">,</span>
+                    <span class="char">'INSERT INTO Collection VALUES(?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)'</span><span class="operator">,</span>
                     <span class="operator">[</span>item<span class="operator">.</span>title<span class="operator">,</span>
                      item<span class="operator">.</span>origin<span class="operator">,</span> item<span class="operator">.</span>originColor<span class="operator">,</span>
                      item<span class="operator">.</span>type<span class="operator">,</span>
@@ -127,7 +129,7 @@ var obj <span class="operator">=</span> JSON<span class="operator">.</span>parse
                      item<span class="operator">.</span>weightTotal<span class="operator">,</span> item<span class="operator">.</span>weightLeft<span class="operator">,</span>
                      item<span class="operator">.</span>weightUnit<span class="operator">,</span>
                      item<span class="operator">.</span>cost<span class="operator">,</span> item<span class="operator">.</span>secondaryCost<span class="operator">,</span>
-                     item<span class="operator">.</span>primaryColor<span class="operator">,</span> item<span class="operator">.</span>secondaryColor<span class="operator">,</span>
+                     item<span class="operator">.</span>mainColor<span class="operator">,</span> item<span class="operator">.</span>textureColor<span class="operator">,</span> item<span class="operator">.</span>borderColor<span class="operator">,</span>
                      tagStr(item<span class="operator">.</span>tags)<span class="operator">]</span>
                 );
             });
@@ -165,8 +167,9 @@ var obj <span class="operator">=</span> JSON<span class="operator">.</span>parse
               weightLeft: item<span class="operator">.</span>weightLeft<span class="operator">,</span>
               weightUnit: item<span class="operator">.</span>weightUnit<span class="operator">,</span>
               cost: item<span class="operator">.</span>cost<span class="operator">,</span> secondaryCost: item<span class="operator">.</span>secondaryCost<span class="operator">,</span>
-              primaryColor: item<span class="operator">.</span>primaryColor<span class="operator">,</span>
-              secondaryColor: item<span class="operator">.</span>secondaryColor<span class="operator">,</span>
+              mainColor: item<span class="operator">.</span>mainColor<span class="operator">,</span>
+              textureColor: item<span class="operator">.</span>textureColor<span class="operator">,</span>
+              borderColor: item<span class="operator">.</span>borderColor<span class="operator">,</span>
               tagStr: item<span class="operator">.</span>tags
             } );
     };

@@ -99,17 +99,23 @@
     required property string weightUnit
     required property int cost
     required property int secondaryCost
-    required property string primaryColor
-    required property string secondaryColor
+    required property string mainColor
+    required property string textureColor
+    required property string borderColor
     required property string tagStr
     property list<string> tags
     \endcode
 
-    The list of tags will be created from \c{tagStr} when it is available:
+    The list of tags will be created from \c{tagStr} if
+    the tags are not passed as list.
+    While \c{tagStr} is also not mandatory, it still needs to be marked as
+    \c{required} to be associated with model data in case the delegate is used
+    inside a list view.
 
     \code
     Component.onCompleted: {
-        tags = Data.tagList(tagStr);
+        if (tags.length == 0)
+            tags = Data.tagList(tagStr);
     }
     \endcode
 
@@ -148,7 +154,7 @@
         height: parent.height
         width: delegate.width / 7
 
-        color: delegate.primaryColor
+        color: delegate.mainColor
     }
 
     Column {
@@ -175,6 +181,16 @@
     }
     \endcode
 
+    As a small add-on, it would also be nice to be able to set the text
+    color of the item. There is no background set so it would already be
+    possible to change it from outside the component, but the text color
+    would be fix.
+    So add another property that would per default be set to the theme color.
+
+    \code
+    property color textColor: Theme.colors.textColor
+    \endcode
+
     \section2 Layout of properties title and origin
 
     The first line of the content column will be title and origin.
@@ -187,6 +203,7 @@
             id: txtTitle
 
             text: delegate.title
+            color: delegate.textColor
             font.bold: true
         }
 
@@ -218,9 +235,8 @@
 
         AppText {
             id: txtType
-
             text: delegate.type
-
+            color: delegate.textColor
             anchors.centerIn: parent
         }
     }
@@ -241,18 +257,21 @@
         spacing: 2
 
         AppText {
-                text: delegate.cost + "€"
-                font.strikeout: delegate.cost !== delegate.secondaryCost
+            text: delegate.cost + "€"
+            font.strikeout: delegate.cost !== delegate.secondaryCost
+            color: delegate.textColor
         }
 
         AppText {
             text: delegate.secondaryCost + "€"
             visible: delegate.cost !== delegate.secondaryCost
+            color: delegate.textColor
         }
 
         AppText {
             text: "/10g"
             opacity: 0.7
+            color: delegate.textColor
         }
     }
     \endcode
@@ -266,6 +285,7 @@
     AppText {
         text: delegate.ageDescription.arg(delegate.age)
                                      .arg(delegate.ageUnit)
+        color: delegate.textColor
     }
     \endcode
 
@@ -288,27 +308,24 @@
             Item {
                 required property string modelData
 
-                height: rectPropBg.height
-                width: rectPropBg.width + 3
+                height: rectTagBackground.height
+                width: rectTagBackground.width + 3
 
                 AppText {
-                    id: txtProp
-
+                    id: txtTag
                     text: parent.modelData
-
                     opacity: 0.8
-                    anchors.centerIn: rectPropBg
+                    color: delegate.textColor
+                    anchors.centerIn: rectTagBackground
                 }
 
                 Rectangle {
-                    id: rectPropBg
-
-                    color: txtProp.color
+                    id: rectTagBackground
+                    color: txtTag.color
                     opacity: 0.1
                     radius: height / 2 - 2
-
-                    height: txtProp.height + 4
-                    width: txtProp.width + 10
+                    height: txtTag.height + 4
+                    width: txtTag.width + 10
                 }
             }
         }
