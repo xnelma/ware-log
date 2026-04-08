@@ -32,7 +32,8 @@
 <h1 class="title">Set Up Collection</h1>
 <!-- $$$09-setup.html-description -->
 <div class="descr" id="details">
-<p>...</p>
+<p>We now have a database table with general column names, can now add, remove and udpate items, and can manipulate the appearance of the weight indicator of an item. But there is no view for setting domain specific properties, so the appearance of the texture for a domain, maybe some default values like the colors of the texture that might be similar across items of a collection. Or more specific: we hardcoded the context of the age of an item, so it would be good to be able to set it for a domain.</p>
+<p>In this chapter we will add a view for collection settings. The collection will get a name and a domain, we will set the age context and texture appearance, and set default colors. We will create a second table in the database to save those values in, and we will write a component to show a preview for a list item.</p>
 <h2 id="navigate-to-settings-page">Navigate to settings page</h2>
 <p>Add another menu item with the title &quot;Collection Settings&quot;, and another qml component file <code translate="no">CollectionSettingsView.qml</code> with an import for the <code translate="no">Felgo</code> module and an empty <code translate="no">AppPage</code> with the title &quot;Collection Settings&quot;.</p>
 <p class="centerAlign"><img src="images/collection_settings_menu_item.jpg" alt="{Menu item for collection settings}" /></p><pre class="cpp" translate="no">import Felgo
