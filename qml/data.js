@@ -1,3 +1,5 @@
+var id = "placeholderid";
+
 function parseSampleData()
 {
     var path = "assets/sample_data.json";
@@ -31,13 +33,25 @@ function openDatabase()
                       'weightTotal NUMERIC, weightLeft NUMERIC, ' +
                       'weightUnit TEXT, ' +
                       'cost NUMERIC, secondaryCost NUMERIC, ' +
-                      'primaryColor TEXT, secondaryColor TEXT, ' +
+                      'mainColor TEXT, textureColor TEXT, borderColor TEXT, ' +
                       'tags TEXT)');
 
         var res = tx.executeSql('SELECT * FROM Collection');
         if (res.rows.length === 0) {
             Data.fillDatabase(db);
         }
+
+        tx.executeSql('CREATE TABLE IF NOT EXISTS Domain(id TEXT, name TEXT, ' +
+                      'domain TEXT, ' +
+                      'ageContextPrefix TEXT, ageContextSuffix TEXT, ' +
+                      'borderWidth NUMERIC, ' +
+                      'textureType NUMERIC, smooth NUMERIC, ' +
+                      'textureHeight NUMERIC, textureWidth NUMERIC, ' +
+                      'mainColor TEXT, textureColor TEXT, borderColor TEXT)');
+        res = tx.executeSql('SELECT * FROM Domain WHERE id = \'' + id + '\'');
+        if (res.rows.length === 0)
+            tx.executeSql('INSERT INTO Domain VALUES(?,?,?,?,?,?,?,?,?,?,?,?,?)',
+                          [id, "", "", "", "", 0, 0, 0, 100, 100, "", "", ""]);
     });
 
     return db;
@@ -55,7 +69,7 @@ function insertItem(item, tx)
     }
     case 2: {
         tx.executeSql(
-            'INSERT INTO Collection VALUES(?,?,?,?,?,?,?,?,?,?,?,?,?,?)',
+            'INSERT INTO Collection VALUES(?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)',
             [item.title,
              item.origin, item.originColor,
              item.type,
@@ -63,7 +77,7 @@ function insertItem(item, tx)
              item.weightTotal, item.weightLeft,
              item.weightUnit,
              item.cost, item.secondaryCost,
-             item.primaryColor, item.secondaryColor,
+             item.mainColor, item.textureColor, item.borderColor,
              tagStr(item.tags)]
         );
         break;
@@ -117,8 +131,9 @@ function get(model)
                   weightLeft: item.weightLeft,
                   weightUnit: item.weightUnit,
                   cost: item.cost, secondaryCost: item.secondaryCost,
-                  primaryColor: item.primaryColor,
-                  secondaryColor: item.secondaryColor,
+                  mainColor: item.mainColor,
+                  textureColor: item.textureColor,
+                  borderColor: item.borderColor,
                   tagStr: item.tags
                   // TODO Why can't I directly add a list of string as
                   // property of the list element? If I use the property
@@ -181,6 +196,29 @@ function getAllTags()
     return allTags;
 }
 
+function getRandomColors()
+{
+    var mainColor = "";
+    var textureColor = "";
+    var borderColor = "";
+
+    var db = openDatabase();
+    db.transaction(function(tx) {
+        var res = tx.executeSql('SELECT mainColor, textureColor, borderColor ' +
+                                'FROM Collection');
+        if (res.rows.length === 0)
+            return;
+
+        var index = Math.floor(Math.random() * res.rows.length);
+        var item = res.rows.item(index);
+        mainColor = item.mainColor;
+        textureColor = item.textureColor;
+        borderColor = item.borderColor;
+    });
+
+    return [mainColor, textureColor, borderColor];
+}
+
 function getAllTypes()
 {
     const allTypes = [];
@@ -194,4 +232,164 @@ function getAllTypes()
         }
     });
     return allTypes;
+}
+
+function setDomainValue(col, value)
+{
+    var db = openDatabase();
+    db.transaction(function(tx) {
+        tx.executeSql('UPDATE Domain SET ' + col + ' = \'' + value + '\' ' +
+                      'WHERE id = \'' + id + '\'');
+    });
+}
+
+function getDomainValue(col)
+{
+    var item = "";
+    var db = openDatabase();
+    db.transaction(function(tx) {
+        var res = tx.executeSql('SELECT ' + col + ' FROM Domain ' +
+                                'WHERE id = \'' + id + '\'');
+        if (res.rows.length === 0 )
+            return;
+        item = res.rows.item(0);
+    });
+    return item;
+}
+
+function setDomainName(name)
+{
+    setDomainValue("name", name);
+}
+
+function getDomainName()
+{
+    var item = getDomainValue("name");
+    return item === "" ? "" : item.name;
+}
+
+function setDomainType(domain)
+{
+    setDomainValue("domain", domain);
+}
+
+function getDomainType(domain)
+{
+    var item = getDomainValue("domain");
+    return item === "" ? "" : item.domain;
+}
+
+function setDomainAgeContextPrefix(prefix)
+{
+    setDomainValue("ageContextPrefix", prefix);
+}
+
+function getDomainAgeContextPrefix()
+{
+    var item = getDomainValue("ageContextPrefix");
+    return item === "" ? "" : item.ageContextPrefix;
+}
+
+function setDomainAgeContextSuffix(suffix)
+{
+    setDomainValue("ageContextSuffix", suffix);
+}
+
+function getDomainAgeContextSuffix()
+{
+    var item = getDomainValue("ageContextSuffix");
+    return item === "" ? "" : item.ageContextSuffix;
+}
+
+function formatDomainAgeContext(prefix, suffix)
+{
+    return (prefix + " %1 %2 " + suffix).trim();
+}
+
+function setDomainBorderWidth(borderWidth)
+{
+    setDomainValue("borderWidth", borderWidth);
+}
+
+function getDomainBorderWidth()
+{
+    var item = getDomainValue("borderWidth");
+    return item === "" ? 0 : item.borderWidth;
+}
+
+function setDomainTextureType(type)
+{
+    setDomainValue("textureType", type);
+}
+
+function getDomainTextureType()
+{
+    var item = getDomainValue("textureType");
+    return item === "" ? 0 /* No Texture */ : item.textureType;
+}
+
+function setDomainTextureSmooth(isSmooth)
+{
+    setDomainValue("smooth", isSmooth ? 1 : 0);
+}
+
+function getDomainTextureSmooth()
+{
+    var item = getDomainValue("smooth");
+    return item !== "" && item.smooth !== 0;
+}
+
+function setDomainTextureHeight(height)
+{
+    setDomainValue("textureHeight", height);
+}
+
+function getDomainTextureHeight()
+{
+    var item = getDomainValue("textureHeight");
+    return item === "" ? 100 : item.textureHeight;
+}
+
+function setDomainTextureWidth(width)
+{
+    setDomainValue("textureWidth", width);
+}
+
+function getDomainTextureWidth()
+{
+    var item = getDomainValue("textureWidth");
+    return item === "" ? 100 : item.textureWidth;
+}
+
+function setDomainMainColor(color)
+{
+    setDomainValue("mainColor", color);
+}
+
+function getDomainMainColor()
+{
+    var item = getDomainValue("mainColor");
+    return item === "" ? "" : item.mainColor;
+}
+
+function setDomainTextureColor(color)
+{
+    setDomainValue("textureColor", color);
+}
+
+function getDomainTextureColor()
+{
+    var item = getDomainValue("textureColor");
+    return item === "" ? "" : item.textureColor;
+}
+
+function setDomainBorderColor(color)
+{
+    setDomainValue("borderColor", color);
+}
+
+function getDomainBorderColor()
+{
+    var item = getDomainValue("borderColor");
+    return item === "" ? "" : item.borderColor;
 }

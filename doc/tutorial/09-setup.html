@@ -1,0 +1,849 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+<!-- collection_settings.qdoc -->
+  <meta name="description" content="provides steps for configuring domain properties of a collection">
+  <title>Set Up Collection | WareLog</title>
+<link rel="stylesheet" type="text/css" href="style/style.css"/>
+</head>
+<body>
+  <link rel="prev" href="08-update.html" />
+<p class="naviNextPrevious headerNavi">
+<a class="prevPage" href="08-update.html">Update Weight and Cost</a>
+</p>
+<div class="sidebar">
+<div class="toc">
+<h3 id="toc">Contents</h3>
+<ul>
+<li class="level1"><a href="#navigate-to-settings-page">Navigate to settings page</a></li>
+<li class="level1"><a href="#prepare-database">Prepare database</a></li>
+<li class="level2"><a href="#use-database-values-in-other-views">Use database values in other views</a></li>
+<li class="level1"><a href="#layout-settings">Layout settings</a></li>
+<li class="level2"><a href="#layout-name-and-domain-input">Layout name and domain input</a></li>
+<li class="level2"><a href="#add-age-context-input">Add age context input</a></li>
+<li class="level2"><a href="#set-texture-and-border-properties">Set texture and border properties</a></li>
+<li class="level2"><a href="#layout-color-buttons">Layout color buttons</a></li>
+<li class="level2"><a href="#add-collection-delegate-preview">Add collection delegate preview</a></li>
+<li class="level2"><a href="#get-random-colors-from-database">Get random colors from database</a></li>
+</ul>
+</div>
+<div class="sidebar-content" id="sidebar-content"></div></div>
+<h1 class="title">Set Up Collection</h1>
+<!-- $$$09-setup.html-description -->
+<div class="descr" id="details">
+<p>We now have a database table with general column names, can now add, remove and udpate items, and can manipulate the appearance of the weight indicator of an item. But there is no view for setting domain specific properties, so the appearance of the texture for a domain, maybe some default values like the colors of the texture that might be similar across items of a collection. Or more specific: we hardcoded the context of the age of an item, so it would be good to be able to set it for a domain.</p>
+<p>In this chapter we will add a view for collection settings. The collection will get a name and a domain, we will set the age context and texture appearance, and set default colors. We will create a second table in the database to save those values in, and we will write a component to show a preview for a list item.</p>
+<h2 id="navigate-to-settings-page">Navigate to settings page</h2>
+<p>Add another menu item with the title &quot;Collection Settings&quot;, and another qml component file <code translate="no">CollectionSettingsView.qml</code> with an import for the <code translate="no">Felgo</code> module and an empty <code translate="no">AppPage</code> with the title &quot;Collection Settings&quot;.</p>
+<p class="centerAlign"><img src="images/collection_settings_menu_item.jpg" alt="{Menu item for collection settings}" /></p><pre class="cpp" translate="no">import Felgo
+
+AppPage {
+    title: qsTr(<span class="string">&quot;Collection Settings&quot;</span>)
+}</pre>
+<p>Then add this page inside a <code translate="no">Component</code> in <code translate="no">Main.qml</code>, give it an id.</p>
+<pre class="cpp" translate="no">Component {
+    id: compCollectionSettings
+
+    CollectionSettingsView {
+    }
+}</pre>
+<p>Then, on clicking the menu item, push the component onto the stack. The navigation stack should already have been added by the project creation wizard.</p>
+<pre class="cpp" translate="no">NavigationStack {
+    AppPage {
+        <span class="operator">.</span><span class="operator">.</span><span class="operator">.</span>
+
+        rightBarItem: IconButtonBarItem {
+            <span class="operator">.</span><span class="operator">.</span><span class="operator">.</span>
+
+            Menu {
+                <span class="operator">.</span><span class="operator">.</span><span class="operator">.</span>
+
+                MenuItem {
+                    text: qsTr(<span class="string">&quot;Collection Settings&quot;</span>)
+                    onClicked: pageMain<span class="operator">.</span>navigationStack
+                        <span class="operator">.</span>push(compCollectionSettings)
+                }
+<span class="operator">.</span><span class="operator">.</span><span class="operator">.</span>
+
+}</pre>
+<h2 id="prepare-database">Prepare database</h2>
+<p>The domain properties would go into a different table than the collection. So we will create another table in <code translate="no">openDatabase</code> and insert a default row, to not have to handle undefined values. For now there will only be one row in it, but we will already identify it with an id, which is useful for being able to change the collection name. Though the id will only be a hardcoded placeholder id at the top of <code translate="no">&quot;data.js&quot;</code> for now.</p>
+<pre class="cpp" translate="no">var id <span class="operator">=</span> <span class="string">&quot;placeholderid&quot;</span>;</pre>
+<p>In <code translate="no">openDatabase</code>, after the lines for creating the &quot;Collection&quot; table and filling it with the sample values, create and fill a &quot;Domain&quot; table:</p>
+<pre class="cpp" translate="no">tx<span class="operator">.</span>executeSql(<span class="char">'CREATE TABLE IF NOT EXISTS Domain(id TEXT, name TEXT, '</span> <span class="operator">+</span>
+              <span class="char">'domain TEXT, '</span> <span class="operator">+</span>
+              <span class="char">'ageContextPrefix TEXT, ageContextSuffix TEXT, '</span> <span class="operator">+</span>
+              <span class="char">'borderWidth NUMERIC, '</span> <span class="operator">+</span>
+              <span class="char">'textureType NUMERIC, smooth NUMERIC, '</span> <span class="operator">+</span>
+              <span class="char">'textureHeight NUMERIC, textureWidth NUMERIC, '</span> <span class="operator">+</span>
+              <span class="char">'mainColor TEXT, textureColor TEXT, borderColor TEXT)'</span>);
+res <span class="operator">=</span> tx<span class="operator">.</span>executeSql(<span class="char">'SELECT * FROM Domain WHERE id = \''</span> <span class="operator">+</span> id <span class="operator">+</span> <span class="char">'\''</span>);
+<span class="keyword">if</span> (res<span class="operator">.</span>rows<span class="operator">.</span>length <span class="operator">=</span><span class="operator">=</span><span class="operator">=</span> <span class="number">0</span>)
+    tx<span class="operator">.</span>executeSql(<span class="char">'INSERT INTO Domain VALUES(?,?,?,?,?,?,?,?,?,?,?,?,?)'</span><span class="operator">,</span>
+                  <span class="operator">[</span>id<span class="operator">,</span> <span class="string">&quot;&quot;</span><span class="operator">,</span> <span class="string">&quot;&quot;</span><span class="operator">,</span> <span class="string">&quot;&quot;</span><span class="operator">,</span> <span class="string">&quot;&quot;</span><span class="operator">,</span> <span class="number">0</span><span class="operator">,</span> <span class="number">0</span><span class="operator">,</span> <span class="number">0</span><span class="operator">,</span> <span class="number">100</span><span class="operator">,</span> <span class="number">100</span><span class="operator">,</span> <span class="string">&quot;&quot;</span><span class="operator">,</span> <span class="string">&quot;&quot;</span><span class="operator">,</span> <span class="string">&quot;&quot;</span><span class="operator">]</span>);</pre>
+<p>The '100' for the texture height and width is just an arbitrary value to make the texture visible if the size is not yet set and the texture is selected. This matches a default initialization of <code translate="no">(to - from) / 4</code> for the sliders, so at a quarter of a slider.</p>
+<p>The color is not initialized by default to e.g. black, as this would be handled by <code translate="no">defaultColor</code> we added in a previous chapter.</p>
+<p>Now we need methods to read and write single values. While this could lead to performance issues unlike just saving once on pressing a button, this should rarely be the case nowadays. We will add two general methods, and then call them from smaller methods for each property.</p>
+<pre class="cpp" translate="no">function setDomainValue(col<span class="operator">,</span> value)
+{
+    var db <span class="operator">=</span> openDatabase();
+    db<span class="operator">.</span>transaction(function(tx) {
+        tx<span class="operator">.</span>executeSql(<span class="char">'UPDATE Domain SET '</span> <span class="operator">+</span> col <span class="operator">+</span> <span class="char">' = \''</span> <span class="operator">+</span> value <span class="operator">+</span> <span class="char">'\' '</span> <span class="operator">+</span>
+                      <span class="char">'WHERE id = \''</span> <span class="operator">+</span> id <span class="operator">+</span> <span class="char">'\''</span>);
+    });
+}
+
+function getDomainValue(col)
+{
+    var item <span class="operator">=</span> <span class="string">&quot;&quot;</span>;
+    var db <span class="operator">=</span> openDatabase();
+    db<span class="operator">.</span>transaction(function(tx) {
+        var res <span class="operator">=</span> tx<span class="operator">.</span>executeSql(<span class="char">'SELECT '</span> <span class="operator">+</span> col <span class="operator">+</span> <span class="char">' FROM Domain '</span> <span class="operator">+</span>
+                                <span class="char">'WHERE id = \''</span> <span class="operator">+</span> id <span class="operator">+</span> <span class="char">'\''</span>);
+        <span class="keyword">if</span> (res<span class="operator">.</span>rows<span class="operator">.</span>length <span class="operator">=</span><span class="operator">=</span><span class="operator">=</span> <span class="number">0</span> )
+            <span class="keyword">return</span>;
+        item <span class="operator">=</span> res<span class="operator">.</span>rows<span class="operator">.</span>item(<span class="number">0</span>);
+    });
+    <span class="keyword">return</span> item;
+}</pre>
+<p>The lot of smaller methods all have the same structure, so I will only show one and the special case for 'smooth'. For the other methods remember returning 100 as default value for texture height and width, and an empty string for the colors.</p>
+<pre class="cpp" translate="no">function setDomainName(name)
+{
+    setDomainValue(<span class="string">&quot;name&quot;</span><span class="operator">,</span> name);
+}
+
+function getDomainName()
+{
+    var item <span class="operator">=</span> getDomainValue(<span class="string">&quot;name&quot;</span>);
+    <span class="keyword">return</span> item <span class="operator">=</span><span class="operator">=</span><span class="operator">=</span> <span class="string">&quot;&quot;</span> <span class="operator">?</span> <span class="string">&quot;&quot;</span> : item<span class="operator">.</span>name;
+}</pre>
+<p>For 'smooth' we take and return a boolean, but get and write a number:</p>
+<pre class="cpp" translate="no">function setDomainTextureSmooth(isSmooth)
+{
+    setDomainValue(<span class="string">&quot;smooth&quot;</span><span class="operator">,</span> isSmooth <span class="operator">?</span> <span class="number">1</span> : <span class="number">0</span>);
+}
+
+function getDomainTextureSmooth()
+{
+    var item <span class="operator">=</span> getDomainValue(<span class="string">&quot;smooth&quot;</span>);
+    <span class="keyword">return</span> item <span class="operator">!</span><span class="operator">=</span><span class="operator">=</span> <span class="string">&quot;&quot;</span> <span class="operator">&amp;</span><span class="operator">&amp;</span> item<span class="operator">.</span>smooth <span class="operator">!</span><span class="operator">=</span><span class="operator">=</span> <span class="number">0</span>;
+}</pre>
+<p>The texture type is set as number using the index of the type. This is not robust and should be done differently for growing project sizes.</p>
+<p>For the age context there can be a third method that returns the combined string. While it could just be a getter calling the prefix and suffix methods, let's make it independent from those methods and instead just format parameters. We will want to use the method with input item text in the settings view.</p>
+<pre class="cpp" translate="no">function formatDomainAgeContext(prefix<span class="operator">,</span> suffix)
+{
+    <span class="keyword">return</span> (prefix <span class="operator">+</span> <span class="string">&quot; %1 %2 &quot;</span> <span class="operator">+</span> suffix)<span class="operator">.</span>trim();
+}</pre>
+<p>In sum there should be 12x2 smaller methods. With those we have an interface to get the collection properties from the database and save them.</p>
+<h3 id="use-database-values-in-other-views">Use database values in other views</h3>
+<p>Before we continue with the collection settings view, let's assign the values from the database to list items and use the colors in the item edit view. Since the domain properties will be the same for each list item they do not require opening the database and reading the value for each item, so we will save them in properties in the list view.</p>
+<pre class="cpp" translate="no">AppListView { <span class="comment">// in Main.qml</span>
+    id: listView
+
+    <span class="operator">.</span><span class="operator">.</span><span class="operator">.</span>
+
+    property string ageDescription: Data<span class="operator">.</span>formatDomainAgeContext(
+            Data<span class="operator">.</span>getDomainAgeContextPrefix()<span class="operator">,</span>
+            Data<span class="operator">.</span>getDomainAgeContextSuffix())
+    property var textureBorderWidth: Data<span class="operator">.</span>getDomainBorderWidth()
+    property var textureType: Data<span class="operator">.</span>getDomainTextureType()
+    property var textureHeight: Data<span class="operator">.</span>getDomainTextureHeight()
+    property var textureWidth: Data<span class="operator">.</span>getDomainTextureWidth()
+    property <span class="type">bool</span> textureSmooth: Data<span class="operator">.</span>getDomainTextureSmooth()
+
+    delegate: SwipableCollectionDelegate {
+        <span class="operator">.</span><span class="operator">.</span><span class="operator">.</span>
+
+        ageDescription: listView<span class="operator">.</span>ageDescription
+        borderWidth: listView<span class="operator">.</span>textureBorderWidth
+        textureType: listView<span class="operator">.</span>textureType
+        textureHeight: listView<span class="operator">.</span>textureHeight
+        textureWidth: listView<span class="operator">.</span>textureWidth
+        editable: <span class="keyword">false</span>
+        smooth: listView<span class="operator">.</span>textureSmooth
+    }
+}</pre>
+<p>For the item edit view replace the default colors with calls to the respective methods:</p>
+<pre class="cpp" translate="no"><span class="comment">// in rowColors in EditItemView.qml</span>
+property string mainColor: Data<span class="operator">.</span>getDomainMainColor()
+property string textureColor: Data<span class="operator">.</span>getDomainTextureColor()
+property string borderColor: Data<span class="operator">.</span>getDomainBorderColor()</pre>
+<p>The texture height and width for the sample database would be 354 (a bit less than 380, the height of texture.png) and 220 (the width of texture.png). When we are done with the settings, you can go back here to set to those values to keep the texture appearance for the sample database.</p>
+<p>We can now also make the properties required, so we won't have to specify hardcoded default values in different places. This concerns <code translate="no">SwipableCollectionDelegate.qml</code> and <code translate="no">CollectionDelegate.qml</code>.</p>
+<p>If you build now and run the app, you will only see default values, so some noise for the list items (100x100 was the size of the texture we return by default), and the age is formatted without context to e.g. &quot;2 months&quot;.</p>
+<h2 id="layout-settings">Layout settings</h2>
+<p>The content will be structured as a column, with margins and spacing of 10:</p>
+<pre class="cpp" translate="no">AppPage {
+    title: qsTr(<span class="string">&quot;CollectionSettings&quot;</span>)
+
+Column {
+    id: content
+    anchors<span class="operator">.</span>fill: parent
+    anchors<span class="operator">.</span>margins: <span class="number">10</span>
+    spacing: <span class="number">10</span>
+} <span class="comment">// Column</span>
+} <span class="comment">// AppPage</span></pre>
+<p>As the content will get longer than the page width, wrap it inside a <code translate="no">Flickable</code>:</p>
+<pre class="cpp" translate="no">AppPage {
+    <span class="operator">.</span><span class="operator">.</span><span class="operator">.</span>
+
+Flickable {
+    anchors<span class="operator">.</span>fill: parent
+    contentHeight: content<span class="operator">.</span>height
+
+Column {
+    id: content
+    <span class="operator">.</span><span class="operator">.</span><span class="operator">.</span>
+} <span class="comment">// Column</span>
+} <span class="comment">// Flickable</span>
+} <span class="comment">// AppPage</span></pre>
+<p>The ident for those components is on the same level to have less indentation for the content.</p>
+<p>All the imports needed in this chapter are</p>
+<pre class="cpp" translate="no">import Felgo
+import <span class="type">QtQuick</span>
+import <span class="type">QtQuick</span><span class="operator">.</span>Layouts
+import <span class="type">QtQuick</span><span class="operator">.</span>Controls as <span class="type">QtControls</span>
+import <span class="type">QtQuick</span><span class="operator">.</span>Dialogs
+import <span class="string">&quot;data.js&quot;</span> as Data</pre>
+<p>The controls are imported with an alias due to the name clash with the Felgo <code translate="no">Dialog</code>.</p>
+<p>There will be two sections: one for domain settings, and one for default values. Add an <code translate="no">AppText</code> as title for each section, with a low opacity, and a <code translate="no">MenuSeparator</code> before the second title.</p>
+<pre class="cpp" translate="no">Column {
+    id: content
+    <span class="operator">.</span><span class="operator">.</span><span class="operator">.</span>
+
+    AppText {
+        text: qsTr(<span class="string">&quot;Domain settings:&quot;</span>)
+        opacity: <span class="number">0.3</span>
+    }
+
+    <span class="type">QtControls</span><span class="operator">.</span>MenuSeparator {
+        width: parent<span class="operator">.</span>width
+        padding: <span class="number">0</span>
+    }
+
+    AppText {
+        text: qsTr(<span class="string">&quot;Default values:&quot;</span>)
+        opacity: <span class="number">0.3</span>
+    }
+} <span class="comment">// Column</span></pre>
+<p>The section for domain settings will have components for setting a name of the collection and the domain, (e.g. &quot;My Sand Collection&quot; with &quot;Sand&quot;), and the texture (and border) settings for the <code translate="no">WeightIndicator</code> of a list item. The section for default values would for now allow setting default colors for the <code translate="no">WeightIndicator</code>, since items in one domain might have similar colors.</p>
+<h3 id="layout-name-and-domain-input">Layout name and domain input</h3>
+<p>Both the name of a collection and the domain are arbitrary strings, so they would be set through input items. As they should also show the current value from the database, the hint can not be used to explain the input type; at least not if the value is available. So we need a label for the input item. And even with the label the input type might not be clear, so a short explanation with an example should also be shown. Since showing it directly as text would take up quite a lot of space, an info button should be shown next to the input that could e.g. open a dialog with the description and example.</p>
+<p>So add a component file <code translate="no">LabeledTextField.qml</code>. The needed imports are <code translate="no">QtQuick, QtQuick.Layouts</code> and <code translate="no">Felgo</code>.</p>
+<p>To fill the width of the parent component and have the input item fill the space between label and icon button, the base type will be a <code translate="no">RowLayout</code>. It has required properties for the label, the input placeholder and the dialog message, and an optional property for an initial input text. The child items are <code translate="no">AppText</code> for the label, the <code translate="no">AppTextField</code> itself and an <code translate="no">IconButton</code> with <code translate="no">IconType.infocircle</code>. The message can be shown inside a <code translate="no">Dialog</code>, but it should be added to the settings view directly, as it would otherwise be opened inside the row instead of the full page. It should have properties for the message (<code translate="no">string message</code>) and a general title <code translate="no">qsTr(&quot;Info&quot;)</code>. Also add a signal <code translate="no">infoClicked</code> to the row layout and call it when the button is clicked.</p>
+<pre class="cpp" translate="no">RowLayout {
+    id: labeledTextField
+    required property string label
+    required property string placeholderText
+    property string text
+    required property string info
+    signal infoClicked()
+    spacing: <span class="number">10</span>
+    width: parent<span class="operator">.</span>width
+
+    AppText {
+        id: txtLabel
+        text: labeledTextField<span class="operator">.</span>label
+        Layout<span class="operator">.</span>alignment: <span class="type">Qt</span><span class="operator">.</span>AlignVCenter
+    }
+
+    AppTextField {
+        id: input
+        placeholderText: labeledTextField<span class="operator">.</span>placeholderText
+        text: labeledTextField<span class="operator">.</span>text
+        onTextChanged: labeledTextField<span class="operator">.</span>text <span class="operator">=</span> text
+        Layout<span class="operator">.</span>alignment: <span class="type">Qt</span><span class="operator">.</span>AlignVCenter
+        Layout<span class="operator">.</span>fillWidth: <span class="keyword">true</span>
+    }
+
+    IconButton {
+        iconType: IconType<span class="operator">.</span>infocircle
+        Layout<span class="operator">.</span>alignment: <span class="type">Qt</span><span class="operator">.</span>AlignVCenter
+        Layout<span class="operator">.</span>preferredHeight: txtLabel<span class="operator">.</span>height
+        Layout<span class="operator">.</span>preferredWidth: Layout<span class="operator">.</span>preferredHeight
+        onClicked: infoClicked()
+    }
+}
+
+Dialog { <span class="comment">// in CollectionSettingsView.qml</span>
+    id: dlgInfo
+    property string message
+    title: qsTr(<span class="string">&quot;Info&quot;</span>)
+    negativeAction: <span class="keyword">false</span>
+    onAccepted: close()
+    autoSize: <span class="keyword">true</span>
+
+    AppText {
+        text: dlgInfo<span class="operator">.</span>message
+        width: parent<span class="operator">.</span>width <span class="operator">-</span> <span class="number">40</span>
+        anchors<span class="operator">.</span>left: parent<span class="operator">.</span>left
+        anchors<span class="operator">.</span>leftMargin: <span class="number">20</span>
+        anchors<span class="operator">.</span>top: parent<span class="operator">.</span>top
+        anchors<span class="operator">.</span>topMargin: <span class="number">10</span>
+    }
+}</pre>
+<p>Add two <code translate="no">LabeledTextField</code> items to the settings view, and set their labels, placeholder, input text and messages for collection name and domain. Also add handlers for the custom signal <code translate="no">infoClicked</code> that set the dialog message and open it.</p>
+<pre class="cpp" translate="no">AppPage {
+    <span class="operator">.</span><span class="operator">.</span><span class="operator">.</span>
+Column {
+    id: content
+    <span class="operator">.</span><span class="operator">.</span><span class="operator">.</span>
+
+    AppText {
+        text: qsTr(<span class="string">&quot;Domain settings:&quot;</span>)
+        <span class="operator">.</span><span class="operator">.</span><span class="operator">.</span>
+    }
+
+    LabeledTextField {
+        label: qsTr(<span class="string">&quot;Name:&quot;</span>)
+        placeholderText: qsTr(<span class="string">&quot;Enter Name&quot;</span>)
+        text: Data<span class="operator">.</span>getDomainName()
+        onTextChanged: Data<span class="operator">.</span>setDomainName(text)
+        info: qsTr(<span class="string">&quot;The name of your collection. E.g. My Sand Collection&quot;</span>)
+        onInfoClicked: {
+            dlgInfo<span class="operator">.</span>message <span class="operator">=</span> info;
+            dlgInfo<span class="operator">.</span>open();
+        }
+    }
+
+    LabeledTextField {
+        label: qsTr(<span class="string">&quot;Domain:&quot;</span>)
+        placeholderText: qsTr(<span class="string">&quot;Enter Domain&quot;</span>)
+        text: Data<span class="operator">.</span>getDomainType()
+        onTextChanged: Data<span class="operator">.</span>setDomainType(text)
+        info: qsTr(<span class="string">&quot;The domain of your collection. E.g. Sand, Lemonade, ...&quot;</span>)
+        onInfoClicked: {
+            dlgInfo<span class="operator">.</span>message <span class="operator">=</span> info;
+            dlgInfo<span class="operator">.</span>open();
+        }
+    }
+
+    <span class="operator">.</span><span class="operator">.</span><span class="operator">.</span>
+} <span class="comment">// Column</span>
+
+Dialog {
+    id: dlgInfo
+    property string message
+    title: qsTr(<span class="string">&quot;Info&quot;</span>)
+    negativeAction: <span class="keyword">false</span>
+    onAccepted: close()
+    autoSize: <span class="keyword">true</span>
+
+    AppText {
+        text: dlgInfo<span class="operator">.</span>message
+        width: parent<span class="operator">.</span>width <span class="operator">-</span> <span class="number">40</span>
+        anchors<span class="operator">.</span>left: parent<span class="operator">.</span>left
+        anchors<span class="operator">.</span>leftMargin: <span class="number">20</span>
+        anchors<span class="operator">.</span>top: parent<span class="operator">.</span>top
+        anchors<span class="operator">.</span>topMargin: <span class="number">10</span>
+    }
+}
+
+} <span class="comment">// AppPage</span></pre>
+<h3 id="add-age-context-input">Add age context input</h3>
+<p>The age can have a different meaning for domains. For sand and other collectibles it might be &quot;collected 2 months ago&quot;, but there might be a different context, too. Assumed the unit always follows the number, the context can get described with some text preceding and following number and unit. So we could add two input fields, and some sample number and unit. As this would span the complete width, lets add the label and info button in a separate row:</p>
+<pre class="cpp" translate="no">Row {
+    spacing: <span class="number">10</span>
+
+    AppText {
+        id: txtAgeContextLabel
+        text: qsTr(<span class="string">&quot;Age context:&quot;</span>)
+        anchors<span class="operator">.</span>verticalCenter: parent<span class="operator">.</span>verticalCenter
+    }
+
+    IconButton {
+        iconType: IconType<span class="operator">.</span>infocircle
+        Layout<span class="operator">.</span>alignment: <span class="type">Qt</span><span class="operator">.</span>AlignVCenter
+        height: txtAgeContextLabel<span class="operator">.</span>height
+        width: height
+        onClicked: {
+            dlgInfo<span class="operator">.</span>message <span class="operator">=</span> qsTr(<span class="string">&quot;The context of 'age' in your domain, &quot;</span>
+                <span class="operator">+</span> <span class="string">&quot;e.g. \&quot;collected &lt;n&gt; &lt;dmwy&gt; ago\&quot; (collected 2 months &quot;</span>
+                <span class="operator">+</span> <span class="string">&quot;ago)&quot;</span>)
+            dlgInfo<span class="operator">.</span>open();
+        }
+    }
+}
+
+Row {
+    id: rowAgeContext
+    spacing: <span class="number">10</span>
+    width: parent<span class="operator">.</span>width
+
+    property string ageContext: Data<span class="operator">.</span>formatDomainAgeContext(
+        inputAgeContext1<span class="operator">.</span>text<span class="operator">,</span> inputAgeContext2<span class="operator">.</span>text)
+
+    AppTextField {
+        id: inputAgeContext1
+        placeholderText: qsTr(<span class="string">&quot;Input context&quot;</span>)
+        text: Data<span class="operator">.</span>getDomainAgeContextPrefix()
+        onTextChanged: Data<span class="operator">.</span>setDomainAgeContextPrefix(text)
+    }
+
+    AppText {
+        id: txtAgeContextSample
+        text: qsTr(<span class="string">&quot;2 months&quot;</span>)
+        opacity: <span class="number">0.7</span>
+        anchors<span class="operator">.</span>verticalCenter: parent<span class="operator">.</span>verticalCenter
+    }
+
+    AppTextField {
+        id: inputAgeContext2
+        placeholderText: qsTr(<span class="string">&quot;Input context&quot;</span>)
+        text: Data<span class="operator">.</span>getDomainAgeContextSuffix()
+        onTextChanged: Data<span class="operator">.</span>setDomainAgeContextSuffix(text);
+        anchors<span class="operator">.</span>verticalCenter: parent<span class="operator">.</span>verticalCenter
+        width: parent<span class="operator">.</span>width <span class="operator">-</span> inputAgeContext1<span class="operator">.</span>width <span class="operator">-</span> <span class="number">10</span>
+                            <span class="operator">-</span> txtAgeContextSample<span class="operator">.</span>width <span class="operator">-</span> <span class="number">10</span>
+    }
+}</pre>
+<h3 id="set-texture-and-border-properties">Set texture and border properties</h3>
+<p>We will add a slider for the border thickness and the texture height and width, and a combobox to select a texture and a switch to smooth out the texture.</p>
+<p>The sliders for the height and width of the texture are in a grid layout to set them to the same width together with some labels, but the border width and texture setting will both take a row layout, again to span the full width.</p>
+<p>But before the layouts, there will be a label to summarize them:</p>
+<pre class="cpp" translate="no">AppText {
+    text: qsTr(<span class="string">&quot;Item image style:&quot;</span>)
+}</pre>
+<p>Then add the <code translate="no">RowLayout</code> components for the border width and texture:</p>
+<pre class="cpp" translate="no">RowLayout {
+    spacing: <span class="number">10</span>
+    width: parent<span class="operator">.</span>width
+
+    AppText {
+        text: qsTr(<span class="string">&quot;Border width: &quot;</span>)
+        opacity: <span class="number">0.5</span>
+        Layout<span class="operator">.</span>alignment: <span class="type">Qt</span><span class="operator">.</span>AlignVCenter
+    }
+
+    AppSlider {
+        id: sliderBorderWidth
+        from: <span class="number">0</span>
+        to: <span class="number">10</span>
+        value: Data<span class="operator">.</span>getDomainBorderWidth()
+        onValueChanged: Data<span class="operator">.</span>setDomainBorderWidth(value)
+        padding: <span class="number">0</span>
+        Layout<span class="operator">.</span>alignment: <span class="type">Qt</span><span class="operator">.</span>AlignVCenter
+        Layout<span class="operator">.</span>fillWidth: <span class="keyword">true</span>
+    }
+}
+
+RowLayout {
+    uniformCellSizes: <span class="keyword">true</span> <span class="comment">// Make the combobox span half the full width</span>
+    height: comboTexture<span class="operator">.</span>height
+    width: parent<span class="operator">.</span>width
+
+    LightDarkComboBox {
+        id: comboTexture
+        model: <span class="operator">[</span><span class="string">&quot;No Texture&quot;</span><span class="operator">,</span> <span class="string">&quot;Noise&quot;</span><span class="operator">]</span>
+        currentIndex: Data<span class="operator">.</span>getDomainTextureType()
+        onCurrentIndexChanged: Data<span class="operator">.</span>setDomainTextureType(currentIndex)
+        Layout<span class="operator">.</span>fillWidth: <span class="keyword">true</span>
+    }
+
+    <span class="comment">// Center in cell:</span>
+    Row {
+        spacing: <span class="number">10</span>
+        Layout<span class="operator">.</span>alignment: <span class="type">Qt</span><span class="operator">.</span>AlignCenter
+
+        AppText {
+            text: qsTr(<span class="string">&quot;Smooth:&quot;</span>)
+            opacity: <span class="number">0.5</span>
+        }
+
+        AppSwitch {
+            id: switchSmooth
+            checked: Data<span class="operator">.</span>getDomainTextureSmooth()
+            onCheckedChanged: Data<span class="operator">.</span>setDomainTextureSmooth(checked)
+        }
+    }
+}</pre>
+<p>Then a label for the height and width sliders:</p>
+<pre class="cpp" translate="no">AppText {
+    text: qsTr(<span class="string">&quot;Scale texture:&quot;</span>)
+    opacity: <span class="number">0.5</span>
+}</pre>
+<p>And finally the <code translate="no">GridLayout</code> for the height and width sliders:</p>
+<pre class="cpp" translate="no">GridLayout {
+    columns: <span class="number">2</span>
+    rows: <span class="number">2</span>
+    columnSpacing: <span class="number">10</span>
+    rowSpacing: <span class="number">10</span>
+    width: parent<span class="operator">.</span>width
+
+    AppText {
+        text: qsTr(<span class="string">&quot;v:&quot;</span>)
+        Layout<span class="operator">.</span>row: <span class="number">0</span>
+        Layout<span class="operator">.</span>column: <span class="number">0</span>
+    }
+
+    AppSlider {
+        id: sliderHeight
+        from: <span class="number">1</span>
+        to: <span class="number">400</span>
+        value: Data<span class="operator">.</span>getDomainTextureHeight()
+        onValueChanged: Data<span class="operator">.</span>setDomainTextureHeight(value)
+        padding: <span class="number">0</span>
+        Layout<span class="operator">.</span>row: <span class="number">0</span>
+        Layout<span class="operator">.</span>column: <span class="number">1</span>
+        Layout<span class="operator">.</span>fillWidth: <span class="keyword">true</span>
+    }
+
+    AppText {
+        text: qsTr(<span class="string">&quot;h:&quot;</span>)
+        Layout<span class="operator">.</span>row: <span class="number">1</span>
+        Layout<span class="operator">.</span>column: <span class="number">0</span>
+    }
+
+    AppSlider {
+        id: sliderWidth
+        from: <span class="number">1</span>
+        to: <span class="number">400</span>
+        value: Data<span class="operator">.</span>getDomainTextureWidth();
+        onValueChanged: Data<span class="operator">.</span>setDomainTextureWidth(value);
+        padding: <span class="number">0</span>
+        Layout<span class="operator">.</span>row: <span class="number">1</span>
+        Layout<span class="operator">.</span>column: <span class="number">1</span>
+        Layout<span class="operator">.</span>fillWidth: <span class="keyword">true</span>
+    }
+} <span class="comment">// GridLayout</span></pre>
+<h3 id="layout-color-buttons">Layout color buttons</h3>
+<p>The color buttons first need a label to give them context. We will also allow setting the colors randomly from an item in the database, since colors in a domain might be similar between items. So next to the label, there will be an icon button for that, but also an info button for the randomize button.</p>
+<pre class="cpp" translate="no">AppText {
+    text: qsTr(<span class="string">&quot;Default values:&quot;</span>)
+    <span class="operator">.</span><span class="operator">.</span><span class="operator">.</span>
+}
+
+Row {
+    spacing: <span class="number">10</span>
+    height: txtImageColorsLabel<span class="operator">.</span>height <span class="operator">+</span> <span class="number">4</span>
+
+    AppText {
+        id: txtImageColorsLabel
+        text: qsTr(<span class="string">&quot;Item image colors:&quot;</span>)
+        anchors<span class="operator">.</span>verticalCenter: parent<span class="operator">.</span>verticalCenter
+    }
+
+    <span class="comment">// Show some background to group the buttons together.</span>
+    Item {
+        width: btnRandomColors<span class="operator">.</span>width <span class="operator">+</span> btnRandomColorsInfo<span class="operator">.</span>width <span class="operator">+</span> <span class="number">20</span>
+        <span class="comment">// The margin of 20 is the left margin (10) + the margin between the</span>
+        <span class="comment">// buttons (5) + a smaller right margin (5) to visually &quot;group&quot; the</span>
+        <span class="comment">// info button to the button it relates to.</span>
+        height: parent<span class="operator">.</span>height
+
+        <span class="comment">// The rectangle color depends on the text color to not have to</span>
+        <span class="comment">// specify light and dark colors.</span>
+        <span class="comment">// But to lower the opacity, the rectangle cannot be the parent item;</span>
+        <span class="comment">// otherwise the buttons would also be transparent.</span>
+        Rectangle {
+            color: txtImageColorsLabel<span class="operator">.</span>color
+            opacity: <span class="number">0.05</span>
+            radius: height <span class="operator">/</span> <span class="number">2</span>
+            anchors<span class="operator">.</span>fill: parent
+        }
+
+        IconButton {
+            id: btnRandomColors
+            iconType: IconType<span class="operator">.</span>random
+            height: parent<span class="operator">.</span>height
+            width: height
+            anchors<span class="operator">.</span>left: parent<span class="operator">.</span>left
+            anchors<span class="operator">.</span>leftMargin: <span class="number">10</span>
+        }
+
+        IconButton {
+            id: btnRandomColorsInfo
+            iconType: IconType<span class="operator">.</span>infocircle
+            height: parent<span class="operator">.</span>height
+            width: height
+            anchors<span class="operator">.</span>left: btnRandomColors<span class="operator">.</span>right
+            anchors<span class="operator">.</span>leftMargin: <span class="number">5</span>
+            anchors<span class="operator">.</span>top: btnRandomColors<span class="operator">.</span>top
+            onClicked: {
+                dlgInfo<span class="operator">.</span>message <span class="operator">=</span> qsTr(<span class="string">&quot;Get the colors of a random item in &quot;</span>
+                    <span class="operator">+</span> <span class="string">&quot;the database.&quot;</span>);
+                dlgInfo<span class="operator">.</span>open();
+            }
+        }
+    } <span class="comment">// Item</span>
+} <span class="comment">// Row</span></pre>
+<p>The color buttons will be inside a <code translate="no">ColumnLayout</code>, so setting them all to the same width will be done by column layout properties. The layout will also hold properties for the buttons and for use later on. And then we will use the <code translate="no">ColorButton</code> component we wrote in a previous chapter.</p>
+<pre class="cpp" translate="no">Row { <span class="operator">.</span><span class="operator">.</span><span class="operator">.</span> }
+
+ColumnLayout {
+    id: colColors
+
+    property string defaultMainColor: {
+        var c <span class="operator">=</span> Data<span class="operator">.</span>getDomainMainColor();
+        <span class="keyword">return</span> c <span class="operator">=</span><span class="operator">=</span><span class="operator">=</span> <span class="string">&quot;&quot;</span> <span class="operator">?</span> defaultColor : c;
+    }
+    property string defaultTextureColor: {
+        var c <span class="operator">=</span> Data<span class="operator">.</span>getDomainTextureColor();
+        <span class="keyword">return</span> c <span class="operator">=</span><span class="operator">=</span><span class="operator">=</span> <span class="string">&quot;&quot;</span> <span class="operator">?</span> defaultColor : c;
+    }
+    property string defaultBorderColor: {
+        var c <span class="operator">=</span> Data<span class="operator">.</span>getDomainBorderColor();
+        <span class="keyword">return</span> c <span class="operator">=</span><span class="operator">=</span><span class="operator">=</span> <span class="string">&quot;&quot;</span> <span class="operator">?</span> defaultColor : c;
+    }
+
+    ColorButton {
+        id: btnColorMain
+        text: qsTr(<span class="string">&quot;Default Main Color&quot;</span>)
+        colorName: colColors<span class="operator">.</span>defaultMainColor
+        onColorNameChanged: {
+            colColors<span class="operator">.</span>defaultMainColor
+                <span class="operator">=</span> <span class="type">Qt</span><span class="operator">.</span>binding(function() { <span class="keyword">return</span> colorName });
+            Data<span class="operator">.</span>setDomainMainColor(colorName);
+        }
+        horizontalMargin: <span class="number">0</span>
+        verticalMargin: <span class="number">0</span>
+        Layout<span class="operator">.</span>fillHeight: <span class="keyword">true</span>
+        Layout<span class="operator">.</span>fillWidth: <span class="keyword">true</span>
+    }
+
+    ColorButton {
+        id: btnColorTexture
+        text: qsTr(<span class="string">&quot;Default Texture Color&quot;</span>)
+        colorName: colColors<span class="operator">.</span>defaultTextureColor
+        onColorNameChanged: {
+            colColors<span class="operator">.</span>defaultTextureColor
+                <span class="operator">=</span> <span class="type">Qt</span><span class="operator">.</span>binding(function() { <span class="keyword">return</span> colorName });
+            Data<span class="operator">.</span>setDomainTextureColor(colorName);
+        }
+        horizontalMargin: <span class="number">0</span>
+        verticalMargin: <span class="number">0</span>
+        Layout<span class="operator">.</span>fillHeight: <span class="keyword">true</span>
+        Layout<span class="operator">.</span>fillWidth: <span class="keyword">true</span>
+    }
+
+    ColorButton {
+        id: btnColorBorder
+        text: qsTr(<span class="string">&quot;Default Border Color&quot;</span>)
+        colorName: colColors<span class="operator">.</span>defaultBorderColor
+        onColorNameChanged: {
+            colColors<span class="operator">.</span>defaultBorderColor
+                <span class="operator">=</span> <span class="type">Qt</span><span class="operator">.</span>binding(function() { <span class="keyword">return</span> colorName });
+            Data<span class="operator">.</span>setDomainBorderColor(colorName);
+        }
+        horizontalMargin: <span class="number">0</span>
+        verticalMargin: <span class="number">0</span>
+        Layout<span class="operator">.</span>fillHeight: <span class="keyword">true</span>
+        Layout<span class="operator">.</span>fillWidth: <span class="keyword">true</span>
+    }
+} <span class="comment">// colColors</span></pre>
+<p>Now the layout for the input is complete, but there is no way of testing out the texture and border settings. So we will add a preview that can be directly manipulated with the settings.</p>
+<h3 id="add-collection-delegate-preview">Add collection delegate preview</h3>
+<p>While we could preview the texture directly on a <code translate="no">WeightIndicator</code>, the texture currently depends on the height of the rectangle. To get the same scale of the texture as it will appear in the list view, we could preview it directly in a list delegate.</p>
+<p>Create another qml file <code translate="no">CollectionDelegatePreview.qml</code>. Needed imports are <code translate="no">QtQuick</code> und <code translate="no">Felgo</code>.</p>
+<p>The root component will be a <code translate="no">Rectangle</code>, and it will have a larger height than the delegate itself to add some margin: it would be handy to be able to switch between dark and light mode to try out the contrast of selected colors, so add some extra space to color around the delegate item.</p>
+<pre class="cpp" translate="no">Rectangle {
+    id: cdpRoot
+
+    height: delegate<span class="operator">.</span>height <span class="operator">+</span> <span class="number">20</span> <span class="operator">+</span> <span class="number">4</span> <span class="comment">// + margin + border width</span>
+    width: parent<span class="operator">.</span>width
+    border<span class="operator">.</span>color: switchDarkStyle<span class="operator">.</span>checked <span class="operator">?</span> <span class="string">&quot;#2f2f2f&quot;</span> : <span class="string">&quot;#cfcfcf&quot;</span>
+    border<span class="operator">.</span>width: <span class="number">2</span>
+}
+
+CollectionDelegate {
+    id: delegate
+
+    width: parent<span class="operator">.</span>width <span class="operator">-</span> cdpRoot<span class="operator">.</span>border<span class="operator">.</span>width <span class="operator">*</span> <span class="number">2</span>
+    anchors<span class="operator">.</span>centerIn: parent
+}</pre>
+<p>The rectangle can then be colored depending on the state of the switch, but that also requires coloring the text of the delegate and other text defined inside the rectangle, so add a property for the text color, too:</p>
+<pre class="cpp" translate="no">Rectangle {
+    id: cdpRoot
+
+    color: switchDarkStyle<span class="operator">.</span>checked<span class="operator">?</span> <span class="string">&quot;black&quot;</span> : <span class="string">&quot;white&quot;</span>
+    property color textColor: switchDarkStyle<span class="operator">.</span>checked<span class="operator">?</span> <span class="string">&quot;white&quot;</span> : <span class="string">&quot;black&quot;</span>
+    <span class="operator">.</span><span class="operator">.</span><span class="operator">.</span>
+}</pre>
+<p>Add properties to expose the delegate properties, but initialize the item specific values with sample values:</p>
+<pre class="cpp" translate="no">Rectangle {
+    id: cdpRoot
+
+    property string title: <span class="string">&quot;Title&quot;</span>
+    property string origin: <span class="string">&quot;Origin&quot;</span>
+    property string originColor: textColor
+    property string type: <span class="string">&quot;Type&quot;</span>
+    property <span class="type">int</span> age: <span class="number">2</span>
+    property string ageUnit: <span class="string">&quot;months&quot;</span>
+    property <span class="type">int</span> weightTotal: <span class="number">10</span>
+    property <span class="type">int</span> weightLeft: <span class="number">9</span>
+    property string weightUnit: <span class="string">&quot;g&quot;</span>
+    property <span class="type">int</span> cost: <span class="number">3</span>
+    property <span class="type">int</span> secondaryCost: <span class="number">3</span>
+    property string mainColor: defaultColor
+    property string textureColor: defaultColor
+    property string borderColor: defaultColor
+    property list<span class="operator">&lt;</span>string<span class="operator">&gt;</span> tags: <span class="operator">[</span><span class="string">&quot;Tag 1&quot;</span><span class="operator">,</span> <span class="string">&quot;Tag 2&quot;</span><span class="operator">,</span> <span class="string">&quot;Tag 3&quot;</span><span class="operator">]</span>
+
+    required property string ageDescription
+    required property <span class="type">int</span> borderWidth
+    required property <span class="type">int</span> textureType
+    required property <span class="type">int</span> textureHeight
+    required property <span class="type">int</span> textureWidth
+    required property <span class="type">bool</span> editable
+    required property <span class="type">bool</span> smooth
+}</pre>
+<p>And add property bindings to the delegate:</p>
+<pre class="cpp" translate="no">CollectionDelegate {
+    id: delegate
+    textColor: cdpRoot<span class="operator">.</span>textColor
+    title: cdpRoot<span class="operator">.</span>title
+    origin: cdpRoot<span class="operator">.</span>origin
+    originColor: cdpRoot<span class="operator">.</span>originColor
+    type: cdpRoot<span class="operator">.</span>type
+    age: cdpRoot<span class="operator">.</span>age
+    ageUnit: cdpRoot<span class="operator">.</span>ageUnit
+    weightTotal: cdpRoot<span class="operator">.</span>weightTotal
+    weightLeft: cdpRoot<span class="operator">.</span>weightLeft
+    weightUnit: cdpRoot<span class="operator">.</span>weightUnit
+    cost: cdpRoot<span class="operator">.</span>cost
+    secondaryCost: cdpRoot<span class="operator">.</span>secondaryCost
+    mainColor: cdpRoot<span class="operator">.</span>mainColor
+    textureColor: cdpRoot<span class="operator">.</span>textureColor
+    borderColor: cdpRoot<span class="operator">.</span>borderColor
+    tagStr: <span class="string">&quot;&quot;</span>
+    tags: cdpRoot<span class="operator">.</span>tags
+
+    ageDescription: cdpRoot<span class="operator">.</span>ageDescription
+    borderWidth: cdpRoot<span class="operator">.</span>borderWidth
+    textureType: cdpRoot<span class="operator">.</span>textureType
+    textureHeight: cdpRoot<span class="operator">.</span>textureHeight
+    textureWidth: cdpRoot<span class="operator">.</span>textureWidth
+    editable: cdpRoot<span class="operator">.</span>editable
+    smooth: cdpRoot<span class="operator">.</span>smooth
+
+    <span class="operator">.</span><span class="operator">.</span><span class="operator">.</span>
+}</pre>
+<p>We have not yet defined the switch for the dark/light color. And we will add a label to mark the component as preview. As they should be displayed in front of the delegate, add them after <code translate="no">CollectionDelegate</code>:</p>
+<pre class="cpp" translate="no">CollectionDelegate { <span class="operator">.</span><span class="operator">.</span><span class="operator">.</span> }
+
+AppText {
+    id: txtPreview
+    text: qsTr(<span class="string">&quot;Preview&quot;</span>)
+    color: cdpRoot<span class="operator">.</span>textColor
+    opacity: <span class="number">0.3</span>
+    anchors<span class="operator">.</span>right: parent<span class="operator">.</span>right
+    anchors<span class="operator">.</span>rightMargin: <span class="number">10</span>
+    anchors<span class="operator">.</span>top: parent<span class="operator">.</span>top
+    anchors<span class="operator">.</span>topMargin: <span class="number">10</span>
+}
+
+AppText {
+    text: qsTr(<span class="string">&quot;Dark style:&quot;</span>)
+    color: cdpRoot<span class="operator">.</span>textColor
+    anchors<span class="operator">.</span>right: switchDarkStyle<span class="operator">.</span>left
+    anchors<span class="operator">.</span>rightMargin: <span class="number">10</span>
+    anchors<span class="operator">.</span>verticalCenter: switchDarkStyle<span class="operator">.</span>verticalCenter
+}
+
+AppSwitch {
+    id: switchDarkStyle
+    anchors<span class="operator">.</span>right: parent<span class="operator">.</span>right
+    anchors<span class="operator">.</span>rightMargin: <span class="number">10</span>
+    anchors<span class="operator">.</span>top: txtPreview<span class="operator">.</span>bottom
+    anchors<span class="operator">.</span>topMargin: <span class="number">10</span>
+    checked: darkModeEnabled <span class="comment">// init with app-wide dark mode property</span>
+}</pre>
+<p>We will use the preview in <code translate="no">CollectionSettingsView.qml</code> as follows:</p>
+<pre class="cpp" translate="no">AppPage {
+    <span class="operator">.</span><span class="operator">.</span><span class="operator">.</span>
+
+Flickable {
+    <span class="operator">.</span><span class="operator">.</span><span class="operator">.</span>
+
+Column {
+    <span class="operator">.</span><span class="operator">.</span><span class="operator">.</span>
+    anchors<span class="operator">.</span>margins: <span class="number">10</span>
+    anchors<span class="operator">.</span>topMargin: <span class="number">0</span>
+    <span class="operator">.</span><span class="operator">.</span><span class="operator">.</span>
+
+    CollectionDelegatePreview {
+        mainColor: colColors<span class="operator">.</span>defaultMainColor
+        textureColor: colColors<span class="operator">.</span>defaultTextureColor
+        borderColor: colColors<span class="operator">.</span>defaultBorderColor
+        ageDescription: rowAgeContext<span class="operator">.</span>ageContext
+        borderWidth: sliderBorderWidth<span class="operator">.</span>value
+        textureType: comboTexture<span class="operator">.</span>currentIndex
+        textureWidth: sliderWidth<span class="operator">.</span>value
+        textureHeight: sliderHeight<span class="operator">.</span>value
+        editable: <span class="keyword">true</span>
+        smooth: switchSmooth<span class="operator">.</span>checked
+        <span class="comment">// remove parent margin and hide borders at sides:</span>
+        width: parent<span class="operator">.</span>width <span class="operator">+</span> <span class="number">20</span> <span class="operator">+</span> border<span class="operator">.</span>width <span class="operator">*</span> <span class="number">2</span>
+        x: <span class="operator">-</span> <span class="number">10</span> <span class="operator">-</span> border<span class="operator">.</span>width
+    }
+<span class="operator">.</span><span class="operator">.</span><span class="operator">.</span></pre>
+<p>So now the collection settings view is complete:</p>
+<p class="centerAlign"><img src="images/collection_settings.jpg" alt="{The collection settings layout}" /></p><p>We can even add the preview to <code translate="no">EditItemView</code> and additionally bind the origin color to it. This way, when the colors for a list item are selected, they can be tested out in light and dark mode.</p>
+<pre class="cpp" translate="no">Column { <span class="comment">// in EditItemView.qml</span>
+    id: col
+    <span class="operator">.</span><span class="operator">.</span><span class="operator">.</span>
+
+    CollectionDelegatePreview {
+        originColor: rowTitle<span class="operator">.</span>originColor
+        mainColor: rowColors<span class="operator">.</span>mainColor
+        textureColor: rowColors<span class="operator">.</span>textureColor
+        borderColor: rowColors<span class="operator">.</span>borderColor
+        ageDescription: Data<span class="operator">.</span>formatDomainAgeContext(
+            Data<span class="operator">.</span>getDomainAgeContextPrefix()<span class="operator">,</span>
+            Data<span class="operator">.</span>getDomainAgeContextSuffix())
+        borderWidth: Data<span class="operator">.</span>getDomainBorderWidth()
+        textureType: Data<span class="operator">.</span>getDomainTextureType()
+        textureHeight: Data<span class="operator">.</span>getDomainTextureHeight()
+        textureWidth: Data<span class="operator">.</span>getDomainTextureWidth()
+        editable: <span class="keyword">false</span>
+        smooth: Data<span class="operator">.</span>getDomainTextureSmooth()
+        <span class="comment">// remove parent margin and hide borders at sides:</span>
+        width: parent<span class="operator">.</span>width <span class="operator">+</span> <span class="number">20</span> <span class="operator">+</span> border<span class="operator">.</span>width <span class="operator">*</span> <span class="number">2</span>
+        x: <span class="operator">-</span> <span class="number">10</span> <span class="operator">-</span> border<span class="operator">.</span>width
+    }
+    <span class="operator">.</span><span class="operator">.</span><span class="operator">.</span>
+}</pre>
+<p class="centerAlign"><img src="images/delegate_preview_add_item.jpg" alt="{Delegate preview in EditItemView}" /></p><h3 id="get-random-colors-from-database">Get random colors from database</h3>
+<p>Add an on-clicked handler to the button for randomizing colors. We will write a method in <code translate="no">data.js</code> that returns an array of three colors: the main color, texture color and border color.</p>
+<pre class="cpp" translate="no">IconButton {
+    id: btnRandomColors
+    <span class="operator">.</span><span class="operator">.</span><span class="operator">.</span>
+    onClicked: {
+        var colors <span class="operator">=</span> Data<span class="operator">.</span>getRandomColors();
+        colColors<span class="operator">.</span>defaultMainColor <span class="operator">=</span> colors<span class="operator">[</span><span class="number">0</span><span class="operator">]</span>;
+        colColors<span class="operator">.</span>defaultTextureColor <span class="operator">=</span> colors<span class="operator">[</span><span class="number">1</span><span class="operator">]</span>;
+        colColors<span class="operator">.</span>defaultBorderColor <span class="operator">=</span> colors<span class="operator">[</span><span class="number">2</span><span class="operator">]</span>;
+    }
+}</pre>
+<p>Inside the method, define variables for each color. Then start a transaction to read the corresponding columns from the collection table, randomize an index over the length of the results and write the colors into the variables.</p>
+<pre class="cpp" translate="no">function getRandomColors()
+{
+    var mainColor <span class="operator">=</span> <span class="string">&quot;&quot;</span>;
+    var textureColor <span class="operator">=</span> <span class="string">&quot;&quot;</span>;
+    var borderColor <span class="operator">=</span> <span class="string">&quot;&quot;</span>;
+
+    var db <span class="operator">=</span> openDatabase();
+    db<span class="operator">.</span>transaction(function(tx) {
+        var res <span class="operator">=</span> tx<span class="operator">.</span>executeSql(<span class="char">'SELECT mainColor, textureColor, borderColor '</span> <span class="operator">+</span>
+                                <span class="char">'FROM Collection'</span>);
+        <span class="keyword">if</span> (res<span class="operator">.</span>rows<span class="operator">.</span>length <span class="operator">=</span><span class="operator">=</span><span class="operator">=</span> <span class="number">0</span>)
+            <span class="keyword">return</span>;
+
+        var index <span class="operator">=</span> Math<span class="operator">.</span>floor(Math<span class="operator">.</span>random() <span class="operator">*</span> res<span class="operator">.</span>rows<span class="operator">.</span>length);
+        var item <span class="operator">=</span> res<span class="operator">.</span>rows<span class="operator">.</span>item(index);
+        mainColor <span class="operator">=</span> item<span class="operator">.</span>mainColor;
+        textureColor <span class="operator">=</span> item<span class="operator">.</span>textureColor;
+        borderColor <span class="operator">=</span> item<span class="operator">.</span>borderColor;
+    });
+
+    <span class="keyword">return</span> <span class="operator">[</span>mainColor<span class="operator">,</span> textureColor<span class="operator">,</span> borderColor<span class="operator">]</span>;
+}</pre>
+<p>And that's it, now you can load sample colors from other items in the database.</p>
+</div>
+<!-- @@@09-setup.html -->
+<p class="naviNextPrevious footerNavi">
+<a class="prevPage" href="08-update.html">Update Weight and Cost</a>
+</p>
+</body>
+</html>

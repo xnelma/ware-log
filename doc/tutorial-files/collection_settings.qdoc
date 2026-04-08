@@ -1,0 +1,1128 @@
+/*!
+    \page 09-setup.html
+    \previouspage {Update Weight and Cost}
+    \title Set Up Collection
+
+    \brief provides steps for configuring domain properties of a collection
+
+    We now have a database table with general column names, can now add,
+    remove and udpate items, and can manipulate the appearance of the weight
+    indicator of an item.
+    But there is no view for setting domain specific properties, so the
+    appearance of the texture for a domain, maybe some default values like
+    the colors of the texture that might be similar across items of a
+    collection. Or more specific: we hardcoded the context of the age of an
+    item, so it would be good to be able to set it for a domain.
+
+    In this chapter we will add a view for collection settings. The collection
+    will get a name and a domain, we will set the age context and texture
+    appearance, and set default colors.
+    We will create a second table in the database to save those values in,
+    and we will write a component to show a preview for a list item.
+
+    \section1 Navigate to settings page
+
+    Add another menu item with the title "Collection Settings", and another
+    qml component file \c{CollectionSettingsView.qml} with an import for
+    the \c{Felgo} module and an empty \c{AppPage} with the title
+    "Collection Settings".
+
+    \image {collection_settings_menu_item.jpg} {Menu item for collection settings}
+
+    \code
+    import Felgo
+
+    AppPage {
+        title: qsTr("Collection Settings")
+    }
+    \endcode
+
+    Then add this page inside a \c{Component} in \c{Main.qml}, give it
+    an id.
+
+    \code
+    Component {
+        id: compCollectionSettings
+
+        CollectionSettingsView {
+        }
+    }
+    \endcode
+
+    Then, on clicking the menu item, push the component onto the stack.
+    The navigation stack should already have been added by the project
+    creation wizard.
+
+    \code
+    NavigationStack {
+        AppPage {
+            ...
+
+            rightBarItem: IconButtonBarItem {
+                ...
+
+                Menu {
+                    ...
+
+                    MenuItem {
+                        text: qsTr("Collection Settings")
+                        onClicked: pageMain.navigationStack
+                            .push(compCollectionSettings)
+                    }
+    ...
+
+    }
+    \endcode
+
+    \section1 Prepare database
+
+    The domain properties would go into a different table than the collection.
+    So we will create another table in \c{openDatabase} and insert a default
+    row, to not have to handle undefined values.
+    For now there will only be one row in it, but we will already
+    identify it with an id, which is useful for being able to change the
+    collection name.
+    Though the id will only be a hardcoded placeholder id at the top
+    of \c{"data.js"} for now.
+
+    \code
+    var id = "placeholderid";
+    \endcode
+
+    In \c{openDatabase}, after the lines for creating the "Collection" table
+    and filling it with the sample values, create and fill a "Domain" table:
+
+    \code
+    tx.executeSql('CREATE TABLE IF NOT EXISTS Domain(id TEXT, name TEXT, ' +
+                  'domain TEXT, ' +
+                  'ageContextPrefix TEXT, ageContextSuffix TEXT, ' +
+                  'borderWidth NUMERIC, ' +
+                  'textureType NUMERIC, smooth NUMERIC, ' +
+                  'textureHeight NUMERIC, textureWidth NUMERIC, ' +
+                  'mainColor TEXT, textureColor TEXT, borderColor TEXT)');
+    res = tx.executeSql('SELECT * FROM Domain WHERE id = \'' + id + '\'');
+    if (res.rows.length === 0)
+        tx.executeSql('INSERT INTO Domain VALUES(?,?,?,?,?,?,?,?,?,?,?,?,?)',
+                      [id, "", "", "", "", 0, 0, 0, 100, 100, "", "", ""]);
+    \endcode
+
+    The '100' for the texture height and width is just an arbitrary value
+    to make the texture visible if the size is not yet set and the texture is
+    selected. This matches a default initialization of
+    \c{(to - from) / 4} for the sliders, so at a quarter of a slider.
+
+    The color is not initialized by default to e.g. black, as this would
+    be handled by \c{defaultColor} we added in a previous chapter.
+
+    Now we need methods to read and write single values. While this could
+    lead to performance issues unlike just saving once on pressing a button,
+    this should rarely be the case nowadays.
+    We will add two general methods, and then call them from smaller methods
+    for each property.
+
+    \code
+    function setDomainValue(col, value)
+    {
+        var db = openDatabase();
+        db.transaction(function(tx) {
+            tx.executeSql('UPDATE Domain SET ' + col + ' = \'' + value + '\' ' +
+                          'WHERE id = \'' + id + '\'');
+        });
+    }
+
+    function getDomainValue(col)
+    {
+        var item = "";
+        var db = openDatabase();
+        db.transaction(function(tx) {
+            var res = tx.executeSql('SELECT ' + col + ' FROM Domain ' +
+                                    'WHERE id = \'' + id + '\'');
+            if (res.rows.length === 0 )
+                return;
+            item = res.rows.item(0);
+        });
+        return item;
+    }
+    \endcode
+
+    The lot of smaller methods all have the same structure, so I will only
+    show one and the special case for 'smooth'.
+    For the other methods remember returning 100 as default value for
+    texture height and width, and an empty string for the colors.
+
+    \code
+    function setDomainName(name)
+    {
+        setDomainValue("name", name);
+    }
+
+    function getDomainName()
+    {
+        var item = getDomainValue("name");
+        return item === "" ? "" : item.name;
+    }
+    \endcode
+
+    For 'smooth' we take and return a boolean, but get and write a number:
+
+    \code
+    function setDomainTextureSmooth(isSmooth)
+    {
+        setDomainValue("smooth", isSmooth ? 1 : 0);
+    }
+
+    function getDomainTextureSmooth()
+    {
+        var item = getDomainValue("smooth");
+        return item !== "" && item.smooth !== 0;
+    }
+    \endcode
+
+    The texture type is set as number using the index of the type.
+    This is not robust and should be done differently for growing project sizes.
+
+    For the age context there can be a third method that returns the
+    combined string. While it could just be a getter calling the prefix
+    and suffix methods, let's make it independent from those methods
+    and instead just format parameters.
+    We will want to use the method with input item text in the settings view.
+
+    \code
+    function formatDomainAgeContext(prefix, suffix)
+    {
+        return (prefix + " %1 %2 " + suffix).trim();
+    }
+    \endcode
+
+    In sum there should be 12x2 smaller methods.
+    With those we have an interface to get the collection properties from the
+    database and save them.
+
+    \section2 Use database values in other views
+
+    Before we continue with the collection settings view, let's assign the
+    values from the database to list items and use the colors in
+    the item edit view.
+    Since the domain properties will be the same for each list item they do
+    not require opening the database and reading the value for each item,
+    so we will save them in properties in the list view.
+
+    \code
+    AppListView { // in Main.qml
+        id: listView
+
+        ...
+
+        property string ageDescription: Data.formatDomainAgeContext(
+                Data.getDomainAgeContextPrefix(),
+                Data.getDomainAgeContextSuffix())
+        property var textureBorderWidth: Data.getDomainBorderWidth()
+        property var textureType: Data.getDomainTextureType()
+        property var textureHeight: Data.getDomainTextureHeight()
+        property var textureWidth: Data.getDomainTextureWidth()
+        property bool textureSmooth: Data.getDomainTextureSmooth()
+
+        delegate: SwipableCollectionDelegate {
+            ...
+
+            ageDescription: listView.ageDescription
+            borderWidth: listView.textureBorderWidth
+            textureType: listView.textureType
+            textureHeight: listView.textureHeight
+            textureWidth: listView.textureWidth
+            editable: false
+            smooth: listView.textureSmooth
+        }
+    }
+    \endcode
+
+    For the item edit view replace the default colors with calls to
+    the respective methods:
+
+    \code
+    // in rowColors in EditItemView.qml
+    property string mainColor: Data.getDomainMainColor()
+    property string textureColor: Data.getDomainTextureColor()
+    property string borderColor: Data.getDomainBorderColor()
+    \endcode
+
+    The texture height and width for the sample database would be
+    354 (a bit less than 380, the height of texture.png) and 220 (the
+    width of texture.png). When we are done with the settings, you can go
+    back here to set to those values to keep the texture appearance for the
+    sample database.
+
+    We can now also make the properties required, so we won't have to
+    specify hardcoded default values in different places.
+    This concerns \c{SwipableCollectionDelegate.qml} and
+    \c{CollectionDelegate.qml}.
+
+    If you build now and run the app, you will only see default values, so
+    some noise for the list items (100x100 was the size of the texture we
+    return by default), and the age is formatted without context to e.g.
+    "2 months".
+
+    \section1 Layout settings
+
+    The content will be structured as a column, with margins and spacing
+    of 10:
+
+    \code
+    AppPage {
+        title: qsTr("CollectionSettings")
+
+    Column {
+        id: content
+        anchors.fill: parent
+        anchors.margins: 10
+        spacing: 10
+    } // Column
+    } // AppPage
+    \endcode
+
+    As the content will get longer than the page width, wrap it inside
+    a \c{Flickable}:
+
+    \code
+    AppPage {
+        ...
+
+    Flickable {
+        anchors.fill: parent
+        contentHeight: content.height
+
+    Column {
+        id: content
+        ...
+    } // Column
+    } // Flickable
+    } // AppPage
+    \endcode
+
+    The ident for those components is on the same level to have less
+    indentation for the content.
+
+    All the imports needed in this chapter are
+
+    \code
+    import Felgo
+    import QtQuick
+    import QtQuick.Layouts
+    import QtQuick.Controls as QtControls
+    import QtQuick.Dialogs
+    import "data.js" as Data
+    \endcode
+
+    The controls are imported with an alias due to the name clash with the
+    Felgo \c{Dialog}.
+
+    There will be two sections: one for domain settings, and one for
+    default values.
+    Add an \c{AppText} as title for each section, with a low opacity, and
+    a \c{MenuSeparator} before the second title.
+
+    \code
+    Column {
+        id: content
+        ...
+
+        AppText {
+            text: qsTr("Domain settings:")
+            opacity: 0.3
+        }
+
+        QtControls.MenuSeparator {
+            width: parent.width
+            padding: 0
+        }
+
+        AppText {
+            text: qsTr("Default values:")
+            opacity: 0.3
+        }
+    } // Column
+    \endcode
+
+    The section for domain settings will have components for setting a name
+    of the collection and the domain, (e.g. "My Sand Collection" with "Sand"),
+    and the texture (and border) settings for the \c{WeightIndicator} of
+    a list item.
+    The section for default values would for now allow setting default
+    colors for the \c{WeightIndicator}, since items in one domain might have
+    similar colors.
+
+    \section2 Layout name and domain input
+
+    Both the name of a collection and the domain are arbitrary strings, so
+    they would be set through input items.
+    As they should also show the current value from the database, the hint
+    can not be used to explain the input type; at least not if the value
+    is available.
+    So we need a label for the input item.
+    And even with the label the input type might not be clear, so a
+    short explanation with an example should also be shown. Since showing it
+    directly as text would take up quite a lot of space,
+    an info button should be shown next to the input that
+    could e.g. open a dialog with the description and example.
+
+    So add a component file \c{LabeledTextField.qml}. The needed imports are
+    \c{QtQuick, QtQuick.Layouts} and \c{Felgo}.
+
+    To fill the width of the parent component and have the input item
+    fill the space between label and icon button, the base type will be a
+    \c{RowLayout}.
+    It has required properties for the label, the input placeholder
+    and the dialog message, and an optional property for an initial input text.
+    The child items are \c{AppText} for the label, the \c{AppTextField} itself
+    and an \c{IconButton} with \c{IconType.infocircle}.
+    The message can be shown inside a \c{Dialog}, but it should be
+    added to the settings view directly, as it would
+    otherwise be opened inside the row instead of the full page.
+    It should have properties for the message (\c{string message}) and a
+    general title \c{qsTr("Info")}.
+    Also add a signal \c{infoClicked} to the row layout and call it when the button
+    is clicked.
+
+    \code
+    RowLayout {
+        id: labeledTextField
+        required property string label
+        required property string placeholderText
+        property string text
+        required property string info
+        signal infoClicked()
+        spacing: 10
+        width: parent.width
+
+        AppText {
+            id: txtLabel
+            text: labeledTextField.label
+            Layout.alignment: Qt.AlignVCenter
+        }
+
+        AppTextField {
+            id: input
+            placeholderText: labeledTextField.placeholderText
+            text: labeledTextField.text
+            onTextChanged: labeledTextField.text = text
+            Layout.alignment: Qt.AlignVCenter
+            Layout.fillWidth: true
+        }
+
+        IconButton {
+            iconType: IconType.infocircle
+            Layout.alignment: Qt.AlignVCenter
+            Layout.preferredHeight: txtLabel.height
+            Layout.preferredWidth: Layout.preferredHeight
+            onClicked: infoClicked()
+        }
+    }
+
+    Dialog { // in CollectionSettingsView.qml
+        id: dlgInfo
+        property string message
+        title: qsTr("Info")
+        negativeAction: false
+        onAccepted: close()
+        autoSize: true
+
+        AppText {
+            text: dlgInfo.message
+            width: parent.width - 40
+            anchors.left: parent.left
+            anchors.leftMargin: 20
+            anchors.top: parent.top
+            anchors.topMargin: 10
+        }
+    }
+    \endcode
+
+    Add two \c{LabeledTextField} items to the settings view, and set their
+    labels, placeholder, input text and messages for collection name and domain.
+    Also add handlers for the custom signal \c{infoClicked} that set the dialog message and
+    open it.
+
+    \code
+    AppPage {
+        ...
+    Column {
+        id: content
+        ...
+
+        AppText {
+            text: qsTr("Domain settings:")
+            ...
+        }
+
+        LabeledTextField {
+            label: qsTr("Name:")
+            placeholderText: qsTr("Enter Name")
+            text: Data.getDomainName()
+            onTextChanged: Data.setDomainName(text)
+            info: qsTr("The name of your collection. E.g. My Sand Collection")
+            onInfoClicked: {
+                dlgInfo.message = info;
+                dlgInfo.open();
+            }
+        }
+
+        LabeledTextField {
+            label: qsTr("Domain:")
+            placeholderText: qsTr("Enter Domain")
+            text: Data.getDomainType()
+            onTextChanged: Data.setDomainType(text)
+            info: qsTr("The domain of your collection. E.g. Sand, Lemonade, ...")
+            onInfoClicked: {
+                dlgInfo.message = info;
+                dlgInfo.open();
+            }
+        }
+
+        ...
+    } // Column
+
+    Dialog {
+        id: dlgInfo
+        property string message
+        title: qsTr("Info")
+        negativeAction: false
+        onAccepted: close()
+        autoSize: true
+
+        AppText {
+            text: dlgInfo.message
+            width: parent.width - 40
+            anchors.left: parent.left
+            anchors.leftMargin: 20
+            anchors.top: parent.top
+            anchors.topMargin: 10
+        }
+    }
+
+    } // AppPage
+    \endcode
+
+    \section2 Add age context input
+
+    The age can have a different meaning for domains. For sand and other
+    collectibles it might be "collected 2 months ago", but there might be
+    a different context, too.
+    Assumed the unit always follows the number, the context can get
+    described with some text preceding and following number and unit.
+    So we could add two input fields, and some sample number and unit.
+    As this would span the complete width, lets add the label and info button
+    in a separate row:
+
+    \code
+    Row {
+        spacing: 10
+
+        AppText {
+            id: txtAgeContextLabel
+            text: qsTr("Age context:")
+            anchors.verticalCenter: parent.verticalCenter
+        }
+
+        IconButton {
+            iconType: IconType.infocircle
+            Layout.alignment: Qt.AlignVCenter
+            height: txtAgeContextLabel.height
+            width: height
+            onClicked: {
+                dlgInfo.message = qsTr("The context of 'age' in your domain, "
+                    + "e.g. \"collected <n> <dmwy> ago\" (collected 2 months "
+                    + "ago)")
+                dlgInfo.open();
+            }
+        }
+    }
+
+    Row {
+        id: rowAgeContext
+        spacing: 10
+        width: parent.width
+
+        property string ageContext: Data.formatDomainAgeContext(
+            inputAgeContext1.text, inputAgeContext2.text)
+
+        AppTextField {
+            id: inputAgeContext1
+            placeholderText: qsTr("Input context")
+            text: Data.getDomainAgeContextPrefix()
+            onTextChanged: Data.setDomainAgeContextPrefix(text)
+        }
+
+        AppText {
+            id: txtAgeContextSample
+            text: qsTr("2 months")
+            opacity: 0.7
+            anchors.verticalCenter: parent.verticalCenter
+        }
+
+        AppTextField {
+            id: inputAgeContext2
+            placeholderText: qsTr("Input context")
+            text: Data.getDomainAgeContextSuffix()
+            onTextChanged: Data.setDomainAgeContextSuffix(text);
+            anchors.verticalCenter: parent.verticalCenter
+            width: parent.width - inputAgeContext1.width - 10
+                                - txtAgeContextSample.width - 10
+        }
+    }
+    \endcode
+
+    \section2 Set texture and border properties
+
+    We will add a slider for the border thickness and the texture height
+    and width, and a combobox to select a texture and a switch to smooth out
+    the texture.
+
+    The sliders for the height and width of the texture are in a grid
+    layout to set them to the same width together with some labels, but the
+    border width and texture setting will both take a row layout, again to
+    span the full width.
+
+    But before the layouts, there will be a label to summarize them:
+
+    \code
+    AppText {
+        text: qsTr("Item image style:")
+    }
+    \endcode
+
+    Then add the \c{RowLayout} components for the border width and texture:
+
+    \code
+    RowLayout {
+        spacing: 10
+        width: parent.width
+
+        AppText {
+            text: qsTr("Border width: ")
+            opacity: 0.5
+            Layout.alignment: Qt.AlignVCenter
+        }
+
+        AppSlider {
+            id: sliderBorderWidth
+            from: 0
+            to: 10
+            value: Data.getDomainBorderWidth()
+            onValueChanged: Data.setDomainBorderWidth(value)
+            padding: 0
+            Layout.alignment: Qt.AlignVCenter
+            Layout.fillWidth: true
+        }
+    }
+
+    RowLayout {
+        uniformCellSizes: true // Make the combobox span half the full width
+        height: comboTexture.height
+        width: parent.width
+
+        LightDarkComboBox {
+            id: comboTexture
+            model: ["No Texture", "Noise"]
+            currentIndex: Data.getDomainTextureType()
+            onCurrentIndexChanged: Data.setDomainTextureType(currentIndex)
+            Layout.fillWidth: true
+        }
+
+        // Center in cell:
+        Row {
+            spacing: 10
+            Layout.alignment: Qt.AlignCenter
+
+            AppText {
+                text: qsTr("Smooth:")
+                opacity: 0.5
+            }
+
+            AppSwitch {
+                id: switchSmooth
+                checked: Data.getDomainTextureSmooth()
+                onCheckedChanged: Data.setDomainTextureSmooth(checked)
+            }
+        }
+    }
+    \endcode
+
+    Then a label for the height and width sliders:
+
+    \code
+    AppText {
+        text: qsTr("Scale texture:")
+        opacity: 0.5
+    }
+    \endcode
+
+    And finally the \c{GridLayout} for the height and width sliders:
+
+    \code
+    GridLayout {
+        columns: 2
+        rows: 2
+        columnSpacing: 10
+        rowSpacing: 10
+        width: parent.width
+
+        AppText {
+            text: qsTr("v:")
+            Layout.row: 0
+            Layout.column: 0
+        }
+
+        AppSlider {
+            id: sliderHeight
+            from: 1
+            to: 400
+            value: Data.getDomainTextureHeight()
+            onValueChanged: Data.setDomainTextureHeight(value)
+            padding: 0
+            Layout.row: 0
+            Layout.column: 1
+            Layout.fillWidth: true
+        }
+
+        AppText {
+            text: qsTr("h:")
+            Layout.row: 1
+            Layout.column: 0
+        }
+
+        AppSlider {
+            id: sliderWidth
+            from: 1
+            to: 400
+            value: Data.getDomainTextureWidth();
+            onValueChanged: Data.setDomainTextureWidth(value);
+            padding: 0
+            Layout.row: 1
+            Layout.column: 1
+            Layout.fillWidth: true
+        }
+    } // GridLayout
+    \endcode
+
+    \section2 Layout color buttons
+
+    The color buttons first need a label to give them context.
+    We will also allow setting the colors randomly from an item in the
+    database, since colors in a domain might be similar between items.
+    So next to the label, there will be an icon button for that, but also
+    an info button for the randomize button.
+
+    \code
+    AppText {
+        text: qsTr("Default values:")
+        ...
+    }
+
+    Row {
+        spacing: 10
+        height: txtImageColorsLabel.height + 4
+
+        AppText {
+            id: txtImageColorsLabel
+            text: qsTr("Item image colors:")
+            anchors.verticalCenter: parent.verticalCenter
+        }
+
+        // Show some background to group the buttons together.
+        Item {
+            width: btnRandomColors.width + btnRandomColorsInfo.width + 20
+            // The margin of 20 is the left margin (10) + the margin between the
+            // buttons (5) + a smaller right margin (5) to visually "group" the
+            // info button to the button it relates to.
+            height: parent.height
+
+            // The rectangle color depends on the text color to not have to
+            // specify light and dark colors.
+            // But to lower the opacity, the rectangle cannot be the parent item;
+            // otherwise the buttons would also be transparent.
+            Rectangle {
+                color: txtImageColorsLabel.color
+                opacity: 0.05
+                radius: height / 2
+                anchors.fill: parent
+            }
+
+            IconButton {
+                id: btnRandomColors
+                iconType: IconType.random
+                height: parent.height
+                width: height
+                anchors.left: parent.left
+                anchors.leftMargin: 10
+            }
+
+            IconButton {
+                id: btnRandomColorsInfo
+                iconType: IconType.infocircle
+                height: parent.height
+                width: height
+                anchors.left: btnRandomColors.right
+                anchors.leftMargin: 5
+                anchors.top: btnRandomColors.top
+                onClicked: {
+                    dlgInfo.message = qsTr("Get the colors of a random item in "
+                        + "the database.");
+                    dlgInfo.open();
+                }
+            }
+        } // Item
+    } // Row
+    \endcode
+
+    The color buttons will be inside a \c{ColumnLayout}, so setting them
+    all to the same width will be done by column layout properties.
+    The layout will also hold properties for the buttons and for use later on.
+    And then we will use the \c{ColorButton} component we wrote in a
+    previous chapter.
+
+    \code
+    Row { ... }
+
+    ColumnLayout {
+        id: colColors
+
+        property string defaultMainColor: {
+            var c = Data.getDomainMainColor();
+            return c === "" ? defaultColor : c;
+        }
+        property string defaultTextureColor: {
+            var c = Data.getDomainTextureColor();
+            return c === "" ? defaultColor : c;
+        }
+        property string defaultBorderColor: {
+            var c = Data.getDomainBorderColor();
+            return c === "" ? defaultColor : c;
+        }
+
+        ColorButton {
+            id: btnColorMain
+            text: qsTr("Default Main Color")
+            colorName: colColors.defaultMainColor
+            onColorNameChanged: {
+                colColors.defaultMainColor
+                    = Qt.binding(function() { return colorName });
+                Data.setDomainMainColor(colorName);
+            }
+            horizontalMargin: 0
+            verticalMargin: 0
+            Layout.fillHeight: true
+            Layout.fillWidth: true
+        }
+
+        ColorButton {
+            id: btnColorTexture
+            text: qsTr("Default Texture Color")
+            colorName: colColors.defaultTextureColor
+            onColorNameChanged: {
+                colColors.defaultTextureColor
+                    = Qt.binding(function() { return colorName });
+                Data.setDomainTextureColor(colorName);
+            }
+            horizontalMargin: 0
+            verticalMargin: 0
+            Layout.fillHeight: true
+            Layout.fillWidth: true
+        }
+
+        ColorButton {
+            id: btnColorBorder
+            text: qsTr("Default Border Color")
+            colorName: colColors.defaultBorderColor
+            onColorNameChanged: {
+                colColors.defaultBorderColor
+                    = Qt.binding(function() { return colorName });
+                Data.setDomainBorderColor(colorName);
+            }
+            horizontalMargin: 0
+            verticalMargin: 0
+            Layout.fillHeight: true
+            Layout.fillWidth: true
+        }
+    } // colColors
+    \endcode
+
+    Now the layout for the input is complete, but there is no way of testing
+    out the texture and border settings.
+    So we will add a preview that can be directly manipulated with the settings.
+
+    \section2 Add collection delegate preview
+
+    While we could preview the texture directly on a \c{WeightIndicator}, the
+    texture currently depends on the height of the rectangle.
+    To get the same scale of the texture as it will appear in the list view,
+    we could preview it directly in a list delegate.
+
+    Create another qml file \c{CollectionDelegatePreview.qml}.
+    Needed imports are \c{QtQuick} und \c{Felgo}.
+
+    The root component will be a \c{Rectangle}, and it will have a larger
+    height than the delegate itself to add some margin:
+    it would be handy to be able to switch between dark and light mode to try
+    out the contrast of selected colors, so add some extra space to
+    color around the delegate item.
+
+    \code
+    Rectangle {
+        id: cdpRoot
+
+        height: delegate.height + 20 + 4 // + margin + border width
+        width: parent.width
+        border.color: switchDarkStyle.checked ? "#2f2f2f" : "#cfcfcf"
+        border.width: 2
+    }
+
+    CollectionDelegate {
+        id: delegate
+
+        width: parent.width - cdpRoot.border.width * 2
+        anchors.centerIn: parent
+    }
+    \endcode
+
+    The rectangle can then be colored depending on the state of the switch,
+    but that also requires coloring the text of the delegate and other
+    text defined inside the rectangle, so add a property for the text color,
+    too:
+
+    \code
+    Rectangle {
+        id: cdpRoot
+
+        color: switchDarkStyle.checked? "black" : "white"
+        property color textColor: switchDarkStyle.checked? "white" : "black"
+        ...
+    }
+    \endcode
+
+    Add properties to expose the delegate properties, but initialize the
+    item specific values with sample values:
+
+    \code
+    Rectangle {
+        id: cdpRoot
+
+        property string title: "Title"
+        property string origin: "Origin"
+        property string originColor: textColor
+        property string type: "Type"
+        property int age: 2
+        property string ageUnit: "months"
+        property int weightTotal: 10
+        property int weightLeft: 9
+        property string weightUnit: "g"
+        property int cost: 3
+        property int secondaryCost: 3
+        property string mainColor: defaultColor
+        property string textureColor: defaultColor
+        property string borderColor: defaultColor
+        property list<string> tags: ["Tag 1", "Tag 2", "Tag 3"]
+
+        required property string ageDescription
+        required property int borderWidth
+        required property int textureType
+        required property int textureHeight
+        required property int textureWidth
+        required property bool editable
+        required property bool smooth
+    }
+    \endcode
+
+    And add property bindings to the delegate:
+
+    \code
+    CollectionDelegate {
+        id: delegate
+        textColor: cdpRoot.textColor
+        title: cdpRoot.title
+        origin: cdpRoot.origin
+        originColor: cdpRoot.originColor
+        type: cdpRoot.type
+        age: cdpRoot.age
+        ageUnit: cdpRoot.ageUnit
+        weightTotal: cdpRoot.weightTotal
+        weightLeft: cdpRoot.weightLeft
+        weightUnit: cdpRoot.weightUnit
+        cost: cdpRoot.cost
+        secondaryCost: cdpRoot.secondaryCost
+        mainColor: cdpRoot.mainColor
+        textureColor: cdpRoot.textureColor
+        borderColor: cdpRoot.borderColor
+        tagStr: ""
+        tags: cdpRoot.tags
+
+        ageDescription: cdpRoot.ageDescription
+        borderWidth: cdpRoot.borderWidth
+        textureType: cdpRoot.textureType
+        textureHeight: cdpRoot.textureHeight
+        textureWidth: cdpRoot.textureWidth
+        editable: cdpRoot.editable
+        smooth: cdpRoot.smooth
+
+        ...
+    }
+    \endcode
+
+    We have not yet defined the switch for the dark/light color. And we will
+    add a label to mark the component as preview.
+    As they should be displayed in front of the delegate, add them after
+    \c{CollectionDelegate}:
+
+    \code
+    CollectionDelegate { ... }
+
+    AppText {
+        id: txtPreview
+        text: qsTr("Preview")
+        color: cdpRoot.textColor
+        opacity: 0.3
+        anchors.right: parent.right
+        anchors.rightMargin: 10
+        anchors.top: parent.top
+        anchors.topMargin: 10
+    }
+
+    AppText {
+        text: qsTr("Dark style:")
+        color: cdpRoot.textColor
+        anchors.right: switchDarkStyle.left
+        anchors.rightMargin: 10
+        anchors.verticalCenter: switchDarkStyle.verticalCenter
+    }
+
+    AppSwitch {
+        id: switchDarkStyle
+        anchors.right: parent.right
+        anchors.rightMargin: 10
+        anchors.top: txtPreview.bottom
+        anchors.topMargin: 10
+        checked: darkModeEnabled // init with app-wide dark mode property
+    }
+    \endcode
+
+    We will use the preview in \c{CollectionSettingsView.qml} as follows:
+
+    \code
+    AppPage {
+        ...
+
+    Flickable {
+        ...
+
+    Column {
+        ...
+        anchors.margins: 10
+        anchors.topMargin: 0
+        ...
+
+        CollectionDelegatePreview {
+            mainColor: colColors.defaultMainColor
+            textureColor: colColors.defaultTextureColor
+            borderColor: colColors.defaultBorderColor
+            ageDescription: rowAgeContext.ageContext
+            borderWidth: sliderBorderWidth.value
+            textureType: comboTexture.currentIndex
+            textureWidth: sliderWidth.value
+            textureHeight: sliderHeight.value
+            editable: true
+            smooth: switchSmooth.checked
+            // remove parent margin and hide borders at sides:
+            width: parent.width + 20 + border.width * 2
+            x: - 10 - border.width
+        }
+    ...
+    \endcode
+
+    So now the collection settings view is complete:
+
+    \image {collection_settings.jpg} {The collection settings layout}
+
+    We can even add the preview to \c{EditItemView} and additionally bind the
+    origin color to it. This way, when the colors for a list item are selected,
+    they can be tested out in light and dark mode.
+
+    \code
+    Column { // in EditItemView.qml
+        id: col
+        ...
+
+        CollectionDelegatePreview {
+            originColor: rowTitle.originColor
+            mainColor: rowColors.mainColor
+            textureColor: rowColors.textureColor
+            borderColor: rowColors.borderColor
+            ageDescription: Data.formatDomainAgeContext(
+                Data.getDomainAgeContextPrefix(),
+                Data.getDomainAgeContextSuffix())
+            borderWidth: Data.getDomainBorderWidth()
+            textureType: Data.getDomainTextureType()
+            textureHeight: Data.getDomainTextureHeight()
+            textureWidth: Data.getDomainTextureWidth()
+            editable: false
+            smooth: Data.getDomainTextureSmooth()
+            // remove parent margin and hide borders at sides:
+            width: parent.width + 20 + border.width * 2
+            x: - 10 - border.width
+        }
+        ...
+    }
+    \endcode
+
+    \image {delegate_preview_add_item.jpg} {Delegate preview in EditItemView}
+
+    \section2 Get random colors from database
+
+    Add an on-clicked handler to the button for randomizing colors.
+    We will write a method in \c{data.js} that returns an array of three
+    colors: the main color, texture color and border color.
+
+    \code
+    IconButton {
+        id: btnRandomColors
+        ...
+        onClicked: {
+            var colors = Data.getRandomColors();
+            colColors.defaultMainColor = colors[0];
+            colColors.defaultTextureColor = colors[1];
+            colColors.defaultBorderColor = colors[2];
+        }
+    }
+    \endcode
+
+    Inside the method, define variables for each color.
+    Then start a transaction to read the corresponding columns from the
+    collection table, randomize an index over the length of the results
+    and write the colors into the variables.
+
+    \code
+    function getRandomColors()
+    {
+        var mainColor = "";
+        var textureColor = "";
+        var borderColor = "";
+
+        var db = openDatabase();
+        db.transaction(function(tx) {
+            var res = tx.executeSql('SELECT mainColor, textureColor, borderColor ' +
+                                    'FROM Collection');
+            if (res.rows.length === 0)
+                return;
+
+            var index = Math.floor(Math.random() * res.rows.length);
+            var item = res.rows.item(index);
+            mainColor = item.mainColor;
+            textureColor = item.textureColor;
+            borderColor = item.borderColor;
+        });
+
+        return [mainColor, textureColor, borderColor];
+    }
+    \endcode
+
+    And that's it, now you can load sample colors from other items in the
+    database.
+*/

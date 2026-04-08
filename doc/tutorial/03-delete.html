@@ -29,9 +29,9 @@
 <p>This chapter shows the steps for deleting an item from the list.</p>
 <h2 id="add-the-delete-button">Add the delete button</h2>
 <p>The Felgo SDK provides a component <code translate="no">SwipeOptionsContainer</code>, that makes e.g. a list item swipable, and shows a button left or right on swipe.</p>
-<p>Wrap the base component <code translate="no">Item</code> in <code translate="no">CollectionDelegate.qml</code> in <code translate="no">SwipeOptionsContainer</code> by moving id and properties to it, and having the <code translate="no">Item</code> as child component of it.</p>
+<p>We will wrap the base component <code translate="no">Item</code> in <code translate="no">CollectionDelegate.qml</code> in a <code translate="no">SwipeOptionsContainer</code>, but to be able to also use the layout for a list item without the swipe buttons, it should be a separate component that includes <code translate="no">CollectionDelegate</code>. Create a file <code translate="no">SwipableCollectionDelegate.qml</code> with the same properties for the list model as <code translate="no">CollectionDelegate</code>, that has the swipe container as root item, and the delegate as child item, with its properties bound to the delegate item.</p>
 <pre class="cpp" translate="no">SwipeOptionsContainer {
-    id: delegate
+    id: swipeOptionsContainer
 
     height: content<span class="operator">.</span>height
 
@@ -42,21 +42,30 @@
 
     property string ageDescription: qsTr(<span class="string">&quot;collected %1 %2 ago&quot;</span>)
 
-    Component<span class="operator">.</span>onCompleted: {
-        tags <span class="operator">=</span> Data<span class="operator">.</span>tagList(tagStr);
-    }
+    Component<span class="operator">.</span>onCompleted: { <span class="operator">.</span><span class="operator">.</span><span class="operator">.</span> }
 
-    Item {
+    CollectionDelegate {
         id: content
 
-        height: colContent<span class="operator">.</span>height <span class="operator">+</span> <span class="number">2</span>
-
-        Rectangle {
-            <span class="operator">.</span><span class="operator">.</span><span class="operator">.</span>
-        }
+        title: swipeOptionsContainer<span class="operator">.</span>title
+        origin: swipeOptionsContainer<span class="operator">.</span>origin
+        originColor: swipeOptionsContainer<span class="operator">.</span>originColor
+        type: swipeOptionsContainer<span class="operator">.</span>type
+        age: swipeOptionsContainer<span class="operator">.</span>age
+        ageUnit: swipeOptionsContainer<span class="operator">.</span>ageUnit
+        weightTotal: swipeOptionsContainer<span class="operator">.</span>weightTotal
+        weightLeft: swipeOptionsContainer<span class="operator">.</span>weightLeft
+        weightUnit: swipeOptionsContainer<span class="operator">.</span>weightUnit
+        cost: swipeOptionsContainer<span class="operator">.</span>cost
+        secondaryCost: swipeOptionsContainer<span class="operator">.</span>secondaryCost
+        mainColor: swipeOptionsContainer<span class="operator">.</span>mainColor
+        textureColor: swipeOptionsContainer<span class="operator">.</span>textureColor
+        borderColor: swipeOptionsContainer<span class="operator">.</span>borderColor
+        tagStr: swipeOptionsContainer<span class="operator">.</span>tagStr
+        tags: swipeOptionsContainer<span class="operator">.</span>tags
     }
-    <span class="operator">.</span><span class="operator">.</span><span class="operator">.</span>
 }</pre>
+<p>Use the <code translate="no">SwipableCollectionDelegate</code> instead of the <code translate="no">CollectionDelegate</code> in the list view in <code translate="no">Main.qml</code>.</p>
 <p>Then assign a <code translate="no">SwipeButton</code> to the <code translate="no">rightOption</code> property, with a <code translate="no">remove</code> icon.</p>
 <pre class="cpp" translate="no">rightOption: SwipeButton {
     iconType: IconType<span class="operator">.</span>remove

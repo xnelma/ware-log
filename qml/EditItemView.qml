@@ -20,6 +20,25 @@ AppPage {
         anchors.right: parent.right
         anchors.margins: 10
 
+        CollectionDelegatePreview {
+            originColor: rowTitle.originColor
+            mainColor: rowColors.mainColor
+            textureColor: rowColors.textureColor
+            borderColor: rowColors.borderColor
+            ageDescription: Data.formatDomainAgeContext(
+                Data.getDomainAgeContextPrefix(),
+                Data.getDomainAgeContextSuffix())
+            borderWidth: Data.getDomainBorderWidth()
+            textureType: Data.getDomainTextureType()
+            textureHeight: Data.getDomainTextureHeight()
+            textureWidth: Data.getDomainTextureWidth()
+            editable: false
+            smooth: Data.getDomainTextureSmooth()
+            // remove parent margin and hide borders at sides:
+            width: parent.width + 20 + border.width * 2
+            x: - 10 - border.width
+        }
+
         Row {
             id: rowTitle
             spacing: 10
@@ -67,6 +86,8 @@ AppPage {
                 onColorNameChanged: rowTitle.originColor = colorName
                 minimumWidth: 10
                 anchors.verticalCenter: parent.verticalCenter
+
+
             }
         } // rowTitle
 
@@ -111,31 +132,45 @@ AppPage {
             id: rowColors
             spacing: 10
 
-            property string primaryColor: defaultColor
-            property string secondaryColor: defaultColor
+            property string mainColor: Data.getDomainMainColor()
+            property string textureColor: Data.getDomainTextureColor()
+            property string borderColor: Data.getDomainBorderColor()
 
             // Needed for reset().
             // TODO Why does the property binding have to be redone?
-            onPrimaryColorChanged: btnPrimaryColor.colorName
-                = Qt.binding(function () {return primaryColor})
-            onSecondaryColorChanged: btnSecondaryColor.colorName
-                = Qt.binding(function () {return secondaryColor})
+            onMainColorChanged: btnMainColor.colorName
+                = Qt.binding(function () {return mainColor})
+            onTextureColorChanged: btnTextureColor.colorName
+                = Qt.binding(function () {return textureColor})
+            onBorderColorChanged: btnBorderColor.colorName
+                = Qt.binding(function () {return borderColor})
 
             ColorButton {
-                id: btnPrimaryColor
-                text: "Color 1"
-                colorName: rowColors.primaryColor
-                onColorNameChanged: rowColors.primaryColor
+                id: btnMainColor
+                text: qsTr("Main Color")
+                colorName: rowColors.mainColor
+                onColorNameChanged: rowColors.mainColor
                     = Qt.binding(function() { return colorName })
                 horizontalMargin: 0
                 verticalMargin: 0
             }
 
             ColorButton {
-                id: btnSecondaryColor
-                text: "Color 2"
-                colorName: rowColors.secondaryColor
-                onColorNameChanged: rowColors.secondaryColor
+                id: btnTextureColor
+                text: qsTr("Texture Color")
+                colorName: rowColors.textureColor
+                onColorNameChanged: rowColors.textureColor
+                    = Qt.binding(function() { return colorName });
+                horizontalMargin: 0
+                verticalMargin: 0
+            }
+
+            // TODO disable border or texture button if not set for collection.
+            ColorButton {
+                id: btnBorderColor
+                text: qsTr("Border Color")
+                colorName: rowColors.borderColor
+                onColorNameChanged: rowColors.borderColor
                     = Qt.binding(function() { return colorName });
                 horizontalMargin: 0
                 verticalMargin: 0
@@ -337,8 +372,9 @@ AppPage {
                             origin: inputOrigin.text,
                             originColor: rowTitle.originColor,
                             type: comboTypes.editText,
-                            primaryColor: rowColors.primaryColor,
-                            secondaryColor: rowColors.secondaryColor,
+                            mainColor: rowColors.mainColor,
+                            textureColor: rowColors.textureColor,
+                            borderColor: rowColors.borderColor,
                             cost: Number(inputCost.text),
                             secondaryCost: Number(inputCost.text),
                             weightTotal: Number(inputWeight.text),
@@ -404,55 +440,15 @@ AppPage {
         }
     }
 
-    component ColorButton : AppButton {
-        property string colorName
-        backgroundColor: colorName
-        textColor: colorButtonTextColor
-        onClicked: {
-            dialogColor.selectedColor = colorName;
-            connectDialogColor.enabled = true;
-            dialogColor.open();
-        }
-
-        Connections {
-            id: connectDialogColor
-            target: dialogColor
-            enabled: false
-            function onAccepted() {
-                colorName = dialogColor.selectedColor;
-                connectDialogColor.enabled = false;
-            }
-        }
-    }
-
-    component LightDarkComboBox : ComboBox {
-        palette {
-            text: textColor
-            base: editable ? backgroundColor : lightColor
-            highlight: lightColor
-            button: lightColor
-            mid: mediumColor
-            dark: textColor
-            buttonText: textColor
-            highlightedText: textColor
-            window: backgroundColor
-            midlight: lightColor
-            light: lighterColor
-        }
-    }
-
-    ColorDialog {
-        id: dialogColor
-    }
-
     function reset() {
         inputTitle.text = "";
         inputOrigin.text = "";
         rowTitle.originColor = Qt.binding(function() { return defaultColor });
         comboTypes.currentIndex = 0;
         comboTypes.model = Data.getAllTypes();
-        rowColors.primaryColor = Qt.binding(function() { return defaultColor });
-        rowColors.secondaryColor = Qt.binding(function() { return defaultColor });
+        rowColors.mainColor = Qt.binding(function() { return defaultColor });
+        rowColors.textureColor = Qt.binding(function() { return defaultColor });
+        rowColors.borderColor = Qt.binding(function() { return defaultColor });
         inputCost.text = "";
         comboCostPerWeightUnit.currentIndex = 0;
         inputWeight.text = "";

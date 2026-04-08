@@ -122,8 +122,9 @@ property string defaultColor: darkModeEnabled<span class="operator">?</span> <sp
 <p>and in <code translate="no">EditItemView.qml</code>:</p>
 <pre class="cpp" translate="no">property string originColor: defaultColor
 <span class="operator">.</span><span class="operator">.</span><span class="operator">.</span>
-property string primaryColor: defaultColor
-property string secondaryColor: defaultColor
+property string mainColor: defaultColor
+property string textureColor: defaultColor
+property string borderColor: defaultColor
 <span class="operator">.</span><span class="operator">.</span><span class="operator">.</span>
 
 component ColorButton : AppButton {
@@ -136,13 +137,14 @@ component ColorButton : AppButton {
     <span class="operator">.</span><span class="operator">.</span><span class="operator">.</span>
     rowTitle<span class="operator">.</span>originColor <span class="operator">=</span> <span class="type">Qt</span><span class="operator">.</span>binding(function() { <span class="keyword">return</span> defaultColor });
     <span class="operator">.</span><span class="operator">.</span><span class="operator">.</span>
-    rowColors<span class="operator">.</span>primaryColor <span class="operator">=</span> <span class="type">Qt</span><span class="operator">.</span>binding(function() { <span class="keyword">return</span> defaultColor });
-    rowColors<span class="operator">.</span>secondaryColor <span class="operator">=</span> <span class="type">Qt</span><span class="operator">.</span>binding(function() { <span class="keyword">return</span> defaultColor });
+    rowColors<span class="operator">.</span>mainColor <span class="operator">=</span> <span class="type">Qt</span><span class="operator">.</span>binding(function() { <span class="keyword">return</span> defaultColor });
+    rowColors<span class="operator">.</span>textureColor <span class="operator">=</span> <span class="type">Qt</span><span class="operator">.</span>binding(function() { <span class="keyword">return</span> defaultColor });
+    rowColors<span class="operator">.</span>borderColor <span class="operator">=</span> <span class="type">Qt</span><span class="operator">.</span>binding(function() { <span class="keyword">return</span> defaultColor });
     <span class="operator">.</span><span class="operator">.</span><span class="operator">.</span>
 }</pre>
 <h2 id="set-combobox-dark-mode-colors">Set combobox dark mode colors</h2>
 <p>The <code translate="no">ComboBox</code> components have no direct color properties, but can be changed via their <a href="https://doc.qt.io/qt-6/qml-qtquick-palette.html">palette</a>.</p>
-<p>Add a component <code translate="no">LightDarkComboBox</code> with <code translate="no">ComboBox</code> as base type and set the colors with bindings to color properties. This is trial and error and results in following properties:</p>
+<p>Add a component file <code translate="no">LightDarkComboBox.qml</code> with <code translate="no">ComboBox</code> as base type and set the colors with bindings to color properties. This is trial and error and results in following properties:</p>
 <pre class="cpp" translate="no">component LightDarkComboBox : ComboBox {
     palette {
         text: textColor

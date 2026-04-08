@@ -216,24 +216,32 @@ function getAllTypes()
     editable: <span class="keyword">true</span>
 }</pre>
 <h3 id="layout-color-selection">Layout color selection</h3>
-<p>Now we add a row for setting the colors for a list item. There will be two colors, so add two buttons. Remove their margins, so they will align well with other UI elements. Add the colors as properties, so they can be changed and accessed later on, when writing the item to the database.</p>
+<p>Now we add a row for setting the colors for a list item. There will be three colors, so add three buttons. Remove their margins, so they will align well with other UI elements. Add the colors as properties, so they can be changed and accessed later on, when writing the item to the database.</p>
 <pre class="cpp" translate="no">Row {
     id: rowColors
     spacing: <span class="number">10</span>
 
-    property string primaryColor: <span class="string">&quot;#000&quot;</span>
-    property string secondaryColor: <span class="string">&quot;#000&quot;</span>
+    property string mainColor: <span class="string">&quot;#000&quot;</span>
+    property string textureColor: <span class="string">&quot;#000&quot;</span>
+    property string borderColor: <span class="string">&quot;#000&quot;</span>
 
     AppButton {
-        text: <span class="string">&quot;Color 1&quot;</span>
-        backgroundColor: rowColors<span class="operator">.</span>primaryColor
+        text: <span class="string">&quot;Main Color&quot;</span>
+        backgroundColor: rowColors<span class="operator">.</span>mainColor
         horizontalMargin: <span class="number">0</span>
         verticalMargin: <span class="number">0</span>
     }
 
     AppButton {
-        text: <span class="string">&quot;Color 2&quot;</span>
-        backgroundColor: rowColors<span class="operator">.</span>secondaryColor
+        text: <span class="string">&quot;Texture Color&quot;</span>
+        backgroundColor: rowColors<span class="operator">.</span>textureColor
+        horizontalMargin: <span class="number">0</span>
+        verticalMargin: <span class="number">0</span>
+    }
+
+    AppButton {
+        text: <span class="string">&quot;Border Color&quot;</span>
+        backgroundColor: rowColors<span class="operator">.</span>borderColor
         horizontalMargin: <span class="number">0</span>
         verticalMargin: <span class="number">0</span>
     }
@@ -400,10 +408,14 @@ Row {
 <pre class="cpp" translate="no">ColorDialog {
     id: dialogColor
 }</pre>
-<p>This dialog should be opened when one of the three buttons are clicked. It already has a full layout, including 'Cancel' and 'OK' buttons that close the dialog. We will have to set the initial color of the dialog depending on the clicked button, and get the selected color when the 'OK' button is clicked. But first, because it will be the same behavior for three buttons, just with different colors, we will add a component <code translate="no">ColorButton</code> to the bottom of the file, above <code translate="no">ColorDialog</code>.</p>
-<pre class="cpp" translate="no">component ColorButton : AppButton {
+<p>The dialog should be opened when one of the three buttons are clicked. It already has a full layout, including 'Cancel' and 'OK' buttons that close the dialog. We will have to set the initial color of the dialog depending on the clicked button, and get the selected color when the 'OK' button is clicked. But first, because it will be the same behavior for three buttons, just with different colors, we will add a custom component <code translate="no">ColorButton</code>, but in its own file <code translate="no">ColorButton.qml</code> so we can use it in other views later on. Also move the color dialog into this file, so as child element of <code translate="no">AppButton</code>:</p>
+<pre class="cpp" translate="no">AppButton { <span class="comment">// in ColorButton.qml</span>
     property string colorName
     backgroundColor: colorName
+
+    ColorDialog {
+        id: dialogColor
+    }
 }</pre>
 <p>Replace the three buttons with this component, and set the color property instead of their background color.<br />
  The color type of the dialog has the QML type <code translate="no">color</code>, but we will keep using <code translate="no">string</code> because this is the only type we will use it as for now, namely for setting color properties and saving it to the database.</p>
@@ -424,20 +436,22 @@ Row {
     connectDialogColor<span class="operator">.</span>enabled <span class="operator">=</span> <span class="keyword">true</span>;
     dialogColor<span class="operator">.</span>open();
 }</pre>
-<p>The overall structure of the inline component should now be as follows:</p>
-<pre class="cpp" translate="no">component ColorButton : AppButton {
+<p>The overall structure of the component should now be as follows:</p>
+<pre class="cpp" translate="no">AppButton {
     property string colorName
     backgroundColor: colorName
     onClicked: { <span class="operator">.</span><span class="operator">.</span><span class="operator">.</span> }
 
-    Connections { }
+    Connections { <span class="operator">.</span><span class="operator">.</span><span class="operator">.</span> }
+
+    ColorDialog { <span class="operator">.</span><span class="operator">.</span><span class="operator">.</span> }
 }</pre>
 <p>The three buttons also need to handle the color name change, as the Property Bindings to it are one sided:</p>
 <pre class="cpp" translate="no">ColorButton {
     <span class="operator">.</span><span class="operator">.</span><span class="operator">.</span>
     colorName: rowTitle<span class="operator">.</span>originColor
     onColorNameChanged: rowTitle<span class="operator">.</span>originColor <span class="operator">=</span> colorName
-    <span class="comment">// or rowColors.primaryColor or rowColors.secondaryColor</span>
+    <span class="comment">// or rowColors.mainColor, rowColors.textureColor or .borderColor</span>
     <span class="operator">.</span><span class="operator">.</span><span class="operator">.</span>
 }</pre>
 <p>Now the colors can be changed through a color dialog.</p>
@@ -538,7 +552,7 @@ tags <span class="operator">=</span> tags<span class="operator">.</span>concat(r
 <pre class="cpp" translate="no">function insertItem(tx<span class="operator">,</span> item)
 {
     tx<span class="operator">.</span>executeSql(
-        <span class="char">'INSERT INTO Collection VALUES(?,?,?,?,?,?,?,?,?,?,?,?,?,?)'</span><span class="operator">,</span>
+        <span class="char">'INSERT INTO Collection VALUES(?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)'</span><span class="operator">,</span>
         <span class="operator">[</span>item<span class="operator">.</span>title<span class="operator">,</span>
          item<span class="operator">.</span>origin<span class="operator">,</span> item<span class="operator">.</span>originColor<span class="operator">,</span>
          item<span class="operator">.</span>type<span class="operator">,</span>
@@ -546,7 +560,7 @@ tags <span class="operator">=</span> tags<span class="operator">.</span>concat(r
          item<span class="operator">.</span>weightTotal<span class="operator">,</span> item<span class="operator">.</span>weightLeft<span class="operator">,</span>
          item<span class="operator">.</span>weightUnit<span class="operator">,</span>
          item<span class="operator">.</span>cost<span class="operator">,</span> item<span class="operator">.</span>secondaryCost<span class="operator">,</span>
-         item<span class="operator">.</span>primaryColor<span class="operator">,</span> item<span class="operator">.</span>secondaryColor<span class="operator">,</span>
+         item<span class="operator">.</span>mainColor<span class="operator">,</span> item<span class="operator">.</span>textureColor<span class="operator">,</span> item<span class="operator">.</span>borderColor<span class="operator">,</span>
          tagStr(item<span class="operator">.</span>tags)<span class="operator">]</span>
     );
 }</pre>
@@ -563,7 +577,7 @@ tags <span class="operator">=</span> tags<span class="operator">.</span>concat(r
     }
     <span class="keyword">case</span> <span class="number">2</span>: {
         tx<span class="operator">.</span>executeSql(
-            <span class="char">'INSERT INTO Collection VALUES(?,?,?,?,?,?,?,?,?,?,?,?,?,?)'</span><span class="operator">,</span>
+            <span class="char">'INSERT INTO Collection VALUES(?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)'</span><span class="operator">,</span>
             <span class="operator">[</span>item<span class="operator">.</span>title<span class="operator">,</span>
              item<span class="operator">.</span>origin<span class="operator">,</span> item<span class="operator">.</span>originColor<span class="operator">,</span>
              item<span class="operator">.</span>type<span class="operator">,</span>
@@ -571,7 +585,7 @@ tags <span class="operator">=</span> tags<span class="operator">.</span>concat(r
              item<span class="operator">.</span>weightTotal<span class="operator">,</span> item<span class="operator">.</span>weightLeft<span class="operator">,</span>
              item<span class="operator">.</span>weightUnit<span class="operator">,</span>
              item<span class="operator">.</span>cost<span class="operator">,</span> item<span class="operator">.</span>secondaryCost<span class="operator">,</span>
-             item<span class="operator">.</span>primaryColor<span class="operator">,</span> item<span class="operator">.</span>secondaryColor<span class="operator">,</span>
+             item<span class="operator">.</span>mainColor<span class="operator">,</span> item<span class="operator">.</span>textureColor<span class="operator">,</span> item<span class="operator">.</span>borderColor<span class="operator">,</span>
              tagStr(item<span class="operator">.</span>tags)<span class="operator">]</span>
         );
         <span class="keyword">break</span>;
@@ -589,8 +603,9 @@ tags <span class="operator">=</span> tags<span class="operator">.</span>concat(r
             origin: inputOrigin<span class="operator">.</span>text<span class="operator">,</span>
             originColor: rowTitle<span class="operator">.</span>originColor<span class="operator">,</span>
             type: comboTypes<span class="operator">.</span>editText<span class="operator">,</span>
-            primaryColor: rowColors<span class="operator">.</span>primaryColor<span class="operator">,</span>
-            secondaryColor: rowColors<span class="operator">.</span>secondaryColor<span class="operator">,</span>
+            mainColor: rowColors<span class="operator">.</span>mainColor<span class="operator">,</span>
+            textureColor: rowColors<span class="operator">.</span>textureColor<span class="operator">,</span>
+            borderColor: rowColors<span class="operator">.</span>borderColor<span class="operator">,</span>
             cost: Number(inputCost<span class="operator">.</span>text)<span class="operator">,</span>
             secondaryCost: Number(inputCost<span class="operator">.</span>text)<span class="operator">,</span>
             weightTotal: Number(inputWeight<span class="operator">.</span>text)<span class="operator">,</span>
@@ -629,8 +644,9 @@ tags <span class="operator">=</span> tags<span class="operator">.</span>concat(r
         rowTitle<span class="operator">.</span>originColor <span class="operator">=</span> <span class="string">&quot;#000&quot;</span>;
         comboTypes<span class="operator">.</span>currentIndex <span class="operator">=</span> <span class="number">0</span>;
         comboTypes<span class="operator">.</span>model <span class="operator">=</span> Data<span class="operator">.</span>getAllTypes();
-        rowColors<span class="operator">.</span>primaryColor <span class="operator">=</span> <span class="string">&quot;#000&quot;</span>;
-        rowColors<span class="operator">.</span>secondaryColor <span class="operator">=</span> <span class="string">&quot;#000&quot;</span>;
+        rowColors<span class="operator">.</span>mainColor <span class="operator">=</span> <span class="string">&quot;#000&quot;</span>;
+        rowColors<span class="operator">.</span>textureColor <span class="operator">=</span> <span class="string">&quot;#000&quot;</span>;
+        rowColors<span class="operator">.</span>borderColor <span class="operator">=</span> <span class="string">&quot;#000&quot;</span>;
         inputCost<span class="operator">.</span>text <span class="operator">=</span> <span class="string">&quot;&quot;</span>;
         comboCostPerWeightUnit<span class="operator">.</span>currentIndex <span class="operator">=</span> <span class="number">0</span>;
         inputWeight<span class="operator">.</span>text <span class="operator">=</span> <span class="string">&quot;&quot;</span>;
@@ -657,10 +673,12 @@ tags <span class="operator">=</span> tags<span class="operator">.</span>concat(r
 Row {
     id: rowColors
     <span class="operator">.</span><span class="operator">.</span><span class="operator">.</span>
-    onPrimaryColorChanged: btnPrimaryColor<span class="operator">.</span>colorName
-        <span class="operator">=</span> <span class="type">Qt</span><span class="operator">.</span>binding(function () {<span class="keyword">return</span> primaryColor})
-    onSecondaryColorChanged: btnSecondaryColor<span class="operator">.</span>colorName
-        <span class="operator">=</span> <span class="type">Qt</span><span class="operator">.</span>binding(function () {<span class="keyword">return</span> secondaryColor})
+    onMainColorChanged: btnMainColor<span class="operator">.</span>colorName
+        <span class="operator">=</span> <span class="type">Qt</span><span class="operator">.</span>binding(function () {<span class="keyword">return</span> mainColor})
+    onTextureColorChanged: btnTextureColor<span class="operator">.</span>colorName
+        <span class="operator">=</span> <span class="type">Qt</span><span class="operator">.</span>binding(function () {<span class="keyword">return</span> textureColor})
+    onBorderColorChanged: btnBorderColor<span class="operator">.</span>colorName
+        <span class="operator">=</span> <span class="type">Qt</span><span class="operator">.</span>binding(function () {<span class="keyword">return</span> borderColor})
     <span class="operator">.</span><span class="operator">.</span><span class="operator">.</span>
 }</pre>
 <p>Now, when adding another item, the fields are all empty again.</p>

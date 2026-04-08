@@ -57,10 +57,17 @@ App {
                         onClicked: settings.darkModeEnabled
                                    = !settings.darkModeEnabled
                     }
+
+                    MenuItem {
+                        text: qsTr("Collection Settings")
+                        onClicked: pageMain.navigationStack
+                            .push(compCollectionSettings)
+                    }
                 }
             }
 
             AppListView {
+                id: listView
                 spacing: 10
                 anchors.top: parent.top
                 anchors.topMargin: 10
@@ -77,8 +84,25 @@ App {
                     }
                 }
 
-                delegate: CollectionDelegate {
+                property string ageDescription: Data.formatDomainAgeContext(
+                        Data.getDomainAgeContextPrefix(),
+                        Data.getDomainAgeContextSuffix())
+                property var textureBorderWidth: Data.getDomainBorderWidth()
+                property var textureType: Data.getDomainTextureType()
+                property var textureHeight: Data.getDomainTextureHeight()
+                property var textureWidth: Data.getDomainTextureWidth()
+                property bool textureSmooth: Data.getDomainTextureSmooth()
+
+                delegate: SwipableCollectionDelegate {
                     width: pageMain.width
+
+                    ageDescription: listView.ageDescription
+                    borderWidth: listView.textureBorderWidth
+                    textureType: listView.textureType
+                    textureHeight: listView.textureHeight
+                    textureWidth: listView.textureWidth
+                    editable: false
+                    smooth: listView.textureSmooth
                 }
             }
 
@@ -128,6 +152,13 @@ App {
                                    + "full price (%1€)")
                                 .arg(dlgUpdateCost.cost)
                 maxNum: cost
+            }
+
+            Component {
+                id: compCollectionSettings
+
+                CollectionSettingsView {
+                }
             }
 
         } // pageMain
