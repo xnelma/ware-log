@@ -245,6 +245,14 @@
     property string mainColor: Data.getDomainMainColor()
     property string textureColor: Data.getDomainTextureColor()
     property string borderColor: Data.getDomainBorderColor()
+
+    // in reset() in EditItemView.qml
+    rowColors.mainColor = Qt.binding(
+        function() { return Data.getDomainMainColor() });
+    rowColors.textureColor = Qt.binding(
+        function() { return Data.getDomainTextureColor() });
+    rowColors.borderColor = Qt.binding(
+        function() { return Data.getDomainBorderColor() });
     \endcode
 
     The texture height and width for the sample database would be
