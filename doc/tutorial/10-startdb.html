@@ -1,0 +1,54 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+<!-- start-new-db.qdoc -->
+  <meta name="description" content="provides steps for initializing a new database">
+  <title>Start New Database | WareLog</title>
+<link rel="stylesheet" type="text/css" href="style/style.css"/>
+</head>
+<body>
+  <link rel="prev" href="09-setup.html" />
+<p class="naviNextPrevious headerNavi">
+<a class="prevPage" href="09-setup.html">Set Up Collection</a>
+</p>
+<div class="sidebar">
+<div class="toc">
+<h3 id="toc">Contents</h3>
+<ul>
+<li class="level1"><a href="#add-button-to-collection-settings">Add button to collection settings</a></li>
+</ul>
+</div>
+<div class="sidebar-content" id="sidebar-content"></div></div>
+<h1 class="title">Start New Database</h1>
+<!-- $$$10-startdb.html-description -->
+<div class="descr" id="details">
+<p>So far we worked on sample data. Now that we have a working list view, can delete and add items, update the cost and weight field, and set collection specific properties, let's not load the sample data anymore. Then, (after clearing the data of the current installation) starting the app the first time greets the user with an empty view.</p>
+<p>In this chapter we will remove the call to the sample data in that was so far used to fill the database, and we will add a button that leads to the collection set up in case of an empty database.</p>
+<p>As the table columns attempt to be generic and work for different domains of items that can be measured in grams, liters etc. we will not have to configure the table to start a new database.</p>
+<h2 id="add-button-to-collection-settings">Add button to collection settings</h2>
+<p>First, remove the call for <code translate="no">fillSampleDatabase</code> in <code translate="no">openDatabase</code>, including the check for whether the database is empty. Building now should show an empty page. Adding a new item is still possible, since we still create the table in <code translate="no">openDatabase</code>, but the list of types to choose from and the tags are empty, so you have to add new ones. As there are no performance issues so far with the check for creating the table every time, we can keep it for simplicity. So adding items right away will still be possible.</p>
+<p>Set the visibility of the <code translate="no">AppListView</code> in <code translate="no">Main.qml</code> to depend on the number of list items:</p>
+<pre class="cpp" translate="no">AppListView {
+    <span class="operator">.</span><span class="operator">.</span><span class="operator">.</span>
+    visible: listModel<span class="operator">.</span>count <span class="operator">&gt;</span> <span class="number">0</span>
+    <span class="operator">.</span><span class="operator">.</span><span class="operator">.</span>
+}</pre>
+<p>Then add an <code translate="no">AppButton</code> for 'Collection Settings' above the list. It should be as wide as the view, minus some margin, and it is only visible if the list is empty.</p>
+<pre class="cpp" translate="no">AppButton {
+    text: qsTr(<span class="string">&quot;Collection Settings&quot;</span>)
+    visible: listModel<span class="operator">.</span>count <span class="operator">=</span><span class="operator">=</span><span class="operator">=</span> <span class="number">0</span>
+    width: parent<span class="operator">.</span>width <span class="operator">-</span> <span class="number">20</span>
+    anchors<span class="operator">.</span>horizontalCenter: parent<span class="operator">.</span>horizontalCenter
+    anchors<span class="operator">.</span>top: parent<span class="operator">.</span>top
+    anchors<span class="operator">.</span>topMargin: <span class="number">10</span>
+    onClicked: pageMain<span class="operator">.</span>navigationStack<span class="operator">.</span>push(compCollectionSettings)
+}</pre>
+<p class="centerAlign"><img src="images/start_db_button.jpg" alt="{An empty button is shown if the list is empty}" /></p><p>So now, if the app is started the first time, we would start a new collection, set its name and domain, add items, update them, etc. Of course this concept can be extended much further, so this would be a base implementation.</p>
+</div>
+<!-- @@@10-startdb.html -->
+<p class="naviNextPrevious footerNavi">
+<a class="prevPage" href="09-setup.html">Set Up Collection</a>
+</p>
+</body>
+</html>

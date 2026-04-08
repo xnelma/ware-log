@@ -65,6 +65,9 @@
             <contents name="add-collection-delegate-preview" title="Add collection delegate preview" level="2"/>
             <contents name="get-random-colors-from-database" title="Get random colors from database" level="2"/>
         </page>
+        <page name="10-startdb.html" href="10-startdb.html" status="active" location="start-new-db.qdoc" filepath="/home/maja/Desktop/ware-log/doc/tutorial-files/start-new-db.qdoc" lineno="1" documented="true" subtype="page" title="Start New Database" fulltitle="Start New Database" subtitle="" brief="Steps for initializing a new database">
+            <contents name="add-button-to-collection-settings" title="Add button to collection settings" level="1"/>
+        </page>
         <page name="tutorial.html" href="tutorial.html" status="active" location="home.qdoc" filepath="/home/maja/Desktop/ware-log/doc/tutorial-files/home.qdoc" lineno="1" documented="true" subtype="page" title="Tutorial for the WareLog App" fulltitle="Tutorial for the WareLog App" subtitle="" brief="Steps for creating an app for entering a catalogue of items"/>
         <page name="08-update.html" href="08-update.html" status="active" location="update_weight_and_cost.qdoc" filepath="/home/maja/Desktop/ware-log/doc/tutorial-files/update_weight_and_cost.qdoc" lineno="1" documented="true" subtype="page" title="Update Weight and Cost" fulltitle="Update Weight and Cost" subtitle="" brief="Steps for showing inputs to update weight and cost">
             <contents name="add-buttons-to-list-element" title="Add buttons to list element" level="1"/>
